@@ -1,0 +1,20 @@
+{
+  "name": "introducao-api-nodejs",
+  "version": "1.0.0",
+  "description": "Introdução API com NODE JS - Express, MySql",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiagomtl/introducao-api-nodejs.git"
+  },
+  "keywords": ["nodejs", "api", "express", "mysql"],
+  "author": "Thiago de Melo Torres Lopes<",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thiagomtl/introducao-api-nodejs/issues"
+  },
+  "homepage": "https://github.com/thiagomtl/introducao-api-nodejs#readme"
+}
