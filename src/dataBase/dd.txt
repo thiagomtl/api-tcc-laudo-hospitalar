@@ -1,0 +1,155 @@
+
+Dicionário de dados
+
+
+
+Quadro 1 – Tabela Paciente
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID do Paciente	pac_id	INT		x		Auto incremento
+Nome	pac_nome	VARCHAR	60			Nome completo
+Data de Nascimento	pac_datanasc	DATE				
+CPF	pac_cpf	CHAR	11			Unique
+Telefone	pac_telefone	VARCHAR	15			Pode conter DDD
+Data de Cadastro	pac_datacadastro	DATETIME				Gerado pelo sistema
+Sexo	pac_sexo	BIT				Sexo do paciente –0F e 1M
+Numero Prontuario	pac_num_prontuario	INT				
+CNS	pac_cns	CHAR	15			Cartão Nacional de Saúde
+Nome da mãe do paciente	pac_nome_mae	VARCHAR	60			
+Raça	pac_raca	VARCHAR	10			Conforme classificação IBGE
+Bairro	pac_bairro	VARCHAR	50			
+Numero Casa	pac_num_casa	VARCHAR	7			Pode conter complemento
+Logradouro casa	pac_logradouro	VARCHAR	120			Rua/Avenida
+CEP	pac_cep	CHAR	8			Apenas números
+UF	pac_uf	CHAR	2			Sigla do estado
+Municipio	pac_municipio	VARCHAR	50			
+Codigo IBGE	pac_cod_ibge	INT				Código IBGE do município
+
+Quadro 2 – Tabela Convênio
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Convênio	con_id	INT		x		Auto incremento
+Tipo de Convênio	con_tipo	VARCHAR	50			
+
+Quadro 3 - Tabela Leito
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Leito	leito_id	INT		x		Auto incremento
+ID Setor	set_id	INT			x	Relaciona com Setor
+Identificação Leito	leito_identificacao	VARCHAR	20			
+
+Quadro 4 - Tabela Setor
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Setor	set_id	INT		x		Auto incremento
+Nome do Setor	set_nome	VARCHAR	30			
+
+Quadro 5 - Tabela Caráter
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Caráter	car_id	INT		x		Auto incremento
+Tipo de Caráter	car_tipo	VARCHAR	30			
+
+Quadro 6 - Tabela Instituição
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Instituição	inst_id	INT		x		Auto incremento
+Nome Fantasia	inst_nome	VARCHAR	100			
+Razão Social	inst_razao_social	VARCHAR	150			
+CNES	inst_cnes	CHAR	7			
+CNPJ	inst_cnpj	CHAR	14			Formato numérico
+
+Quadro 7 - Tabela Atendimento
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Atendimento	atend_id	INT		x		Auto incremento
+ID Paciente	pac_id	INT			x	Paciente
+ID Convênio	con_id	INT			x	Convenio
+ID Leito	leito_id	INT			x	Leito
+ID Caráter	car_id	INT			x	Carater
+ID Médico	med_id	INT			x	Medico
+Data Atendimento	atend_data	DATETIME				
+
+Quadro 8 - Tabela Logs Ação
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Log	log_id	INT		x		Auto incremento
+ID Usuário	usu_id	INT			x	Usuário
+Ação	log_acao	VARCHAR	200			
+Detalhe	log_detalhe	VARCHAR	30			
+Data e Hora	log_datahora	DATETIME				Registrado automaticamente
+
+Quadro 9 - Tabela Usuário
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Usuário	usu_id	INT		x		Auto incremento
+Nome	usu_nome	VARCHAR	100			
+Documento	usu_documento	VARCHAR	11			RG ou CPF
+Email	usu_email	VARCHAR	100			
+Senha	usu_senha	VARCHAR	100			Hash da senha
+Data Criação	usu_datacriacao	DATETIME				
+Instituição	inst_id	INT			x	Relacionado com Instituição
+Telefone	usu_telefone	VARCHAR	15			Com DDD
+Foto	usu_foto	VARCHAR	255			Nome da imagem
+NULL
+Biometria	usu_biometria	VARCHAR	255			Nome do arquivo
+NULL
+Tipo de Usuário	usu_tipo	VARCHAR	15			Administrador, Médico, etc.
+Status	usu_status	BIT				Ativo/Inativo
+
+Quadro 10 - Tabela Médico
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Médico	med_id	INT	-	x	x	
+CRM	med_crm	VARCHAR	8			Registro profissional único
+
+Quadro 11 - Tabela Mensagem_Chat
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Mensagem	msg_id	INT		x		Auto incremento
+ID Usuário Remetente	usu_id_remetente	INT			x	Usuário
+ID Usuário Destinatário	usu_id_destinatario	INT			x	Usuário
+Mensagem	msg_conteudo	VARCHAR	500			
+Mensagem Anexo	msg_arqanexo	VARCHAR	255			Arquivo em anexo
+NULL
+Data e Hora	msg_datahoraenvio	DATETIME				
+Status Mensagem	msg_status	VARCHAR	10			Enviada, Lida, Entregue
+Mensagem Resposta	msg_resposta	INT			x	FK para msg_id da mensagem original
+NULL
+
+Quadro 12 - Tabela Laudo
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Laudo	lau_id	INT		x		Auto incremento
+ID Atendimento	atend_id	INT			x	Atendimento
+Escolha Clinica	cli_id	INT			x	Clinica
+Procedimento Cids	proc_cid_id	INT			x	CID
+Sinais Laudo	lau_sinais	VARCHAR	1024			
+Internação Laudo	lau_internacao	VARCHAR	1024			
+Resultado Laudo	lau_resultado	VARCHAR	512			
+Recurso Laudo	lau_recurso	VARCHAR	512			
+Data Preenchimento Laudo	lau_datapreenc	DATETIME				
+Status Laudo	lau_status	BIT				0 – Pendente, 1 - preenchido
+
+
+Quadro 13 - Tabela Favorito
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+Favoritar Laudo	fav_id	INT		x		Auto incremento
+Id do Laudo	lau_id	INT			x	
+Id do médico	med_id	INT			x	
+Nome Favorito	fav_nome	VARCHAR	30			
+
+Quadro 14 - Tabela Escolha_Clinica
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Escolha	cli_id	INT		x		Auto incremento
+Descrição	cli_descricao	VARCHAR	20			
+
+Quadro 15 - Tabela Procedimento
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Procedimento	pro_id	INT		x		Auto incremento
+Codigo	pro_codigo	INT				
+Descrição	pro_descricao	VARCHAR	100			
+
+
+
+
+Quadro 16 - Tabela Procedimento_Cids
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID Procedimento Cid	proc_cid_id	INT		x		Auto incremento
+ID Procedimento	pro_id	INT			x	Procedimento
+ID CID	cid_id	INT			x	Cid
+
+Quadro 17 - Tabela CID
+Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
+ID CID	cid_id	INT		PK		Auto incremento
+Codigo Cid	cid_codigo	VARCHAR	4			
+Descrição CID	cid_descricao	VARCHAR	100			
+
