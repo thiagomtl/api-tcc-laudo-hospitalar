@@ -51,12 +51,12 @@ INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VAL
 
 -- Tabela Usuario
 INSERT INTO Usuario (usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status) VALUES
-('Paulo Mendes', '123456789', 'paulo@hospital.com', 'senha123', '2025-10-10 09:00:00', 1, '11999999999', NULL, NULL, 'Médico', 1),
-('Carla Dias', '987654321', 'carla@hospital.com', 'senha456', '2025-10-10 09:05:00', 2, '21988888888', NULL, NULL, 'Médico', 1),
-('Lucas Rocha', '456789123', 'lucas@hospital.com', 'senha789', '2025-10-10 09:10:00', 3, '31977777777', NULL, NULL, 'Administrador', 1),
-('Fernanda Alves', '789123456', 'fernanda@hospital.com', 'senha321', '2025-10-10 09:15:00', 4, '41966666666', NULL, NULL, 'Médico', 1),
-('João Lima', '321654987', 'joao@hospital.com', 'senha654', '2025-10-10 09:20:00', 5, '51955555555', NULL, NULL, 'Faturista', 1),
-('Marina Costa', '654987321', 'marina@hospital.com', 'senha987', '2025-10-10 09:25:00', 6, '61944444444', NULL, NULL, 'Médico', 1);
+('Paulo Mendes', '123456789', 'paulo@hospital.com', 'senha123', '2025-10-10 09:00:00', 1, '11999999999', 'paulomendes.png', NULL, 'Médico', 1),
+('Carla Dias', '987654321', 'carla@hospital.com', 'senha456', '2025-10-10 09:05:00', 2, '21988888888', 'carladias.png', NULL, 'Médico', 1),
+('Lucas Rocha', '456789123', 'lucas@hospital.com', 'senha789', '2025-10-10 09:10:00', 3, '31977777777', 'lucasrocha.png', NULL, 'Administrador', 1),
+('Fernanda Alves', '789123456', 'fernanda@hospital.com', 'senha321', '2025-10-10 09:15:00', 4, '41966666666', 'fernandaalves.png', NULL, 'Médico', 1),
+('João Lima', '321654987', 'joao@hospital.com', 'senha654', '2025-10-10 09:20:00', 5, '51955555555', 'joaolima.png', NULL, 'Faturista', 1),
+('Marina Costa', '654987321', 'marina@hospital.com', 'senha987', '2025-10-10 09:25:00', 6, '61944444444', 'marinacosta.png', NULL, 'Médico', 1);
 
 -- Tabela Medico
 INSERT INTO Medico (med_crm) VALUES
