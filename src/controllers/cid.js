@@ -1,0 +1,88 @@
+const db = require('../dataBase/connection')
+
+module.exports = {
+    
+    async listarCid(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Lista de cid obtida cosm sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao listar cid: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
+    async cadastrarCid(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Cadastro de cid realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao cadastrar cid: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
+    async editarCid(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Atualização de cid realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao atualizar cid: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
+    async apagarCid(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Exclusão de cid realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao excluir cid: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+}
