@@ -1,7 +1,7 @@
 const db = require('..database/connection');
 
 
-nodule.exports = {
+module.exports = {
     async listarCarater (request, response) {
         try {
             return response.status(200).json(
@@ -24,6 +24,28 @@ nodule.exports = {
 
         }
     },
+
+     async cadastrarCarater(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Cadastro de carater realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao cadastra carater: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
     async editarCarater (request, response) {
         try {
             return response.status(200).json(
