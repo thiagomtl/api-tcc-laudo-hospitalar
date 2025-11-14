@@ -7,7 +7,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Lista de laudo obtida cosm sucesso',
+                    mensagem: 'Lista de laudos obtidas com sucesso',
                     dados: null
                 }
             )
@@ -16,7 +16,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao listar laudo: ${error.message}',
+                    mensagem: 'Erro ao listar laudos: ${error.message}',
                     dados: null
                 }
             )
@@ -28,7 +28,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Cadastro de laudo realizado com sucesso',
+                    mensagem: 'Cadastro de laudos realizados com sucesso',
                     dados: null
                 }
             )
@@ -37,7 +37,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao cadastrar laudo: ${error.message}',
+                    mensagem: 'Erro ao cadastrar laudos: ${error.message}',
                     dados: null
                 }
             )
@@ -49,7 +49,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de laudo realizado com sucesso',
+                    mensagem: 'Atualização de laudos realizados com sucesso',
                     dados: null
                 }
             )
@@ -58,7 +58,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao atualizar laudo: ${error.message}',
+                    mensagem: 'Erro ao atualizar laudos: ${error.message}',
                     dados: null
                 }
             )
@@ -70,7 +70,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de laudo realizado com sucesso',
+                    mensagem: 'Exclusão de laudo realizados com sucesso',
                     dados: null
                 }
             )
@@ -79,7 +79,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao excluir laudo: ${error.message}',
+                    mensagem: 'Erro ao excluir laudos: ${error.message}',
                     dados: null
                 }
             )

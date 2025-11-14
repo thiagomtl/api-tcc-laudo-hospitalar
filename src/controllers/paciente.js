@@ -1,7 +1,6 @@
 const db = require('..database/connection');
 
-
-nodule.exports = {
+module.exports = {
     async listarPaciente (request, response) {
         try {
             return response.status(200).json(
@@ -24,6 +23,28 @@ nodule.exports = {
 
         }
     },
+
+     async cadastrarPaciente(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Cadastro de paciente realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao cadastrar paciente: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
     async editarPaciente (request, response) {
         try {
             return response.status(200).json(

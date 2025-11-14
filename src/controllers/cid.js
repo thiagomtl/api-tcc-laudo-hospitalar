@@ -7,7 +7,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Lista de cid obtida cosm sucesso',
+                    mensagem: 'Lista de cid obtidas com sucesso',
                     dados: null
                 }
             )
@@ -28,7 +28,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Cadastro de cid realizado com sucesso',
+                    mensagem: 'Cadastro de cid realizados com sucesso',
                     dados: null
                 }
             )
@@ -49,7 +49,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de cid realizado com sucesso',
+                    mensagem: 'Atualização de cid realizados com sucesso',
                     dados: null
                 }
             )
@@ -70,7 +70,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de cid realizado com sucesso',
+                    mensagem: 'Exclusão de cid realizados com sucesso',
                     dados: null
                 }
             )
