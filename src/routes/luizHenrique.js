@@ -21,10 +21,10 @@ router.post('/favoritos', FavoritoController.cadastrarFavorito);
 router.patch('/favoritos', FavoritoController.editarFavorito);
 router.delete('/favoritos', FavoritoController.apagarFavorito);
 
-router.get('/instituição', InstituicaoController.listarInstituicao);
-router.post('/instituição', InstituicaoController.cadastrarInstituicao);
-router.patch('/instituição', InstituicaoController.editarInstituicao);
-router.delete('/instituição', InstituicaoController.apagarInstituicao);
+router.get('/instituicao', InstituicaoController.listarInstituicao);
+router.post('/instituicao', InstituicaoController.cadastrarInstituicao);
+router.patch('/instituicao', InstituicaoController.editarInstituicao);
+router.delete('/instituicao', InstituicaoController.apagarInstituicao);
 
 module.exports = router;
 
