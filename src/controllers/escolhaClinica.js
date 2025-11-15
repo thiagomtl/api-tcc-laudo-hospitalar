@@ -1,4 +1,4 @@
-const db = require('../dataBase/connection')
+const db = require(`../dataBase/connection`)
 
 module.exports = {
     
@@ -7,7 +7,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Lista de escolhas clínicas obtidas com sucesso',
+                    mensagem: `Lista de escolhas clínicas obtidas com sucesso`,
                     dados: null
                 }
             )
@@ -16,7 +16,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao listar escolha clínica: ${error.message}',
+                    mensagem: `Erro ao listar escolha clínica: ${error.message}`,
                     dados: null
                 }
             )
@@ -28,7 +28,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Cadastro de escolha clínica realizados com sucesso',
+                    mensagem: `Cadastro de escolha clínica realizados com sucesso`,
                     dados: null
                 }
             )
@@ -37,7 +37,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao cadastrar escolha clínica: ${error.message}',
+                    mensagem: `Erro ao cadastrar escolha clínica: ${error.message}`,
                     dados: null
                 }
             )
@@ -49,7 +49,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de escolha clínica realizados com sucesso',
+                    mensagem: `Atualização de escolha clínica realizados com sucesso`,
                     dados: null
                 }
             )
@@ -58,7 +58,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao atualizar escolha clínica: ${error.message}',
+                    mensagem: `Erro ao atualizar escolha clínica: ${error.message}`,
                     dados: null
                 }
             )
@@ -70,7 +70,7 @@ module.exports = {
             return response.status(200), json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de escolha clínica realizados com sucesso',
+                    mensagem: `Exclusão de escolha clínica realizados com sucesso`,
                     dados: null
                 }
             )
@@ -79,7 +79,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: 'Erro ao excluir escolha clínica: ${error.message}',
+                    mensagem: `Erro ao excluir escolha clínica: ${error.message}`,
                     dados: null
                 }
             )
