@@ -3,7 +3,7 @@ const db = require('../database/connection');
 module.exports = {
     async listarLeito(request, response) {
         try {
-            return response.status(200).jason(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de leito obtida com sucesso',
@@ -12,7 +12,7 @@ module.exports = {
                 }
             );
         } catch (error) {
-            return response.status(500).jason(
+            return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao leito atendimento: ${error.message}`,
@@ -24,7 +24,7 @@ module.exports = {
     },
     async cadastrarLeito(request, response) {
         try {
-            return response.status(200).jason(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de leito obtida com sucesso',
@@ -33,7 +33,7 @@ module.exports = {
                 }
             );
         } catch (error) {
-            return response.status(500).jason(
+            return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar leito: ${error.message}`,
@@ -45,7 +45,7 @@ module.exports = {
     },
     async editarLeito(request, response) {
         try {
-            return response.status(200).jason(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de leito obtida com sucesso',
@@ -54,7 +54,7 @@ module.exports = {
                 }
             );
         } catch (error) {
-            return response.status(500).jason(
+            return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar leito: ${error.message}`,
@@ -66,7 +66,7 @@ module.exports = {
     },
     async apagarLeito(request, response) {
         try {
-            return response.status(200).jason(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de leito obtida com sucesso',
@@ -75,7 +75,7 @@ module.exports = {
                 }
             );
         } catch (error) {
-            return response.status(500).jason(
+            return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao apagar leito: ${error.message}`,
