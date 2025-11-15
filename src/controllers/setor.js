@@ -1,7 +1,7 @@
 const db = require('..database/connection');
 
+module.exports = {
 
-nodule.exports = {
     async listarSetor (request, response) {
         try {
             return response.status(200).json(
@@ -24,6 +24,28 @@ nodule.exports = {
 
         }
     },
+
+    async cadastrarSetor(request, response) {
+        try {
+            return response.status(200), json(
+                {
+                    sucesso: true,
+                    mensagem: 'Cadastro de setor realizado com sucesso',
+                    dados: null
+                }
+            )
+        } 
+        catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: 'Erro ao cadastrar setor: ${error.message}',
+                    dados: null
+                }
+            )
+        }
+    },
+
     async editarSetor (request, response) {
         try {
             return response.status(200).json(
