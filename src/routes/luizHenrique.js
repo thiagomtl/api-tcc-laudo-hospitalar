@@ -7,24 +7,24 @@ const FavoritoController = require('../controllers/Favorito');
 const InstituicaoController = require('../controllers/Instituicao');
 
 router.get('/medicos', MedicoController.listarMedico);
-router.get('/medicos', MedicoController.cadastrarMedico);
-router.get('/medicos', MedicoController.editarMedico);
-router.get('/medicos', MedicoController.apagarMedico);
+router.post('/medicos', MedicoController.cadastrarMedico);
+router.patch('/medicos', MedicoController.editarMedico);
+router.delete('/medicos', MedicoController.apagarMedico);
 
 router.get('/usuarios', UsuarioController.listarUsuario);
-router.get('/usuarios', UsuarioController.cadastrarUsuario);
-router.get('/usuarios', UsuarioController.editarUsuario);
-router.get('/usuarios', UsuarioController.apagarUsuario);
+router.post('/usuarios', UsuarioController.cadastrarUsuario);
+router.patch('/usuarios', UsuarioController.editarUsuario);
+router.delete('/usuarios', UsuarioController.apagarUsuario);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
-router.get('/favoritos', FavoritoController.cadastrarFavorito);
-router.get('/favoritos', FavoritoController.editarFavorito);
-router.get('/favoritos', FavoritoController.apagarFavorito);
+router.post('/favoritos', FavoritoController.cadastrarFavorito);
+router.patch('/favoritos', FavoritoController.editarFavorito);
+router.delete('/favoritos', FavoritoController.apagarFavorito);
 
 router.get('/instituição', InstituicaoController.listarInstituicao);
-router.get('/instituição', InstituicaoController.cadastrarInstituicao);
-router.get('/instituição', InstituicaoController.editarInstituicao);
-router.get('/instituição', InstituicaoController.apagarInstituicao);
+router.post('/instituição', InstituicaoController.cadastrarInstituicao);
+router.patch('/instituição', InstituicaoController.editarInstituicao);
+router.delete('/instituição', InstituicaoController.apagarInstituicao);
 
 module.exports = router;
 
