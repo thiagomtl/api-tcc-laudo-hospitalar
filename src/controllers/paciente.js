@@ -1,7 +1,7 @@
 const db = require('..database/connection');
 
 module.exports = {
-    async listarPaciente (request, response) {
+    async listarPaciente(request, response) {
         try {
             return response.status(200).json(
                 {
@@ -45,7 +45,7 @@ module.exports = {
         }
     },
 
-    async editarPaciente (request, response) {
+    async editarPaciente(request, response) {
         try {
             return response.status(200).json(
                 {
@@ -67,7 +67,7 @@ module.exports = {
 
         }
     },
-    async apagarPaciente (request, response) {
+    async apagarPaciente(request, response) {
         try {
             return response.status(200).json(
                 {
