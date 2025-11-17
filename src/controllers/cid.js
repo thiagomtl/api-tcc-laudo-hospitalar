@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const db = require('../dataBase/connection');
 
 module.exports = {
     
     async listarCid(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de cid obtidas com sucesso`,
@@ -25,7 +25,7 @@ module.exports = {
 
     async cadastrarCid(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de cid realizados com sucesso`,
@@ -46,7 +46,7 @@ module.exports = {
 
     async editarCid(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de cid realizados com sucesso`,
@@ -67,7 +67,7 @@ module.exports = {
 
     async apagarCid(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de cid realizados com sucesso`,

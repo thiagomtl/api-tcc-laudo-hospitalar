@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const db = require('../dataBase/connection');
 
 module.exports = {
     
     async listarProcedimento(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de procedimentos obtidas com sucesso`,
@@ -25,7 +25,7 @@ module.exports = {
 
     async cadastrarProcedimento(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de procedimentos realizados com sucesso`,
@@ -46,7 +46,7 @@ module.exports = {
 
     async editarProcedimento(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de procedimentos realizados com sucesso`,
@@ -67,7 +67,7 @@ module.exports = {
 
     async apagarProcedimento(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de procedimentos realizados com sucesso`,

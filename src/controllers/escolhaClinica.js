@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const db = require('../dataBase/connection');
 
 module.exports = {
     
     async listarEscolhaClinica(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de escolhas clínicas obtidas com sucesso`,
@@ -25,7 +25,7 @@ module.exports = {
 
     async  cadastrarEscolhaClinica(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de escolha clínica realizados com sucesso`,
@@ -46,7 +46,7 @@ module.exports = {
 
     async editarEscolhaClinica (request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de escolha clínica realizados com sucesso`,
@@ -67,7 +67,7 @@ module.exports = {
 
     async apagarEscolhaClinica (request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de escolha clínica realizados com sucesso`,

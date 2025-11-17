@@ -1,4 +1,4 @@
-const db = require('..database/connection');
+const db = require('../dataBase/connection');
 
 module.exports = {
 
@@ -25,13 +25,13 @@ module.exports = {
 
     async cadastrarSetor(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de setor realizado com sucesso`,
                     dados: null
                 }
-            )
+            );
         }
         catch (error) {
             return response.status(500).json(

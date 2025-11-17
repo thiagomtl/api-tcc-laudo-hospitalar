@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const db = require('../dataBase/connection');
 
 module.exports = {
 
     async listarLaudo(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de laudos obtidas com sucesso`,
@@ -25,7 +25,7 @@ module.exports = {
 
     async cadastrarLaudo(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de laudos realizados com sucesso`,
@@ -46,7 +46,7 @@ module.exports = {
 
     async editarLaudo(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de laudos realizados com sucesso`,
@@ -67,7 +67,7 @@ module.exports = {
 
     async apagarLaudo(request, response) {
         try {
-            return response.status(200), json(
+            return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de laudo realizados com sucesso`,
