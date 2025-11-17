@@ -1,7 +1,7 @@
-const db = require(`../dataBase/connection`)
+const db = require('../dataBase/connection')
 
 module.exports = {
-    
+
     async listarLaudo(request, response) {
         try {
             return response.status(200), json(
@@ -11,7 +11,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -32,7 +32,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -53,7 +53,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -74,7 +74,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
