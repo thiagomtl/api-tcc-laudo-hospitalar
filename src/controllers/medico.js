@@ -3,11 +3,17 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarMedico(request, response) {
         try {
+            const sql = `SELECT med_id, med_crm FROM Medico;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de médico obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -24,11 +30,18 @@ module.exports = {
     },
     async cadastrarMedico(request, response) {
         try {
+
+            const sql = `SELECT med_id, med_crm FROM Medico;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de médico obtida com sucesso',
-                    dados: null
+                   itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -45,12 +58,18 @@ module.exports = {
     },
     async editarMedico(request, response) {
         try {
+
+            const sql = `SELECT med_id, med_crm FROM Medico;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de médico obtida com sucesso',
-                    dados: null
-
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         } catch (error) {
@@ -66,11 +85,18 @@ module.exports = {
     },
     async apagarMedico(request, response) {
         try {
+
+            const sql = `SELECT med_id, med_crm FROM Medico;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de médico obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );

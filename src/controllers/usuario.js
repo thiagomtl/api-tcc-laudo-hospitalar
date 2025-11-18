@@ -3,11 +3,21 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarUsuario(request, response) {
         try {
+
+            const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
+            usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
+            usu_biometria, usu_tipo, usu_status = 1 as usu_status
+            FROM Usuario;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de usuário obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -24,11 +34,21 @@ module.exports = {
     },
     async cadastrarUsuario(request, response) {
         try {
+
+            const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
+            usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
+            usu_biometria, usu_tipo, usu_status = 1 as usu_status
+            FROM Usuario;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de usuário obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -45,11 +65,22 @@ module.exports = {
     },
     async editarUsuario(request, response) {
         try {
+
+
+                const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
+            usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
+            usu_biometria, usu_tipo, usu_status = 1 as usu_status
+            FROM Usuario;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de usuário obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -66,11 +97,21 @@ module.exports = {
     },
     async apagarUsuario(request, response) {
         try {
+
+            const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
+            usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
+            usu_biometria, usu_tipo, usu_status = 1 as usu_status
+            FROM Usuario;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de usuário obtida com sucesso',
-                    dados: null
+                   itens: rows.length,
+                    dados: rows
 
                 }
             );

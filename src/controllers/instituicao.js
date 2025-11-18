@@ -3,11 +3,19 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarInstituicao(request, response) {
         try {
+
+            const sql = `SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj 
+             FROM Instituicao;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de instituição obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -24,11 +32,19 @@ module.exports = {
     },
     async cadastrarInstituicao(request, response) {
         try {
+
+             const sql = `SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj 
+             FROM Instituicao;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de instituição obtida com sucesso',
-                    dados: null
+                     itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -45,11 +61,19 @@ module.exports = {
     },
     async editarInstituicao(request, response) {
         try {
+
+             const sql = `SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj 
+             FROM Instituicao;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de instituição obtida com sucesso',
-                    dados: null
+                     itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -66,11 +90,19 @@ module.exports = {
     },
     async apagarInstituicao(request, response) {
         try {
+
+             const sql = `SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj 
+             FROM Instituicao;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de instituição obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
