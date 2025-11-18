@@ -84,7 +84,7 @@ CREATE TABLE Atendimento (
     FOREIGN KEY (pac_id) REFERENCES Paciente(pac_id),
     FOREIGN KEY (con_id) REFERENCES Convenio(con_id),
     FOREIGN KEY (leito_id) REFERENCES Leito(leito_id),
-    FOREIGN KEY (car_id) REFERENCES Carater(car_id),
+    FOREIGN KEY (car_id) REFERENCES Carater(car_tipo),
     FOREIGN KEY (med_id) REFERENCES Medico(med_id)
 );
 

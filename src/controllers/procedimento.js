@@ -4,11 +4,18 @@ module.exports = {
     
     async listarProcedimento(request, response) {
         try {
+            const sql = `
+                SELECT pro_id, pro_codigo, pro_descricao 
+                FROM Procedimento;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de procedimentos obtidas com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         } 
@@ -17,7 +24,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao listar procedimentos: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -25,11 +33,18 @@ module.exports = {
 
     async cadastrarProcedimento(request, response) {
         try {
+            const sql = `
+                SELECT pro_id, pro_codigo, pro_descricao 
+                FROM Procedimento;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de procedimentos realizados com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         } 
@@ -38,7 +53,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar procedimentos: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -46,11 +62,18 @@ module.exports = {
 
     async editarProcedimento(request, response) {
         try {
+            const sql = `
+                SELECT pro_id, pro_codigo, pro_descricao 
+                FROM Procedimento;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de procedimentos realizados com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         } 
@@ -59,7 +82,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar procedimentos: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -67,11 +91,18 @@ module.exports = {
 
     async apagarProcedimento(request, response) {
         try {
+            const sql = `
+                SELECT pro_id, pro_codigo, pro_descricao 
+                FROM Procedimento;
+                `;
+            const [rows] = await db.query(sql);
+            
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de procedimentos realizados com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         } 
@@ -80,7 +111,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao excluir procedimentos: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
