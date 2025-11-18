@@ -1,7 +1,7 @@
 const db = require('../dataBase/connection');
 
 module.exports = {
-    
+
     async listarProcedimentoCid(request, response) {
         try {
             const sql = `
@@ -9,15 +9,16 @@ module.exports = {
                 FROM Procedimento_Cids;
                 `;
             const [rows] = await db.query(sql);
-            
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de procedimentos e cid obtidas com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -29,7 +30,7 @@ module.exports = {
             )
         }
     },
-    
+
     async cadastrarProcedimentoCid(request, response) {
         try {
             return response.status(200).json(
@@ -39,7 +40,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -60,7 +61,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -81,7 +82,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {

@@ -1,7 +1,7 @@
 const db = require('../dataBase/connection');
 
 module.exports = {
-    
+
     async listarProcedimento(request, response) {
         try {
             const sql = `
@@ -18,7 +18,7 @@ module.exports = {
                     dados: rows
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -39,7 +39,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -60,7 +60,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -73,7 +73,7 @@ module.exports = {
     },
 
     async apagarProcedimento(request, response) {
-        try {            
+        try {
             return response.status(200).json(
                 {
                     sucesso: true,
@@ -81,7 +81,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {

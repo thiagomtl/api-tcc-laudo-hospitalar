@@ -1,7 +1,7 @@
 const db = require('../dataBase/connection');
 
 module.exports = {
-    
+
     async listarEscolhaClinica(request, response) {
         try {
             const sql = `
@@ -18,7 +18,7 @@ module.exports = {
                     dados: rows
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -30,8 +30,9 @@ module.exports = {
         }
     },
 
-    async  cadastrarEscolhaClinica(request, response) {
-        try {const sql = `
+    async cadastrarEscolhaClinica(request, response) {
+        try {
+            const sql = `
                 SELECT cli_id, cli_descricao 
                 FROM Escolha_Clinica;
                 `;
@@ -44,7 +45,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -56,7 +57,7 @@ module.exports = {
         }
     },
 
-    async editarEscolhaClinica (request, response) {
+    async editarEscolhaClinica(request, response) {
         try {
             return response.status(200).json(
                 {
@@ -65,7 +66,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -77,7 +78,7 @@ module.exports = {
         }
     },
 
-    async apagarEscolhaClinica (request, response) {
+    async apagarEscolhaClinica(request, response) {
         try {
             return response.status(200).json(
                 {
@@ -86,7 +87,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
