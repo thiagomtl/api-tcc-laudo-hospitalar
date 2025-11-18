@@ -3,11 +3,22 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarAtendimento(request, response) {
         try {
+
+            const sql = `
+            SELECT 
+                atend_id, pac_id, con_id, 
+                leito_id, car_id, med_id, atend_data 
+            FROM Atendimento;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de atendimento obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );

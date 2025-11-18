@@ -38,6 +38,10 @@ INSERT INTO Leito (set_id, leito_identificacao) VALUES
 -- Tabela Carater
 INSERT INTO Carater (car_tipo) VALUES
 ('Eletivo'),
+('Urgência'),
+('Eletivo'),
+('Urgência'),
+('Eletivo'),
 ('Urgência');
 
 -- Tabela Instituicao
