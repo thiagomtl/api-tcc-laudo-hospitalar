@@ -3,11 +3,21 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarLeito(request, response) {
         try {
+
+            const sql = `
+            SELECT 
+                leito_id, set_id, leito_identificacao 
+            FROM Leito;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de leito obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
