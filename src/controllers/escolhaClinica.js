@@ -24,8 +24,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao listar escolha clínica: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -42,8 +41,7 @@ module.exports = {
                 {
                     sucesso: true,
                     mensagem: `Cadastro de escolha clínica realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -52,8 +50,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar escolha clínica: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -61,18 +58,11 @@ module.exports = {
 
     async editarEscolhaClinica (request, response) {
         try {
-            const sql = `
-                SELECT cli_id, cli_descricao 
-                FROM Escolha_Clinica;
-                `;
-            const [rows] = await db.query(sql);
-
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de escolha clínica realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -81,8 +71,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar escolha clínica: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -90,18 +79,11 @@ module.exports = {
 
     async apagarEscolhaClinica (request, response) {
         try {
-            const sql = `
-                SELECT cli_id, cli_descricao 
-                FROM Escolha_Clinica;
-                `;
-            const [rows] = await db.query(sql);
-
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de escolha clínica realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -110,8 +92,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao excluir escolha clínica: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }

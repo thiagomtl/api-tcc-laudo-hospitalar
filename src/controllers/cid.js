@@ -24,8 +24,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao listar cid: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -33,18 +32,11 @@ module.exports = {
 
     async cadastrarCid(request, response) {
         try {
-            const sql = `
-                SELECT cid_id, cid_codigo, cid_descricao 
-                FROM CID;
-                `;
-            const [rows] = await db.query(sql);
-
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de cid realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -53,8 +45,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar cid: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -62,18 +53,11 @@ module.exports = {
 
     async editarCid(request, response) {
         try {
-            const sql = `
-                SELECT cid_id, cid_codigo, cid_descricao 
-                FROM CID;
-                `;
-            const [rows] = await db.query(sql);
-
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de cid realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -82,8 +66,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar cid: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -91,18 +74,11 @@ module.exports = {
 
     async apagarCid(request, response) {
         try {
-            const sql = `
-                SELECT cid_id, cid_codigo, cid_descricao 
-                FROM CID;
-                `;
-            const [rows] = await db.query(sql);
-
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Exclusão de cid realizados com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         } 
@@ -111,8 +87,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao excluir cid: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
