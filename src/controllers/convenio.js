@@ -3,11 +3,21 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarConvenio(request, response) {
         try {
+
+            const sql = `
+            SELECT 
+                con_id, con_tipo 
+            FROM Convenio;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de convênio obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
