@@ -4,20 +4,28 @@ module.exports = {
 
     async listarCarater(request, response) {
         try {
+            const sql = `
+                SELECT set_id, set_nome 
+                FROM Setor;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de carater obtida com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao obter lista de carater: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -25,11 +33,18 @@ module.exports = {
 
     async cadastrarCarater(request, response) {
         try {
+            const sql = `
+                SELECT car_id, car_tipo 
+                FROM Carater;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de carater realizado com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -38,7 +53,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastra carater: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -46,20 +62,28 @@ module.exports = {
 
     async editarCarater(request, response) {
         try {
+            const sql = `
+                SELECT car_id, car_tipo 
+                FROM Carater;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de carater obtida com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar carater: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -67,20 +91,28 @@ module.exports = {
 
     async apagarCarater(request, response) {
         try {
+            const sql = `
+                SELECT car_id, car_tipo 
+                FROM Carater;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de carater apagada com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao apagar lista de carater: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
