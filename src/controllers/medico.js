@@ -31,17 +31,13 @@ module.exports = {
     async cadastrarMedico(request, response) {
         try {
 
-            const sql = `SELECT med_id, med_crm FROM Medico;`
-                ;
-
-            const [rows] = await db.query(sql);
+            
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de médico obtida com sucesso',
-                   itens: rows.length,
-                    dados: rows
+                    dados: null
 
                 }
             );
@@ -59,17 +55,13 @@ module.exports = {
     async editarMedico(request, response) {
         try {
 
-            const sql = `SELECT med_id, med_crm FROM Medico;`
-                ;
-
-            const [rows] = await db.query(sql);
+           
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de médico obtida com sucesso',
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             );
         } catch (error) {
@@ -86,17 +78,13 @@ module.exports = {
     async apagarMedico(request, response) {
         try {
 
-            const sql = `SELECT med_id, med_crm FROM Medico;`
-                ;
-
-            const [rows] = await db.query(sql);
+           
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de médico obtida com sucesso',
-                    itens: rows.length,
-                    dados: rows
+                    dados: null
 
                 }
             );
