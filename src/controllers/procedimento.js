@@ -32,11 +32,26 @@ module.exports = {
 
     async cadastrarProcedimento(request, response) {
         try {
+            const { codigo, descricao } = request.body;
+
+            const sql = `
+                INSERT INTO Procedimento (pro_codigo, pro_descricao) 
+                VALUES (?, ?);
+            `;
+
+            const values = [ codigo, descricao ];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                codigo,
+                descricao
+            };
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de procedimentos realizados com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }

@@ -32,11 +32,20 @@ module.exports = {
 
     async cadastrarEscolhaClinica(request, response) {
         try {
+            const { descricao } = request.body;
+
             const sql = `
-                SELECT cli_id, cli_descricao 
-                FROM Escolha_Clinica;
-                `;
-            const [rows] = await db.query(sql);
+                INSERT INTO Escolha_Clinica (cli_descricao) 
+                VALUES (?);
+            `;
+
+            const values = [ descricao ];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                descricao
+            };
 
             return response.status(200).json(
                 {

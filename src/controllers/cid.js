@@ -32,11 +32,27 @@ module.exports = {
 
     async cadastrarCid(request, response) {
         try {
+            const { codigo, descricao } = request.body;
+
+            const sql = `
+                INSERT INTO CID (cid_codigo, cid_descricao) 
+                VALUES (?, ?);
+            `;
+
+            const values = [ codigo, descricao ];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                codigo,
+                descricao
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de cid realizados com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }
