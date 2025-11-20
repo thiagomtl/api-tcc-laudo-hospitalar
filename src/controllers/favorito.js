@@ -3,12 +3,18 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarFavorito(request, response) {
         try {
+
+            const sql = `SELECT fav_id, lau_id, med_id, fav_nome FROM Favorito;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de favorito obtida com sucesso',
-                    dados: null
-
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         } catch (error) {
@@ -24,12 +30,36 @@ module.exports = {
     },
     async cadastrarFavorito(request, response) {
         try {
+
+            const { lauid,medid,nome } = request.body;
+            
+
+            const sql =  `
+                   INSERT INTO Favorito (lau_id, med_id, fav_nome) 
+                   VALUES (?, ?, ?);
+                    `;
+
+
+    
+            const values = [nome,lauid,medid]; 
+
+           
+
+            const dados = {
+               
+                nome,
+               lauid,
+                medid,
+                
+            };
+
+            
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de favorito obtida com sucesso',
-                    dados: null
-
+                     dados: dados
                 }
             );
         } catch (error) {
@@ -37,7 +67,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar favorito: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }
@@ -45,6 +75,9 @@ module.exports = {
     },
     async editarFavorito(request, response) {
         try {
+
+            
+
             return response.status(200).json(
                 {
                     sucesso: true,
@@ -66,12 +99,16 @@ module.exports = {
     },
     async apagarFavorito(request, response) {
         try {
+
+           
+
+            
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Exclusão de favorito obtida com sucesso',
-                    dados: null
-
+                     dados: null
                 }
             );
         } catch (error) {

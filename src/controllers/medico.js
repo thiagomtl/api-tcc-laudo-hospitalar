@@ -3,11 +3,17 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarMedico(request, response) {
         try {
+            const sql = `SELECT med_id, med_crm FROM Medico;`
+                ;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de médico obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -24,11 +30,34 @@ module.exports = {
     },
     async cadastrarMedico(request, response) {
         try {
+
+            const {crm } = request.body;
+           
+
+            const sql =  `
+                   NSERT INTO Medico (med_crm) 
+                   VALUES
+                   (?);
+                    `;
+
+
+    
+            const values = [crm]; 
+
+            
+
+            const dados = {
+                crm
+                
+            };
+
+            
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de médico obtida com sucesso',
-                    dados: null
+                    dados: dados
 
                 }
             );
@@ -37,7 +66,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar médico: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }
@@ -45,12 +74,14 @@ module.exports = {
     },
     async editarMedico(request, response) {
         try {
+
+           
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Atualização de médico obtida com sucesso',
                     dados: null
-
                 }
             );
         } catch (error) {
@@ -66,6 +97,9 @@ module.exports = {
     },
     async apagarMedico(request, response) {
         try {
+
+           
+
             return response.status(200).json(
                 {
                     sucesso: true,
