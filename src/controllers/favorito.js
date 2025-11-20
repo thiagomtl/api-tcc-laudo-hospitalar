@@ -31,13 +31,35 @@ module.exports = {
     async cadastrarFavorito(request, response) {
         try {
 
+            const { lauid,medid,nome } = request.body;
+            
+
+            const sql =  `
+                   INSERT INTO Favorito (lau_id, med_id, fav_nome) 
+                   VALUES (?, ?, ?);
+                    `;
+
+
+    
+            const values = [nome,lauid,medid]; 
+
+           
+
+            const dados = {
+               
+                nome,
+               lauid,
+                medid,
+                
+            };
+
             
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de favorito obtida com sucesso',
-                     dados: null
+                     dados: dados
                 }
             );
         } catch (error) {
@@ -45,7 +67,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar favorito: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }
@@ -77,6 +99,8 @@ module.exports = {
     },
     async apagarFavorito(request, response) {
         try {
+
+           
 
             
 

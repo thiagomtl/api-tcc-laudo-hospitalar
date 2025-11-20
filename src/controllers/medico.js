@@ -31,13 +31,33 @@ module.exports = {
     async cadastrarMedico(request, response) {
         try {
 
+            const {crm } = request.body;
+           
+
+            const sql =  `
+                   NSERT INTO Medico (med_crm) 
+                   VALUES
+                   (?);
+                    `;
+
+
+    
+            const values = [crm]; 
+
+            
+
+            const dados = {
+                crm
+                
+            };
+
             
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de médico obtida com sucesso',
-                    dados: null
+                    dados: dados
 
                 }
             );
@@ -46,7 +66,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar médico: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }

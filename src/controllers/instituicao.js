@@ -32,6 +32,27 @@ module.exports = {
     },
     async cadastrarInstituicao(request, response) {
         try {
+            const { nome, razao_social, cnes, cnpj} = request.body;
+            
+
+            const sql =  `
+                    INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) 
+                    VALUES (?, ?, ?, ?,);
+                    `;
+
+            const values = [nome,cnpj,razao_social,cnes]; 
+
+    
+
+            const dados = {
+                nome,
+                cnes,
+                cnpj,
+                razao_social
+                
+            };
+
+
 
              
 
@@ -39,7 +60,7 @@ module.exports = {
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de instituição obtida com sucesso',
-                      dados: null
+                      dados: dados
 
                 }
             );
@@ -48,7 +69,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar instituição: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }
