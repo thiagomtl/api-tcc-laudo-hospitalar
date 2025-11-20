@@ -3,7 +3,7 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarAtendimento(request, response) {
         try {
-
+            
             const sql = `
             SELECT 
                 atend_id, pac_id, con_id, 
@@ -35,11 +35,34 @@ module.exports = {
     },
     async cadastrarAtendimento(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            const { paciente, convenio, leito, carater, medico } = request.body;
+
+            const sql = `
+            INSERT INTO Atendimento 
+            (pac_id, con_id, leito_id, car_id, med_id, atend_data) 
+            VALUES
+            (?,?,?,?,?,NOW());
+            `;
+
+            const values = [paciente, convenio, leito, carater, medico,];
+
+            const [result] = await db.query(sql, values);
+            
+            const dados = {
+                id: result.insertId,
+                paciente,
+                convenio,
+                leito,
+                carater,
+                medico
+            };
+            
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Cadastro de atendimento obtida com sucesso',
-                    dados: null
+                    mensagem: 'Cadastro de atendimento realizado com sucesso',
+                    dados: dados
 
                 }
             );
@@ -48,7 +71,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar atendimento: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }

@@ -34,11 +34,31 @@ module.exports = {
     },
     async cadastrarLeito(request, response) {
         try {
+
+            const { setor, leito} = request.body;
+            
+            const sql =`
+            INSERT INTO Leito 
+                (set_id, leito_identificacao) 
+            VALUES 
+                (?,?);
+            `;
+
+            const values = [setor, leito];
+
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                setor,
+                leito
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de leito obtida com sucesso',
-                    dados: null
+                    dados: dados
 
                 }
             );
@@ -47,7 +67,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar leito: ${error.message}`,
-                    dados: null
+                    dados: error.message
                 }
             );
         }
