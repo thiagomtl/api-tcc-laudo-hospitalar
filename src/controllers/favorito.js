@@ -31,35 +31,36 @@ module.exports = {
     async cadastrarFavorito(request, response) {
         try {
 
-            const { lauid,medid,nome } = request.body;
-            
+            const { lau_id, med_id, fav_nome } = request.body;
 
-            const sql =  `
+
+            const sql = `
                    INSERT INTO Favorito (lau_id, med_id, fav_nome) 
                    VALUES (?, ?, ?);
                     `;
 
 
-    
-            const values = [nome,lauid,medid]; 
 
-           
+            const values = [lau_id, med_id, fav_nome];
+
+            const [result] = await db.query(sql, values);
+
+
 
             const dados = {
-               
-                nome,
-               lauid,
-                medid,
-                
+                id: result.insertId,
+                lau_id,
+                med_id,
+                fav_nome,
             };
 
-            
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de favorito obtida com sucesso',
-                     dados: dados
+                    dados: dados
                 }
             );
         } catch (error) {
@@ -76,13 +77,45 @@ module.exports = {
     async editarFavorito(request, response) {
         try {
 
-            
+             const { lau_id, med_id, fav_nome } = request.body;
+
+            const { id } = request.params;
+
+            const sql = ` UPDATE Favorito SET 
+             lau_id = ?, med_id = ?, fav_nome = ?
+             WHERE 
+             fav_id = ?
+             `;
+
+             const values = [lau_id,med_id,fav_nome ,id];
+
+            const [result] = await db.query(sql,values);
+
+
+            if (result.affectedRows === 0){
+                return response.status(404).json({
+                    sucesso:false,
+                    mensagem:`Favorito ${id} não encontrado!`,
+                    dados:null
+                });
+            }
+
+            const dados ={
+                id,
+                lau_id,
+                med_id,
+                fav_nome
+                
+            };
+
+
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de favorito obtida com sucesso',
-                    dados: null
+                    mensagem: `Favorito ${id} atualizado com sucesso!`,
+                    dados: dados
 
                 }
             );
@@ -100,15 +133,29 @@ module.exports = {
     async apagarFavorito(request, response) {
         try {
 
-           
 
-            
+            const { id } = request.params;
+
+            const sql = `DELETE FROM Favorito where fav_id = ?`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0){
+                return response.status(404).json({
+                    sucesso:false,
+                    mensagem:`Favorito ${id} não encontrado!`,
+                    dados:null
+                });
+            }
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de favorito obtida com sucesso',
-                     dados: null
+                    mensagem: `Favorito ${id} excluído com sucesso`,
+                    dados: null
                 }
             );
         } catch (error) {
