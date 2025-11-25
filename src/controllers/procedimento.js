@@ -4,6 +4,7 @@ module.exports = {
 
     async listarProcedimento(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const sql = `
                 SELECT pro_id, pro_codigo, pro_descricao 
                 FROM Procedimento;
@@ -32,6 +33,7 @@ module.exports = {
 
     async cadastrarProcedimento(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { codigo, descricao } = request.body;
 
             const sql = `
@@ -69,6 +71,7 @@ module.exports = {
 
     async editarProcedimento(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { codigo, descricao } = request.body;
             const { id } = request.params;
 
@@ -115,6 +118,7 @@ module.exports = {
 
     async apagarProcedimento(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { id } = request.params;
             const sql = `DELETE FROM Procedimento WHERE pro_id = ?`;
             const values = [ id ];

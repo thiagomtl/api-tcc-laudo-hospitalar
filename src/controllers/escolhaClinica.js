@@ -4,6 +4,7 @@ module.exports = {
 
     async listarEscolhaClinica(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const sql = `
                 SELECT cli_id, cli_descricao 
                 FROM Escolha_Clinica;
@@ -32,6 +33,7 @@ module.exports = {
 
     async cadastrarEscolhaClinica(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { descricao } = request.body;
 
             const sql = `
@@ -68,6 +70,7 @@ module.exports = {
 
     async editarEscolhaClinica(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { descricao } = request.body;
             const { id } = request.params;
 
@@ -113,6 +116,7 @@ module.exports = {
 
     async apagarEscolhaClinica(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { id } = request.params;
             const sql = `DELETE FROM Escolha_CLinica WHERE cli_id = ?`;
             const values = [ id ];

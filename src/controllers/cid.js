@@ -4,6 +4,7 @@ module.exports = {
 
     async listarCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const sql = `
                 SELECT cid_id, cid_codigo, cid_descricao 
                 FROM CID;
@@ -32,6 +33,7 @@ module.exports = {
 
     async cadastrarCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { codigo, descricao } = request.body;
 
             const sql = `
@@ -69,6 +71,7 @@ module.exports = {
 
     async editarCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { codigo, descricao } = request.body;
             const { id } = request.params;
 
@@ -115,6 +118,7 @@ module.exports = {
 
     async apagarCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
             const { id } = request.params;
             const sql = `DELETE FROM CID WHERE cid_id = ?`;
             const values = [ id ];
