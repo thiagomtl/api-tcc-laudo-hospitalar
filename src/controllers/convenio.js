@@ -68,11 +68,41 @@ module.exports = {
     },
     async editarConvenio(request, response) {
         try {
+
+            const { convenio } = request.body;
+
+            const { id } = request.params;
+
+            const sql =`
+            UPDATE Convenio 
+            SET con_tipo = ?
+            WHERE con_id = ?;
+            `
+
+            const values = [convenio, id];
+            
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json(
+                    {
+                        sucesso: false,
+                        mensagem: `Convênio ID ${id} não encontrado para atualização`,
+                        dados: null
+                    }
+                );
+            }
+
+            const dados = {
+                id,
+                convenio
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de convênio obtida com sucesso',
-                    dados: null
+                    mensagem: `Convênio ID ${id} atualizado com sucesso`,
+                    dados
 
                 }
             );
@@ -89,10 +119,29 @@ module.exports = {
     },
     async apagarConvenio(request, response) {
         try {
+
+            const { id } = request.params;
+
+            const sql =`DELETE FROM Convenio WHERE con_id = ?;`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json(
+                    {
+                        sucesso: false,
+                        mensagem: `Convênio ID ${id} não encontrado para exclusão`,
+                        dados: null
+                    }
+                );
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de convênio obtida com sucesso',
+                    mensagem: `Exclusão ID ${id} de convênio obtida com sucesso`,
                     dados: null
 
                 }
