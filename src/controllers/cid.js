@@ -69,11 +69,36 @@ module.exports = {
 
     async editarCid(request, response) {
         try {
+            const { codigo, descricao } = request.body;
+            const { id } = request.params;
+
+            const sql = `
+                UPDATE CID SET cid_codigo = ?, cid_descricao = ?
+                WHERE cid_id = ?
+            `;
+
+            const values = [ codigo, descricao, id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `CID com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                codigo,
+                descricao
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de cid realizados com sucesso`,
-                    dados: null
+                    mensagem: `Atualização de cid realizada com sucesso`,
+                    dados: dados
                 }
             )
         }
@@ -90,6 +115,19 @@ module.exports = {
 
     async apagarCid(request, response) {
         try {
+            const { id } = request.params;
+            const sql = `DELETE FROM CID WHERE cid_id = ?`;
+            const values = [ id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `CID com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,

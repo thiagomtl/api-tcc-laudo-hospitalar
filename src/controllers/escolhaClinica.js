@@ -68,11 +68,35 @@ module.exports = {
 
     async editarEscolhaClinica(request, response) {
         try {
+            const { descricao } = request.body;
+            const { id } = request.params;
+
+            const sql = `
+                UPDATE Escolha_Clinica SET cli_descricao = ?
+                WHERE cli_id = ?
+            `;
+
+            const values = [ descricao, id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Escolha Clínica com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                descricao
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de escolha clínica realizados com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }
@@ -89,6 +113,19 @@ module.exports = {
 
     async apagarEscolhaClinica(request, response) {
         try {
+            const { id } = request.params;
+            const sql = `DELETE FROM Escolha_CLinica WHERE cli_id = ?`;
+            const values = [ id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Escolha Clínica com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,

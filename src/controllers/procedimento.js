@@ -47,6 +47,7 @@ module.exports = {
                 codigo,
                 descricao
             };
+            
             return response.status(200).json(
                 {
                     sucesso: true,
@@ -68,11 +69,36 @@ module.exports = {
 
     async editarProcedimento(request, response) {
         try {
+            const { codigo, descricao } = request.body;
+            const { id } = request.params;
+
+            const sql = `
+                UPDATE Procedimento SET pro_codigo = ?, pro_descricao = ?
+                WHERE pro_id = ?
+            `;
+
+            const values = [ codigo, descricao, id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Procedimento com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                codigo,
+                descricao
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de procedimentos realizados com sucesso`,
-                    dados: null
+                    mensagem: `Atualização de procedimentos realizada com sucesso`,
+                    dados: dados
                 }
             )
         }
@@ -89,6 +115,19 @@ module.exports = {
 
     async apagarProcedimento(request, response) {
         try {
+            const { id } = request.params;
+            const sql = `DELETE FROM Procedimento WHERE pro_id = ?`;
+            const values = [ id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Procedimento com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
