@@ -78,7 +78,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao apagar atendimento: ${error.message}`,
+                    mensagem: `Erro ao excluir atendimento: ${error.message}`,
                     dados: null
                 }
             );
