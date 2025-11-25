@@ -79,11 +79,43 @@ module.exports = {
     },
     async editarAtendimento(request, response) {
         try {
+
+            const { paciente, convenio, leito, carater, medico } = request.body
+
+            const { id } = request.params;
+
+            const sql = `
+            UPDATE Atendimento 
+            SET pac_id = ?, con_id = ?, leito_id = ?, car_id = ?, med_id = ?, atend_data = NOW()
+            WHERE atend_id = ?;
+            `;
+
+            const values = [paciente, convenio, leito, carater, medico, id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Atendimento ID ${id} não encontrado`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                paciente,
+                convenio,
+                leito,
+                carater,
+                medico
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de atendimento obtida com sucesso',
-                    dados: null
+                    mensagem: `Atendimento ID ${id} atualizado com sucesso`,
+                    dados
 
                 }
             );
@@ -100,10 +132,27 @@ module.exports = {
     },
     async apagarAtendimento(request, response) {
         try {
+
+            const { id } = request.params;
+
+            const sql = `DELETE FROM Atendimento WHERE atend_id = ?`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Atendimento ID ${id} não encontrado para exclusão`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de atendimento obtida com sucesso',
+                    mensagem: `Exclusão ID ${id} de atendimento obtida com sucesso`,
                     dados: null
 
                 }
@@ -112,7 +161,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao apagar atendimento: ${error.message}`,
+                    mensagem: `Erro ao excluir atendimento: ${error.message}`,
                     dados: null
                 }
             );

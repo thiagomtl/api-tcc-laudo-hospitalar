@@ -75,11 +75,42 @@ module.exports = {
     },
     async editarLeito(request, response) {
         try {
+
+            const { setor, leito} = request.body;
+
+            const { id } = request.params;
+
+            const sql =`
+            UPDATE Leito 
+            SET set_id = ?, leito_identificacao = ?
+            WHERE leito_id = ?;
+            `;
+
+            const values = [setor, leito, id];
+            
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json(
+                    {
+                        sucesso: false,
+                        mensagem: `Leito ID ${id} não encontrado para atualização`,
+                        dados: null
+                    }
+                );
+            }
+
+            const dados = {
+                id,
+                setor,
+                leito
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de leito obtida com sucesso',
-                    dados: null
+                    mensagem: `Atualização ID ${id} de leito obtida com sucesso`,
+                    dados
 
                 }
             );
@@ -96,10 +127,26 @@ module.exports = {
     },
     async apagarLeito(request, response) {
         try {
+
+            const { id } = request.params;
+
+            const sql = `DELETE FROM Leito WHERE Leito_id = ?`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Leito ID ${id} não encontrado para exclusão`,
+                    dados: null
+                });
+            }
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de leito obtida com sucesso',
+                    mensagem: `Exclusão ID ${id} de leito obtida com sucesso`,
                     dados: null
 
                 }
