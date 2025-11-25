@@ -4,11 +4,18 @@ module.exports = {
 
     async listarSetor(request, response) {
         try {
+            const sql = `
+                SELECT set_id, set_nome 
+                FROM Setor;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de setores obtida com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -17,7 +24,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao obter lista de setores: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -25,11 +33,18 @@ module.exports = {
 
     async cadastrarSetor(request, response) {
         try {
+            const sql = `
+                SELECT set_id, set_nome 
+                FROM Setor;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de setor realizado com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -38,7 +53,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar setor: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -46,11 +62,18 @@ module.exports = {
 
     async editarSetor(request, response) {
         try {
+            const sql = `
+                SELECT set_id, set_nome 
+                FROM Setor;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de setores obtida com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
 
@@ -59,7 +82,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao atualizar setores: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -67,11 +91,18 @@ module.exports = {
 
     async apagarSetor(request, response) {
         try {
+            const sql = `
+                SELECT set_id, set_nome 
+                FROM Setor;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de setores apagada com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }
@@ -80,7 +111,8 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao apagar lista de setores: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             );
         }

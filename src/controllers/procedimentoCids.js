@@ -1,23 +1,31 @@
 const db = require('../dataBase/connection');
 
 module.exports = {
-    
+
     async listarProcedimentoCid(request, response) {
         try {
+            const sql = `
+                SELECT proc_cid_id, pro_id, cid_id 
+                FROM Procedimento_Cids;
+                `;
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de procedimentos e cid obtidas com sucesso`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
                     mensagem: `Erro ao listar procedimentos e cid: ${error.message}`,
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
                 }
             )
         }
@@ -32,7 +40,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -53,7 +61,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {
@@ -74,7 +82,7 @@ module.exports = {
                     dados: null
                 }
             )
-        } 
+        }
         catch (error) {
             return response.status(500).json(
                 {

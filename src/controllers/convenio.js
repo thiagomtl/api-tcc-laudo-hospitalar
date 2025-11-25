@@ -3,11 +3,21 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarConvenio(request, response) {
         try {
+
+            const sql = `
+            SELECT 
+                con_id, con_tipo 
+            FROM Convenio;
+            `;
+
+            const [rows] = await db.query(sql);
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de convênio obtida com sucesso',
-                    dados: null
+                    itens: rows.length,
+                    dados: rows
 
                 }
             );
@@ -24,24 +34,37 @@ module.exports = {
     },
     async cadastrarConvenio(request, response) {
         try {
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: 'Cadastro de convênio obtida com sucesso',
-                    dados: null
 
-                }
-            );
+            const { convenios } = request.body;
+
+            const placeholders = convenios.map(() => "(?)").join(",");
+
+            const sql = `
+            INSERT INTO Convenio (con_tipo)
+            VALUES ${placeholders};
+        `;
+
+            const [result] = await db.query(sql, convenios);
+
+            const dados = {
+                primeiroIdInserido: result.insertId,
+                quantidadeInserida: result.affectedRows,
+                conveniosCadastrados: convenios
+            };
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Convênios cadastrados com sucesso',
+                dados: dados
+            });
+
         } catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao cadastrar convênio: ${error.message}`,
-                    dados: null
-                }
-            );
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao cadastrar convênios: ${error.message}`,
+                dados: error.message
+            });
         }
-
     },
     async editarConvenio(request, response) {
         try {
