@@ -32,35 +32,39 @@ module.exports = {
     },
     async cadastrarInstituicao(request, response) {
         try {
-            const { nome, razao_social, cnes, cnpj} = request.body;
-            
+            const { nome, razao_social, cnes, cnpj } = request.body;
 
-            const sql =  `
+
+            const sql = `
                     INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) 
-                    VALUES (?, ?, ?, ?,);
+                    VALUES (?, ?, ?, ?);
                     `;
 
-            const values = [nome,cnpj,razao_social,cnes]; 
+            const values = [nome, razao_social, cnes, cnpj];
 
-    
+            const [result] = await db.query(sql, values);
+
+
 
             const dados = {
+                id: result.insertId,
                 nome,
+                razao_social,
                 cnes,
                 cnpj,
-                razao_social
-                
+
+
             };
 
 
 
-             
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Cadastro de instituição obtida com sucesso',
-                      dados: dados
+                    dados: dados
 
                 }
             );
@@ -78,13 +82,44 @@ module.exports = {
     async editarInstituicao(request, response) {
         try {
 
-            
+            const { nome, razao_social, cnes, cnpj } = request.body;
+
+            const { id } = request.params;
+
+            const sql = ` UPDATE Instituicao SET 
+             inst_nome = ?, inst_razao_social = ?, inst_cnes = ?, inst_cnpj = ?
+             WHERE 
+             inst_id = ?
+             `;
+
+            const values = [nome, razao_social, cnes, cnpj, id];
+
+            const [result] = await db.query(sql, values);
+
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Instituição ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                nome,
+                razao_social,
+                cnes,
+                cnpj
+
+            };
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Atualização de instituição obtida com sucesso',
-                     dados: null
+                    mensagem: `Instituição ${id} atualizada com sucesso`,
+                    dados: dados
 
                 }
             );
@@ -102,13 +137,28 @@ module.exports = {
     async apagarInstituicao(request, response) {
         try {
 
-            
+             const { id } = request.params;
+
+            const sql = `DELETE FROM Instituicao where inst_id = ?`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0){
+                return response.status(404).json({
+                    sucesso:false,
+                    mensagem:`Instituição ${id} não encontrado!`,
+                    dados:null
+                });
+            }
+
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: 'Exclusão de instituição obtida com sucesso',
-                     dados: null
+                    mensagem: `Instituição ${id} excluída com sucesso`,
+                    dados: null
 
                 }
             );
