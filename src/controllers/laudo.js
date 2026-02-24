@@ -19,6 +19,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -30,16 +31,35 @@ module.exports = {
         }
     },
 
-    async cadastrarLaudo(request, response) {
+
+    async cadastrarLaudo(request, response) { // Cadastrar precisa ser verificado. 24/02/2026 ; 20:36
         try {
+            console.log("BODY RECEBIDO:", request.body);
+            const { sinais, internacao, resultado, recurso } = request.body;
+
+            const sql = `
+                INSERT INTO Laudo (lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status)
+                VALUES (?, ?);
+            `;
+
+            const values = [ sinais, internacao, resultado, recurso ];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                codigo,
+                descricao
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de laudos realizados com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -51,6 +71,7 @@ module.exports = {
         }
     },
 
+
     async editarLaudo(request, response) {
         try {
             return response.status(200).json(
@@ -61,6 +82,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -72,6 +94,7 @@ module.exports = {
         }
     },
 
+
     async apagarLaudo(request, response) {
         try {
             return response.status(200).json(
@@ -82,6 +105,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {

@@ -19,6 +19,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -31,6 +32,7 @@ module.exports = {
         }
     },
 
+
     async cadastrarProcedimentoCid(request, response) {
         try {
             return response.status(200).json(
@@ -41,6 +43,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -52,6 +55,7 @@ module.exports = {
         }
     },
 
+
     async editarProcedimentoCid(request, response) {
         try {
             return response.status(200).json(
@@ -62,6 +66,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -73,6 +78,7 @@ module.exports = {
         }
     },
 
+
     async apagarProcedimentoCid(request, response) {
         try {
             return response.status(200).json(
@@ -83,6 +89,7 @@ module.exports = {
                 }
             )
         }
+        
         catch (error) {
             return response.status(500).json(
                 {

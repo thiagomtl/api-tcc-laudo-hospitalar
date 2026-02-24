@@ -4,7 +4,7 @@ module.exports = {
 
     async listarProcedimento(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const sql = `
                 SELECT pro_id, pro_codigo, pro_descricao 
                 FROM Procedimento;
@@ -20,6 +20,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -31,9 +32,10 @@ module.exports = {
         }
     },
 
+
     async cadastrarProcedimento(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { codigo, descricao } = request.body;
 
             const sql = `
@@ -49,6 +51,7 @@ module.exports = {
                 codigo,
                 descricao
             };
+       
             
             return response.status(200).json(
                 {
@@ -58,6 +61,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -69,9 +73,10 @@ module.exports = {
         }
     },
 
+
     async editarProcedimento(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { codigo, descricao } = request.body;
             const { id } = request.params;
 
@@ -105,6 +110,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -116,9 +122,10 @@ module.exports = {
         }
     },
 
+
     async apagarProcedimento(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { id } = request.params;
             const sql = `DELETE FROM Procedimento WHERE pro_id = ?`;
             const values = [ id ];
@@ -140,6 +147,7 @@ module.exports = {
                 }
             )
         }
+        
         catch (error) {
             return response.status(500).json(
                 {

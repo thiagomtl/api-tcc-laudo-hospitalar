@@ -4,7 +4,7 @@ module.exports = {
 
     async listarEscolhaClinica(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const sql = `
                 SELECT cli_id, cli_descricao 
                 FROM Escolha_Clinica;
@@ -20,6 +20,7 @@ module.exports = {
                 }
             )
         }
+        
         catch (error) {
             return response.status(500).json(
                 {
@@ -31,9 +32,10 @@ module.exports = {
         }
     },
 
+
     async cadastrarEscolhaClinica(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { descricao } = request.body;
 
             const sql = `
@@ -57,6 +59,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -68,9 +71,10 @@ module.exports = {
         }
     },
 
+
     async editarEscolhaClinica(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { descricao } = request.body;
             const { id } = request.params;
 
@@ -103,6 +107,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -114,9 +119,10 @@ module.exports = {
         }
     },
 
+
     async apagarEscolhaClinica(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); // <-- coloque aqui
+            console.log("BODY RECEBIDO:", request.body); 
             const { id } = request.params;
             const sql = `DELETE FROM Escolha_CLinica WHERE cli_id = ?`;
             const values = [ id ];
@@ -138,6 +144,7 @@ module.exports = {
                 }
             )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
