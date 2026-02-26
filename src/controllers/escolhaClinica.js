@@ -14,7 +14,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Lista de escolhas clínicas obtidas com sucesso`,
+                    mensagem: `Lista de escolha clínica obtida com sucesso`,
                     itens: rows.length,
                     dados: rows
                 }
@@ -102,7 +102,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de escolha clínica realizados com sucesso`,
+                    mensagem: `Atualização de escolha clínica realizado com sucesso`,
                     dados: dados
                 }
             )
@@ -139,7 +139,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Exclusão de escolha clínica realizados com sucesso`,
+                    mensagem: `Exclusão de escolha clínica realizado com sucesso`,
                     dados: null
                 }
             )
