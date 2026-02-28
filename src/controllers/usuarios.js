@@ -208,53 +208,7 @@ module.exports = {
 
         }
 
-    },
-
-     async ocultarUsuario(request, response){
-        try {
-
-            const ativo = false;
-
-            const { id } = request.params;
-
-            const sql = `UPDATE usuarios SET
-                            usu_ativo = ?
-                            WHERE
-                            usu_id = ?;
-                            `;
-
-            const values = [ativo, id];
-
-            const [result] = await db.query(sql, values);
-
-            if (result.affectedRows === 0){
-                return response.status(404).json({
-                    sucesso: false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados: null
-                });
-            }
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Usuário ${id} excluído com sucesso`,
-                    dados: null
-
-                }
-            );
-        } catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao apagar usuário: ${error.message} `,
-                    dados: error.message
-                }
-            );
-
-        }
-         
-     }
-
-
+    }
 }
+
+    

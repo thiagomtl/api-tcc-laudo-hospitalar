@@ -36,7 +36,7 @@ module.exports = {
 
             const sql = `
                    INSERT INTO Favorito (lau_id, med_id, fav_nome) 
-                   VALUES (?, ?, ?);
+                   VALUES (?, ? , ?);
                     `;
 
 

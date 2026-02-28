@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const MedicoController = require('../controllers/medico');
-const UsuarioController = require('../controllers/Usuario');
+const UsuarioController = require('../controllers/Usuarios');
 const FavoritoController = require('../controllers/Favorito');
 const InstituicaoController = require('../controllers/Instituicao');
 
@@ -15,7 +15,6 @@ router.get('/usuarios', UsuarioController.listarUsuario);
 router.post('/usuarios', UsuarioController.cadastrarUsuario);
 router.patch('/usuarios/:id', UsuarioController.editarUsuario);
 router.delete('/usuarios/:id', UsuarioController.apagarUsuario);
-router.delete('/usuarios/del/:id', UsuarioController.ocultarUsuario);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
 router.post('/favoritos', FavoritoController.cadastrarFavorito);
