@@ -13,7 +13,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Lista de procedimentos e cid obtidas com sucesso`,
+                    mensagem: `Lista de procedimento e cid obtida com sucesso`,
                     itens: rows.length,
                     dados: rows
                 }
@@ -24,7 +24,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao listar procedimentos e cid: ${error.message}`,
+                    mensagem: `Erro ao listar procedimento e cid: ${error.message}`,
                     itens: rows.length,
                     dados: rows
                 }
@@ -38,7 +38,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Cadastro de procedimentos e cid realizados com sucesso`,
+                    mensagem: `Cadastro de procedimento e cid realizado com sucesso`,
                     dados: null
                 }
             )
@@ -48,7 +48,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao cadastrar procedimentos e cid: ${error.message}`,
+                    mensagem: `Erro ao cadastrar procedimento e cid: ${error.message}`,
                     dados: null
                 }
             )
@@ -61,7 +61,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de procedimentos e cid realizados com sucesso`,
+                    mensagem: `Atualização de procedimento e cid realizado com sucesso`,
                     dados: null
                 }
             )
@@ -71,7 +71,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao atualizar procedimentos e cid: ${error.message}`,
+                    mensagem: `Erro ao atualizar procedimento e cid: ${error.message}`,
                     dados: null
                 }
             )
@@ -81,10 +81,24 @@ module.exports = {
 
     async apagarProcedimentoCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); 
+            const { id } = request.params;
+            const sql = `DELETE FROM Procedimento_Cids WHERE proc_cid_id = ?`;
+            const values = [ id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Procedimento/Cid com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Exclusão de procedimentos e cid realizados com sucesso`,
+                    mensagem: `Exclusão de procedimento e cid realizado com sucesso`,
                     dados: null
                 }
             )
@@ -94,7 +108,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao excluir procedimentos e cid: ${error.message}`,
+                    mensagem: `Erro ao excluir procedimento e cid: ${error.message}`,
                     dados: null
                 }
             )

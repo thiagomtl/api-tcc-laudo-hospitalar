@@ -13,7 +13,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Lista de laudos obtidas com sucesso`,
+                    mensagem: `Lista de laudo obtida com sucesso`,
                     itens: rows.length,
                     dados: rows
                 }
@@ -24,7 +24,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao listar laudos: ${error.message}`,
+                    mensagem: `Erro ao listar laudo: ${error.message}`,
                     dados: null
                 }
             )
@@ -35,26 +35,29 @@ module.exports = {
     async cadastrarLaudo(request, response) { // Cadastrar precisa ser verificado. 24/02/2026 ; 20:36
         try {
             console.log("BODY RECEBIDO:", request.body);
-            const { sinais, internacao, resultado, recurso } = request.body;
+            const { sinais, internacao, resultado, recurso, data_preenchimento, status } = request.body;
 
             const sql = `
-                INSERT INTO Laudo (lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status)
-                VALUES (?, ?);
+                INSERT INTO Laudo (lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status) 
+                VALUES
             `;
 
-            const values = [ sinais, internacao, resultado, recurso ];
+            const values = [ sinais, internacao, resultado, recurso, data_preenchimento, status ];
             const [result] = await db.query(sql, values);
 
             const dados = {
-                id: result.insertId,
-                codigo,
-                descricao
+                sinais,
+                internacao,
+                resultado,
+                recurso,
+                data_preenchimento,
+                status
             };
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Cadastro de laudos realizados com sucesso`,
+                    mensagem: `Cadastro de laudo realizado com sucesso`,
                     dados: dados
                 }
             )
@@ -64,7 +67,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao cadastrar laudos: ${error.message}`,
+                    mensagem: `Erro ao cadastrar laudo: ${error.message}`,
                     dados: null
                 }
             )
@@ -74,11 +77,40 @@ module.exports = {
 
     async editarLaudo(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); 
+            const { sinais, internacao, resultado, recurso, data_preenchimento, status } = request.body;
+            const { id } = request.params;
+
+            const sql = `
+                UPDATE Laudo SET lau_sinais = ?, lau_internacao = ?, lau_resultado = ?, lau_recurso = ?, lau_status = ?
+                WHERE lau_id = ?
+            `;
+
+            const values = [ sinais, internacao, resultado, recurso, data_preenchimento, status, id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Laudo com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                sinais, 
+                internacao, 
+                resultado, 
+                recurso, 
+                data_preenchimento, 
+                status
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de laudos realizados com sucesso`,
-                    dados: null
+                    mensagem: `Atualização de laudo realizado com sucesso`,
+                    dados: dados
                 }
             )
         }
@@ -87,7 +119,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao atualizar laudos: ${error.message}`,
+                    mensagem: `Erro ao atualizar laudo: ${error.message}`,
                     dados: null
                 }
             )
@@ -97,10 +129,24 @@ module.exports = {
 
     async apagarLaudo(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); 
+            const { id } = request.params;
+            const sql = `DELETE FROM Laudo WHERE lau_id = ?`;
+            const values = [ id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Laudo com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Exclusão de laudo realizados com sucesso`,
+                    mensagem: `Exclusão de laudo realizado com sucesso`,
                     dados: null
                 }
             )
@@ -110,7 +156,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao excluir laudos: ${error.message}`,
+                    mensagem: `Erro ao excluir laudo: ${error.message}`,
                     dados: null
                 }
             )

@@ -183,7 +183,7 @@ module.exports = {
 
             if (result.affectedRows === 0){
                 return response.status(404).json({
-                    sucesso:false,
+                    sucesso: false,
                     mensagem:`Usuário ${id} não encontrado!`,
                     dados:null
                 });
@@ -205,9 +205,10 @@ module.exports = {
                     dados: error.message
                 }
             );
+
         }
 
-    },
-
-
+    }
 }
+
+    

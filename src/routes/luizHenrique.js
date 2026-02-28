@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const MedicoController = require('../controllers/medico');
-const UsuarioController = require('../controllers/Usuario');
+const UsuarioController = require('../controllers/Usuarios');
 const FavoritoController = require('../controllers/Favorito');
 const InstituicaoController = require('../controllers/Instituicao');
 
