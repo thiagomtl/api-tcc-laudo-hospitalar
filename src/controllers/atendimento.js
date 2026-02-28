@@ -168,6 +168,32 @@ module.exports = {
         }
 
     },
+    async listarAtend(request, response){
+        try {
+            const sql = `
+                SELECT DISTINCT
+                    atend_id
+                From
+                    Atendimento  -- assuming singular table name
+                Order BY
+                    atend_id ASC;
+            `;
+
+            const [rows] = await db.query(sql);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Lista de estados.',
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: 'Erro na requisição.',
+                dados: error.message
+            });
+        }
+    },
 
 
 }

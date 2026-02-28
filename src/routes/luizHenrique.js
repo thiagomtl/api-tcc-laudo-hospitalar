@@ -15,6 +15,8 @@ router.get('/usuarios', UsuarioController.listarUsuario);
 router.post('/usuarios', UsuarioController.cadastrarUsuario);
 router.patch('/usuarios/:id', UsuarioController.editarUsuario);
 router.delete('/usuarios/:id', UsuarioController.apagarUsuario);
+router.delete('/usuarios/del/:id', UsuarioController.ocultarUsuario);
+router.get('/login', UsuarioController.login);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
 router.post('/favoritos', FavoritoController.cadastrarFavorito);

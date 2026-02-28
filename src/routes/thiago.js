@@ -6,6 +6,7 @@ const ConvenioController = require('../controllers/convenio');
 const LeitoController = require('../controllers/leito');
 
 router.get('/atendimento', AtendimentoController.listarAtendimento);
+router.get('/atendimento/listar-atend', AtendimentoController.listarAtend); // rota extra para obter lista ascendente de IDs
 router.post('/atendimento', AtendimentoController.cadastrarAtendimento);
 router.patch('/atendimento/:id', AtendimentoController.editarAtendimento);
 router.delete('/atendimento/:id', AtendimentoController.apagarAtendimento);
