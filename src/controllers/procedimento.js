@@ -14,7 +14,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Lista de procedimentos obtidas com sucesso`,
+                    mensagem: `Lista de procedimento obtida com sucesso`,
                     itens: rows.length,
                     dados: rows
                 }
@@ -25,7 +25,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao listar procedimentos: ${error.message}`,
+                    mensagem: `Erro ao listar procedimento: ${error.message}`,
                     dados: null
                 }
             )
@@ -56,7 +56,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Cadastro de procedimentos realizados com sucesso`,
+                    mensagem: `Cadastro de procedimento realizado com sucesso`,
                     dados: dados
                 }
             )
@@ -66,7 +66,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao cadastrar procedimentos: ${error.message}`,
+                    mensagem: `Erro ao cadastrar procedimento: ${error.message}`,
                     dados: null
                 }
             )
@@ -105,7 +105,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de procedimentos realizada com sucesso`,
+                    mensagem: `Atualização de procedimento realizado com sucesso`,
                     dados: dados
                 }
             )
@@ -115,7 +115,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao atualizar procedimentos: ${error.message}`,
+                    mensagem: `Erro ao atualizar procedimento: ${error.message}`,
                     dados: null
                 }
             )
@@ -142,7 +142,7 @@ module.exports = {
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Exclusão de procedimentos realizados com sucesso`,
+                    mensagem: `Exclusão de procedimento realizado com sucesso`,
                     dados: null
                 }
             )
@@ -152,7 +152,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao excluir procedimentos: ${error.message}`,
+                    mensagem: `Erro ao excluir procedimento: ${error.message}`,
                     dados: null
                 }
             )
