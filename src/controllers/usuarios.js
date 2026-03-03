@@ -32,6 +32,45 @@ module.exports = {
         }
 
     },
+    async login(request, response) {
+        try {
+
+            const { email, senha } = request.body;
+
+            const sql = `
+                SELECT
+                    usu_id, usu_nome, usu_tipo
+                FROM 
+                    Usuario
+                WHERE
+                    usu_email = ? AND usu_senha = ? AND usu_status = 1;
+            `;
+            const values = [email, senha];
+
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
+
+            if (nItens < 1) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Login e/ou senha incorretos',
+                    dados: null,
+                });
+            }
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Login realizado com sucesso',
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao realizar login.`,
+                dados: error.message,
+            });
+        }
+    },
     async cadastrarUsuario(request, response) {
         try {
 
