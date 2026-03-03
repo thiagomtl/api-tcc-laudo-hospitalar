@@ -26,7 +26,7 @@ module.exports = {
                     sucesso: false,
                     mensagem: `Erro ao listar procedimento e cid: ${error.message}`,
                     itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -35,11 +35,28 @@ module.exports = {
 
     async cadastrarProcedimentoCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); 
+            const { procedimento, cid } = request.body;
+
+            const sql = `
+                INSERT INTO Procedimento_Cids (pro_id, cid_id) 
+                VALUES (?, ?);
+            `;
+
+            const values = [ procedimento, cid ];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                procedimento, 
+                cid
+            };
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de procedimento e cid realizado com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }
@@ -58,11 +75,37 @@ module.exports = {
 
     async editarProcedimentoCid(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body); 
+            const { procedimento, cid } = request.body;
+            const { id } = request.params;
+
+            const sql = `
+                UPDATE Procedimento_Cids SET pro_id = ?, cid_id = ?
+                WHERE proc_cid_id = ?
+            `;
+
+            const values = [ procedimento, cid, id ];
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `CID com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                procedimento, 
+                cid
+            }
+
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Atualização de procedimento e cid realizado com sucesso`,
-                    dados: null
+                    dados: dados
                 }
             )
         }
