@@ -26,7 +26,7 @@ module.exports = {
                     sucesso: false,
                     mensagem: `Erro ao listar procedimento e cid: ${error.message}`,
                     itens: rows.length,
-                    dados: rows
+                    dados: null
                 }
             )
         }
@@ -35,11 +35,11 @@ module.exports = {
 
     async cadastrarProcedimentoCid(request, response) {
         try {
-             console.log("BODY RECEBIDO:", request.body); 
+            console.log("BODY RECEBIDO:", request.body); 
             const { procedimento, cid } = request.body;
 
             const sql = `
-                INSERT INTO CID (pro_id, cid_id) 
+                INSERT INTO Procedimento_Cids (pro_id, cid_id) 
                 VALUES (?, ?);
             `;
 
@@ -80,8 +80,8 @@ module.exports = {
             const { id } = request.params;
 
             const sql = `
-                UPDATE CID SET pro_id = ?, cid_id = ?
-                WHERE pro_cid_id = ?
+                UPDATE Procedimento_Cids SET pro_id = ?, cid_id = ?
+                WHERE proc_cid_id = ?
             `;
 
             const values = [ procedimento, cid, id ];
