@@ -6,8 +6,11 @@ module.exports = {
 
             const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
             usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
-            usu_biometria, usu_tipo, usu_status = 1 as usu_status
-            FROM Usuario;
+            usu_biometria, usu_tipo, usu_status = 1 As usu_status
+            FROM Usuario
+            
+            WHERE usu_status = 1;
+             
             `;
 
             const [rows] = await db.query(sql);
@@ -116,7 +119,7 @@ module.exports = {
     async editarUsuario(request, response) {
         try {
 
-            const { nome, documento, senha, email, telefone, tipo,  status, inst_id } = request.body;
+            const { nome, documento, senha, email, telefone, tipo, status, inst_id } = request.body;
 
             const { id } = request.params;
 
@@ -126,20 +129,20 @@ module.exports = {
              usu_id = ?
              `;
 
-             const values = [nome, documento ,email,  senha, inst_id, telefone, tipo, status,id];
+            const values = [nome, documento, email, senha, inst_id, telefone, tipo, status, id];
 
-            const [result] = await db.query(sql,values);
+            const [result] = await db.query(sql, values);
 
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
-                    sucesso:false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
-            const dados ={
+            const dados = {
                 id,
                 nome,
                 documento,
@@ -181,11 +184,55 @@ module.exports = {
 
             const [result] = await db.query(sql, values);
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            return response.status(200).json(
+                {
+                    sucesso: true,
+                    mensagem: `Usuário ${id} excluído com sucesso`,
+                    dados: null
+
+                }
+            );
+
+        } catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: `Erro ao apagar usuário: ${error.message} `,
+                    dados: error.message
+                }
+            );
+        }
+    },
+
+    async ocultarUsuario(request, response) {
+        try {
+
+            const status = false
+
+            const { id } = request.params;
+
+            const sql = `UPDATE Usuario SET 
+                    usu_status = ?
+                        WHERE
+                        usu_id = ?`;
+
+            const values = [status, id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
@@ -211,4 +258,3 @@ module.exports = {
     }
 }
 
-    

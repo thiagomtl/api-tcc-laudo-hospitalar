@@ -3,7 +3,7 @@ const router = express.Router();
 
 const MedicoController = require('../controllers/medico');
 const UsuarioController = require('../controllers/Usuarios');
-const FavoritoController = require('../controllers/Favorito');
+const FavoritoController = require('../controllers/favoritos');
 const InstituicaoController = require('../controllers/Instituicao');
 
 router.get('/medicos', MedicoController.listarMedico);
@@ -16,7 +16,7 @@ router.post('/usuarios', UsuarioController.cadastrarUsuario);
 router.patch('/usuarios/:id', UsuarioController.editarUsuario);
 router.delete('/usuarios/:id', UsuarioController.apagarUsuario);
 router.delete('/usuarios/del/:id', UsuarioController.ocultarUsuario);
-router.get('/login', UsuarioController.login);
+// router.get('/login', UsuarioController.login);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
 router.post('/favoritos', FavoritoController.cadastrarFavorito);
