@@ -35,6 +35,62 @@ module.exports = {
         }
 
     },
+    async loginUsuario(request, response) {
+        try {
+
+            const { email, senha } = request.query;
+
+            const sql = `SELECT 
+                usu_id, usu_nome, usu_tipo
+            FROM 
+                usuario 
+            WHERE  
+                usu_email = ? AND usu_senha = ? AND usu_status = 1;
+            `;
+
+            const values = [email, senha];
+
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
+
+            if (nItens < 1) {
+
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Login e/ou senha inválido.',
+                    dados: null,
+                });
+            }
+
+            const dados = rows.map(usuario => ({
+
+                id: usuario.usu_id,
+                nome: usuario.usu_nome,
+                // Status: usuario.usu_status,
+                tipo: usuario.usu_tipo,
+            
+            }));
+
+            return response.status(200).json(
+                {
+                    sucesso: true,
+                    mensagem: 'Login efetuado com sucesso',
+                    dados
+
+                }
+            );
+        } catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: `Erro na requisição`,
+                    dados: error.message
+                }
+            );
+        }
+
+    },
+
     async cadastrarUsuario(request, response) {
         try {
 
