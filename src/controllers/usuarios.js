@@ -6,8 +6,11 @@ module.exports = {
 
             const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
             usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
-            usu_biometria, usu_tipo, usu_status = 1 as usu_status
-            FROM Usuario;
+            usu_biometria, usu_tipo, usu_status = 1 As usu_status
+            FROM Usuario
+            
+            WHERE usu_status = 1;
+             
             `;
 
             const [rows] = await db.query(sql);
@@ -32,44 +35,59 @@ module.exports = {
         }
 
     },
-    async login(request, response) {
+    async loginUsuario(request, response) {
         try {
 
-            const { email, senha } = request.body;
+            const { email, senha } = request.query;
 
-            const sql = `
-                SELECT
-                    usu_id, usu_nome, usu_tipo
-                FROM 
-                    Usuario
-                WHERE
-                    usu_email = ? AND usu_senha = ? AND usu_status = 1;
+            const sql = `SELECT 
+                usu_id, usu_nome, usu_tipo
+            FROM 
+                usuario 
+            WHERE  
+                usu_email = ? AND usu_senha = ? AND usu_status = 1;
             `;
+
             const values = [email, senha];
 
             const [rows] = await db.query(sql, values);
             const nItens = rows.length;
 
             if (nItens < 1) {
+
                 return response.status(403).json({
                     sucesso: false,
-                    mensagem: 'Login e/ou senha incorretos',
+                    mensagem: 'Login e/ou senha inválido.',
                     dados: null,
                 });
             }
+            const dados = rows.map(usuario => ({
 
-            return response.status(200).json({
-                sucesso: true,
-                mensagem: 'Login realizado com sucesso',
-                dados: rows
-            });
+                id: usuario.usu_id,
+                nome: usuario.usu_nome,
+                // Status: usuario.usu_status,
+                tipo: usuario.usu_tipo,
+            
+            }));
+
+            return response.status(200).json(
+                {
+                    sucesso: true,
+                    mensagem: 'Login efetuado com sucesso',
+                    dados
+
+                }
+            );
         } catch (error) {
-            return response.status(500).json({
-                sucesso: false,
-                mensagem: `Erro ao realizar login.`,
-                dados: error.message,
-            });
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: `Erro na requisição`,
+                    dados: error.message
+                }
+            );
         }
+
     },
     async cadastrarUsuario(request, response) {
         try {
@@ -155,7 +173,7 @@ module.exports = {
     async editarUsuario(request, response) {
         try {
 
-            const { nome, documento, senha, email, telefone, tipo,  status, inst_id } = request.body;
+            const { nome, documento, senha, email, telefone, tipo, status, inst_id } = request.body;
 
             const { id } = request.params;
 
@@ -165,20 +183,20 @@ module.exports = {
              usu_id = ?
              `;
 
-             const values = [nome, documento ,email,  senha, inst_id, telefone, tipo, status,id];
+            const values = [nome, documento, email, senha, inst_id, telefone, tipo, status, id];
 
-            const [result] = await db.query(sql,values);
+            const [result] = await db.query(sql, values);
 
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
-                    sucesso:false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
-            const dados ={
+            const dados = {
                 id,
                 nome,
                 documento,
@@ -220,11 +238,55 @@ module.exports = {
 
             const [result] = await db.query(sql, values);
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            return response.status(200).json(
+                {
+                    sucesso: true,
+                    mensagem: `Usuário ${id} excluído com sucesso`,
+                    dados: null
+
+                }
+            );
+
+        } catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: `Erro ao apagar usuário: ${error.message} `,
+                    dados: error.message
+                }
+            );
+        }
+    },
+
+    async ocultarUsuario(request, response) {
+        try {
+
+            const status = false
+
+            const { id } = request.params;
+
+            const sql = `UPDATE Usuario SET 
+                    usu_status = ?
+                        WHERE
+                        usu_id = ?`;
+
+            const values = [status, id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
@@ -250,4 +312,3 @@ module.exports = {
     }
 }
 
-    
