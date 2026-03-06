@@ -8,7 +8,6 @@ module.exports = {
             usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
             usu_biometria, usu_tipo, usu_status = 1 As usu_status
             FROM Usuario
-            
             WHERE usu_status = 1;
              
             `;
@@ -35,7 +34,7 @@ module.exports = {
         }
 
     },
-    async loginUsuario(request, response) {
+     async loginUsuario(request, response) {
         try {
 
             const { email, senha } = request.query;
