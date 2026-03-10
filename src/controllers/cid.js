@@ -4,18 +4,28 @@ module.exports = {
 
     async listarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); 
+            console.log("BODY RECEBIDO:", request.body);
+
+            // const {codigo} = request.body;
+            // const cid_descricao = codigo ? `%${codigo}%` : `%`;
             const sql = `
-                SELECT cid_id, cid_codigo, cid_descricao 
-                FROM CID;
+                SELECT 
+                    cid_id, cid_codigo, cid_descricao 
+                FROM 
+                    CID
+                WHERE
+                    cid_descricao LIKE ?;
                 `;
-            const [rows] = await db.query(sql);
+
+            // const values = [cid_descricao];
+            const [rows] = await db.query(sql, values);
+            const nCid = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de cid obtida com sucesso`,
-                    itens: rows.length,
+                    nCid,
                     dados: rows
                 }
             )
@@ -35,7 +45,7 @@ module.exports = {
 
     async cadastrarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); 
+            console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
 
             const sql = `
@@ -43,7 +53,7 @@ module.exports = {
                 VALUES (?, ?);
             `;
 
-            const values = [ codigo, descricao ];
+            const values = [codigo, descricao];
             const [result] = await db.query(sql, values);
 
             const dados = {
@@ -75,7 +85,7 @@ module.exports = {
 
     async editarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); 
+            console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
             const { id } = request.params;
 
@@ -84,7 +94,7 @@ module.exports = {
                 WHERE cid_id = ?
             `;
 
-            const values = [ codigo, descricao, id ];
+            const values = [codigo, descricao, id];
             const [result] = await db.query(sql, values);
 
             if (result.affectedRows === 0) {
@@ -124,10 +134,10 @@ module.exports = {
 
     async apagarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); 
+            console.log("BODY RECEBIDO:", request.body);
             const { id } = request.params;
             const sql = `DELETE FROM CID WHERE cid_id = ?`;
-            const values = [ id ];
+            const values = [id];
             const [result] = await db.query(sql, values);
 
             if (result.affectedRows === 0) {
