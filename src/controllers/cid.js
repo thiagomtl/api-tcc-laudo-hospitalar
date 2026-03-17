@@ -5,27 +5,30 @@ module.exports = {
     async listarCid(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body);
+            const { nome } = request.query;
 
-            // const {codigo} = request.body;
-            // const cid_descricao = codigo ? `%${codigo}%` : `%`;
+
+            const cid_nome = nome ? `%${nome}%` : `%`;
             const sql = `
                 SELECT 
                     cid_id, cid_codigo, cid_descricao 
                 FROM 
                     CID
                 WHERE
-                    cid_descricao LIKE ?;
+                    cid_descricao like ?;
                 `;
 
-            // const values = [cid_descricao];
+
+            const values = [cid_nome];
+
             const [rows] = await db.query(sql, values);
-            const nCid = rows.length;
+            const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de cid obtida com sucesso`,
-                    nCid,
+                    nItens,
                     dados: rows
                 }
             )
