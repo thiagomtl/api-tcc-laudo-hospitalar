@@ -35,23 +35,26 @@ module.exports = {
     async cadastrarLaudo(request, response) { // Cadastrar precisa ser verificado. 24/02/2026 ; 20:36
         try {
             console.log("BODY RECEBIDO:", request.body);
-            const { sinais, internacao, resultado, recurso, data_preenchimento, status } = request.body;
+            const {atendimento, escolhaClinica, procedimentoCid, sinais, internacao, resultado, recurso} = request.body;
+            const lau_status = 1;
 
             const sql = `
-                INSERT INTO Laudo (lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status) 
-                VALUES
+                INSERT INTO Laudo (atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?);
             `;
 
-            const values = [ sinais, internacao, resultado, recurso, data_preenchimento, status ];
+            const values = [ atendimento, escolhaClinica, procedimentoCid, sinais, internacao, resultado, recurso, lau_status];
             const [result] = await db.query(sql, values);
 
             const dados = {
+                id: result.insertId,
+                atendimento,
+                escolhaClinica, 
+                procedimentoCid,
                 sinais,
                 internacao,
                 resultado,
-                recurso,
-                data_preenchimento,
-                status
+                recurso
             };
 
             return response.status(200).json(
