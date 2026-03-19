@@ -10,12 +10,9 @@ module.exports = {
 
             const cid_nome = nome ? `%${nome}%` : `%`;
             const sql = `
-                SELECT 
-                    cid_id, cid_codigo, cid_descricao 
-                FROM 
-                    CID
-                WHERE
-                    cid_descricao like ?;
+                SELECT cid_id, cid_codigo, cid_descricao 
+                FROM CID
+                WHERE cid_descricao like ?;
                 `;
 
 
@@ -140,7 +137,7 @@ module.exports = {
             console.log("BODY RECEBIDO:", request.body);
             const { id } = request.params;
             const sql = `DELETE FROM CID WHERE cid_id = ?`;
-            const values = [id];
+            const values = [ id ];
             const [result] = await db.query(sql, values);
 
             if (result.affectedRows === 0) {

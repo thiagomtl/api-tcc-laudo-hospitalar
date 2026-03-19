@@ -35,7 +35,7 @@ module.exports = {
     async cadastrarLaudo(request, response) { // Cadastrar precisa ser verificado. 24/02/2026 ; 20:36
         try {
             console.log("BODY RECEBIDO:", request.body);
-            const {atendimento, escolhaClinica, procedimentoCid, sinais, internacao, resultado, recurso} = request.body;
+            const { atendimento, escolhaClinica, procedimentoCid, sinais, internacao, resultado, recurso } = request.body;
             const lau_status = 1;
 
             const sql = `
@@ -83,7 +83,7 @@ module.exports = {
             console.log("BODY RECEBIDO:", request.body); 
             const { sinais, internacao, resultado, recurso } = request.body;
             const { id } = request.params;
-
+           
             const sql = `
                 UPDATE Laudo SET lau_sinais = ?, lau_internacao = ?, lau_resultado = ?, lau_recurso = ?, 
                 WHERE lau_id = ?
