@@ -63,7 +63,7 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao cadastra carater: ${error.message}`,
+                    mensagem: `Erro ao cadastrar carater: ${error.message}`,
                     dados: null
                 }
             )
@@ -82,7 +82,7 @@ module.exports = {
             `;
 
             const values = [ tipo, id ];
-            const [result] = await db.query(sql.values);
+            const [result] = await db.query(sql,values);
 
             if (result.affectedRows === 0) {
                 return response.status(404).json({

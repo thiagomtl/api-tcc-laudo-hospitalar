@@ -33,18 +33,28 @@ module.exports = {
 
     async cadastrarSetor(request, response) {
         try {
+
+            const { nome } = request.body;
             const sql = `
-                SELECT set_id, set_nome 
-                FROM Setor;
+                INSERT INTO Setor
+                (set_nome)
+                VALUES
+                (?);
                 `;
-            const [rows] = await db.query(sql);
+
+            const values = [nome];
+            const [result] = await db.query(sql, values);
+
+            const dados = {
+                id: result.insertId,
+                nome
+            };
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Cadastro de setor realizado com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: dados
                 }
             );
         }
@@ -53,8 +63,7 @@ module.exports = {
                 {
                     sucesso: false,
                     mensagem: `Erro ao cadastrar setor: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    dados: error.message
                 }
             )
         }
@@ -62,18 +71,79 @@ module.exports = {
 
     async editarSetor(request, response) {
         try {
-            const sql = `
-                SELECT set_id, set_nome 
-                FROM Setor;
-                `;
-            const [rows] = await db.query(sql);
+            const { nome } = request.body;
+
+            const { id } = request.params;
+
+            const sql = ` UPDATE Setor SET 
+             set_nome = ?
+             WHERE 
+             set_id = ?
+             `;
+
+            const values = [nome, id];
+
+            const [result] = await db.query(sql, values);
+
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Setor ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            const dados = {
+                id,
+                nome,
+            };
 
             return response.status(200).json(
                 {
                     sucesso: true,
-                    mensagem: `Atualização de setores obtida com sucesso`,
-                    itens: rows.length,
-                    dados: rows
+                    mensagem: `Setor ${id} atualizado com sucesso!`,
+                    dados
+
+                }
+            );
+        } catch (error) {
+            return response.status(500).json(
+                {
+                    sucesso: false,
+                    mensagem: `Erro ao atualizar setor: ${error.message} `,
+                    dados: error.message
+                }
+            );
+        }
+
+    },
+
+    async apagarSetor(request, response) {
+        try {
+
+            const { id } = request.params;
+
+            const sql = `DELETE FROM Setor where set_id = ?`;
+
+            const values = [id];
+
+            const [result] = await db.query(sql, values);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Setor ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            return response.status(200).json(
+                {
+                    sucesso: true,
+                    mensagem: `Setor ${id} excluído com sucesso`,
+                    dados: null
+
                 }
             );
 
@@ -81,38 +151,8 @@ module.exports = {
             return response.status(500).json(
                 {
                     sucesso: false,
-                    mensagem: `Erro ao atualizar setores: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
-                }
-            );
-        }
-    },
-
-    async apagarSetor(request, response) {
-        try {
-            const sql = `
-                SELECT set_id, set_nome 
-                FROM Setor;
-                `;
-            const [rows] = await db.query(sql);
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Lista de setores apagada com sucesso`,
-                    itens: rows.length,
-                    dados: rows
-                }
-            );
-        }
-        catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao apagar lista de setores: ${error.message}`,
-                    itens: rows.length,
-                    dados: rows
+                    mensagem: `Erro ao apagar setor: ${error.message} `,
+                    dados: error.message
                 }
             );
         }
