@@ -3,17 +3,26 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarFavorito(request, response) {
         try {
+            
+            const { nome } = request.query;
 
-            const sql = `SELECT fav_id, lau_id, med_id, fav_nome FROM Favorito;`
+
+            const fav_nome = nome ? `%${nome}%` : `%`;
+            const sql = `SELECT fav_id, lau_id, med_id, fav_nome 
+            FROM Favorito
+            WHERE
+            fav_nome LIKE ?;`
                 ;
 
-            const [rows] = await db.query(sql);
+             const values = [fav_nome];
+                const [rows] = await db.query(sql, values);
+                const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: 'Lista de favorito obtida com sucesso',
-                    itens: rows.length,
+                    nItens,
                     dados: rows
                 }
             );
