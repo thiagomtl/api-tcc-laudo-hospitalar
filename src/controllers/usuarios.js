@@ -34,7 +34,7 @@ module.exports = {
         }
 
     },
-     async loginUsuario(request, response) {
+    async loginUsuario(request, response) {
         try {
 
             const { email, senha } = request.query;
@@ -66,7 +66,7 @@ module.exports = {
                 nome: usuario.usu_nome,
                 // Status: usuario.usu_status,
                 tipo: usuario.usu_tipo,
-            
+
             }));
 
             return response.status(200).json(
@@ -95,22 +95,35 @@ module.exports = {
             const usu_ativo = 1;
 
             const sql = `
-  INSERT INTO Usuario (
-    usu_nome,
-    usu_documento,
-    usu_email,
-    usu_senha,
-    usu_datacriacao,
-    inst_id,
-    usu_telefone,
-    usu_foto,
-    usu_biometria,
-    usu_tipo,
-    usu_status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-`;
+                INSERT INTO Usuario (
+                    usu_nome,
+                    usu_documento,
+                    usu_email,
+                    usu_senha,
+                    usu_datacriacao,
+                    inst_id,
+                    usu_telefone,
+                    usu_foto,
+                    usu_biometria,
+                    usu_tipo,
+                    usu_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    `;
 
+            if (!nome || !documento || !senha || !email || !telefone || !tipo || !inst_id ) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Campos obrigatórios estão ausentes ou inválidos.',
+                });
 
+            }
+            const [emailExiste] = await db.query(`SELECT usu_id from usuario WHERE usu_email = ?`, [email]);
+            if (emailExiste.length > 0 ){
+                return response.status(409).json({
+                    sucesso: false,
+                    mensagem: 'Email já cadastrado.',
+                });
+            }
 
 
             const values = [
@@ -127,9 +140,7 @@ module.exports = {
                 tipo,
                 status,
 
-
             ];
-
 
             const [result] = await db.query(sql, values);
 

@@ -4,7 +4,7 @@ module.exports = {
 
     async listarLaudo(request, response) {
         try {
-            const {nome} = request.query;
+            const { nome } = request.query;
             const lau_nome = nome ? `%${nome}%` : `%`;
             const sql = `
                 SELECT 
@@ -40,8 +40,8 @@ WHERE Paciente.pac_nome LIKE ?`;
                 {
                     sucesso: true,
                     mensagem: `Lista de laudo obtida com sucesso`,
-                   nItens,
-                    dados : rows
+                    nItens,
+                    dados: rows
                 }
             )
         }
