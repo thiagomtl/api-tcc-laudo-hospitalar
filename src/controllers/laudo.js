@@ -4,6 +4,7 @@ module.exports = {
 
     async listarLaudo(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body);
             const { nome } = request.query;
             const lau_nome = nome ? `%${nome}%` : `%`;
             const sql = `

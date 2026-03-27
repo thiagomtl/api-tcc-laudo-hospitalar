@@ -6,13 +6,11 @@ module.exports = {
         try {
             console.log("BODY RECEBIDO:", request.body);
             const { nome } = request.query;
-
-
             const cid_nome = nome ? `%${nome}%` : `%`;
             const sql = `
                 SELECT cid_id, cid_codigo, cid_descricao 
                 FROM CID
-                WHERE cid_descricao like ?;
+                WHERE cid_descricao LIKE ?;
                 `;
 
 
