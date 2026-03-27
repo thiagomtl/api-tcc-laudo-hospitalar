@@ -5,17 +5,24 @@ module.exports = {
     async listarEscolhaClinica(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body); 
+            const { pesquisa } = request.query;
+            const escolha_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
                 SELECT cli_id, cli_descricao 
-                FROM Escolha_Clinica;
+                FROM Escolha_Clinica
+                WHERE cli_descricao LIKE ?;
                 `;
-            const [rows] = await db.query(sql);
+            
+            const values = [escolha_listar];
+
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de escolha clínica obtida com sucesso`,
-                    itens: rows.length,
+                    nItens,
                     dados: rows
                 }
             )

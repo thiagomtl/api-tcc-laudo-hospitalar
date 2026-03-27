@@ -5,17 +5,15 @@ module.exports = {
     async listarCid(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body);
-            const { nome } = request.query;
-            const cid_nome = nome ? `%${nome}%` : `%`;
+            const { pesquisa } = request.query;
+            const cid_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
                 SELECT cid_id, cid_codigo, cid_descricao 
                 FROM CID
-                WHERE cid_descricao LIKE ?;
-                `;
+                WHERE cid_descricao LIKE ? OR cid_codigo LIKE ?;
+            `;
 
-
-            const values = [cid_nome];
-
+            const values = [cid_listar, cid_listar];
             const [rows] = await db.query(sql, values);
             const nItens = rows.length;
 
@@ -45,7 +43,6 @@ module.exports = {
         try {
             console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
-
             const sql = `
                 INSERT INTO CID (cid_codigo, cid_descricao) 
                 VALUES (?, ?);
@@ -86,7 +83,6 @@ module.exports = {
             console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
             const { id } = request.params;
-
             const sql = `
                 UPDATE CID SET cid_codigo = ?, cid_descricao = ?
                 WHERE cid_id = ?

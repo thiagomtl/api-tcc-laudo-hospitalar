@@ -5,22 +5,28 @@ module.exports = {
     async listarCarater(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body);
-
+            const { pesquisa } = request.query;
+            const car_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
                 SELECT car_id, car_tipo 
-                FROM Carater;
-                `;
-            const [rows] = await db.query(sql);
+                FROM Carater
+                WHERE car_tipo LIKE?;
+            `;
+
+            const values = [car_listar];
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de carater obtida com sucesso`,
-                    itens: rows.length,
+                    nItens,
                     dados: rows
                 }
-            );
+            )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -33,11 +39,11 @@ module.exports = {
         }
     },
 
+
     async cadastrarCarater(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body);
             const { tipo } = request.body;
-
             const sql = `
                 INSERT INTO Carater (car_tipo) 
                 VALUES (?);
@@ -59,6 +65,7 @@ module.exports = {
                 }
             );
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -70,12 +77,12 @@ module.exports = {
         }
     },
 
+
     async editarCarater(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body);
             const { tipo } = request.body;
             const { id } = request.params;
-
             const sql = `
                 UPDATE Carater SET car_tipo = ?
                 WHERE car_id = ?
@@ -103,8 +110,9 @@ module.exports = {
                     mensagem: `Atualização de carater obtida com sucesso`,
                     dados: dados
                 }
-            );
+            )
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -112,9 +120,10 @@ module.exports = {
                     mensagem: `Erro ao atualizar carater: ${error.message}`,
                     dados: null
                 }
-            );
+            )
         }
     },
+
 
     async apagarCarater(request, response) {
         try {
@@ -138,7 +147,7 @@ module.exports = {
                     mensagem: `Carater apagado com sucesso`,
                     dados: null
                 }
-            );
+            )
         }
 
         catch (error) {
@@ -148,7 +157,7 @@ module.exports = {
                     mensagem: `Erro ao apagar carater: ${error.message}`,
                     dados: null
                 }
-            );
+            )
         }
     },
 }

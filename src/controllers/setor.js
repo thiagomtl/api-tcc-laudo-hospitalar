@@ -4,21 +4,30 @@ module.exports = {
 
     async listarSetor(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body);
+            const { pesquisa } = request.query;
+            const setor_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
                 SELECT set_id, set_nome 
-                FROM Setor;
+                FROM Setor
+                WHERE set_nome LIKE ?;
                 `;
-            const [rows] = await db.query(sql);
+
+            const values = [setor_listar];
+
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de setores obtida com sucesso`,
-                    itens: rows.length,
+                    nItens,
                     dados: rows
                 }
             );
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -31,16 +40,15 @@ module.exports = {
         }
     },
 
+
     async cadastrarSetor(request, response) {
         try {
-
+            console.log("BODY RECEBIDO:", request.body);
             const { nome } = request.body;
             const sql = `
-                INSERT INTO Setor
-                (set_nome)
-                VALUES
-                (?);
-                `;
+                INSERT INTO Setor (set_nome)
+                VALUES (?);
+            `;
 
             const values = [nome];
             const [result] = await db.query(sql, values);
@@ -58,6 +66,7 @@ module.exports = {
                 }
             );
         }
+
         catch (error) {
             return response.status(500).json(
                 {
@@ -69,20 +78,18 @@ module.exports = {
         }
     },
 
+
     async editarSetor(request, response) {
         try {
+            console.log("BODY RECEBIDO:", request.body);
             const { nome } = request.body;
-
             const { id } = request.params;
-
-            const sql = ` UPDATE Setor SET 
-             set_nome = ?
-             WHERE 
-             set_id = ?
-             `;
+            const sql = `
+                UPDATE Setor SET set_nome = ?
+                WHERE  Set_id = ?
+            `;
 
             const values = [nome, id];
-
             const [result] = await db.query(sql, values);
 
 
@@ -106,8 +113,10 @@ module.exports = {
                     dados
 
                 }
-            );
-        } catch (error) {
+            )
+        } 
+        
+        catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
@@ -119,15 +128,13 @@ module.exports = {
 
     },
 
+
     async apagarSetor(request, response) {
         try {
-
+            console.log("BODY RECEBIDO:", request.body);
             const { id } = request.params;
-
             const sql = `DELETE FROM Setor where set_id = ?`;
-
             const values = [id];
-
             const [result] = await db.query(sql, values);
 
             if (result.affectedRows === 0) {
@@ -145,9 +152,10 @@ module.exports = {
                     dados: null
 
                 }
-            );
-
-        } catch (error) {
+            )
+        } 
+        
+        catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,

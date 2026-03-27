@@ -5,17 +5,24 @@ module.exports = {
     async listarProcedimento(request, response) {
         try {
             console.log("BODY RECEBIDO:", request.body); 
+            const { pesquisa } = request.query;
+            const proc_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
                 SELECT pro_id, pro_codigo, pro_descricao 
-                FROM Procedimento;
+                FROM Procedimento
+                WHERE pro_codigo LIKE ? OR pro_descricao LIKE?;
                 `;
-            const [rows] = await db.query(sql);
+            
+            const values = [proc_listar, proc_listar];
+            
+            const [rows] = await db.query(sql, values);
+            const nItens = rows.length;
 
             return response.status(200).json(
                 {
                     sucesso: true,
                     mensagem: `Lista de procedimento obtida com sucesso`,
-                    itens: rows.length,
+                    nItens,
                     dados: rows
                 }
             )
