@@ -1,5 +1,19 @@
 const db = require('../dataBase/connection');
 
+const{
+    validarCPF,
+    validarEmail,
+    validarTelefone,
+    validarDataNascimento
+} = require('../utils/validacoesUsuarios');
+
+function cpfToInt(cpf){
+    const cpfSemMascara = cpf.replace(/\D/g, '');
+    const cpfInteiro = parseInt(cpfSemMascara);
+    return cpfInteiro;
+
+}
+
 module.exports = {
     async listarUsuario(request, response) {
         try {
@@ -110,7 +124,48 @@ module.exports = {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     `;
 
-            if (!nome || !documento || !senha || !email || !telefone || !tipo || !inst_id ) {
+            // Validações
+            if (!validarEmail(email)) {
+                return response.status(400).json({
+                    sucesso:false,
+                    mensagem:'E-mail Inválido.'
+                });
+            }
+
+            if (!validarCPF(cpf)) {
+                return response.status(400).json({
+                    sucesso:false,
+                    mensagem: 'Documento inválido.'
+                })
+            }
+            const usu_documento = cpfToInt(cpf);
+
+            if(!validarTelefone(cel)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Telefone inválido.'
+                });
+            }
+
+            const dataRegex = /^\d{4}-\d{2}$/;
+            if(!dataRegex.test(dataNasc)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Data de nascimento inválida. Use o formato YYYY-MM-DD.',
+                })
+            }
+
+            if (!validarDataNascimento(dataNasc)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A data de nascimento não pode ser hoje!'
+                })
+            }
+
+            
+            //Verificações
+
+            if (!nome || !documento || !senha || !email || !telefone || !tipo || !inst_id) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Campos obrigatórios estão ausentes ou inválidos.',
@@ -118,11 +173,18 @@ module.exports = {
 
             }
             const [emailExiste] = await db.query(`SELECT usu_id from usuario WHERE usu_email = ?`, [email]);
-            if (emailExiste.length > 0 ){
+            if (emailExiste.length > 0) {
                 return response.status(409).json({
                     sucesso: false,
                     mensagem: 'Email já cadastrado.',
                 });
+            }
+            const [cpfExiste] = await db.query(`SELECT usu_id FROM usuario WHERE usu_documento = ?`, [documento]);
+            if (cpfExiste.length > 0) {
+                return response.status(409).json({
+                    sucesso: false,
+                    mensagem: 'Documento já cadastrado.'
+                })
             }
 
 
