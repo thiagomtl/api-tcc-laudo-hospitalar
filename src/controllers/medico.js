@@ -3,8 +3,9 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarMedico(request, response) {
         try {
-            const sql = `SELECT med_id, med_crm FROM Medico;`
-                ;
+            const sql = `
+                SELECT med_id, med_crm FROM Medico;
+            `;
 
             const [rows] = await db.query(sql);
 
@@ -17,7 +18,10 @@ module.exports = {
 
                 }
             );
-        } catch (error) {
+
+        } 
+        
+        catch (error) {
             return response.status(500).json(
                 {
                     sucesso: false,
@@ -26,8 +30,8 @@ module.exports = {
                 }
             );
         }
-
     },
+    
     async cadastrarMedico(request, response) {
         try {
 

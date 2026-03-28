@@ -3,7 +3,6 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarInstituicao(request, response) {
         try {
-
             const sql = `SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj 
              FROM Instituicao;`
                 ;

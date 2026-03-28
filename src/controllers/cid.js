@@ -4,7 +4,6 @@ module.exports = {
 
     async listarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { pesquisa } = request.query;
             const cid_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `

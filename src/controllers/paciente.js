@@ -4,10 +4,8 @@ module.exports = {
 
     async listarPaciente(request, response) {
         try {
-
             const {nome} = request.query;
-
-           const paci_nome = nome ? `%${nome}%` : `%`;
+            const paci_nome = nome ? `%${nome}%` : `%`;
             const sql = `
                 SELECT pac_id, pac_nome, pac_datanasc, pac_cpf, pac_telefone, pac_datacadastro, pac_sexo, pac_num_prontuario, pac_cns, 
                 pac_nome_mae, pac_raca, pac_bairro, pac_num_casa, pac_logradouro, pac_cep, pac_uf, pac_municipio, pac_cod_ibge 
@@ -16,8 +14,7 @@ module.exports = {
                 pac_nome Like ?
                 `;
 
-                const values = [paci_nome]
-
+            const values = [paci_nome]
             const [rows] = await db.query(sql, values);
             const nItens = rows.length;
 
@@ -30,6 +27,7 @@ module.exports = {
                 }
             );
         }
+        
         catch (error) {
             return response.status(500).json(
                 {

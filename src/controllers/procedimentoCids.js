@@ -7,7 +7,8 @@ module.exports = {
             const sql = `
                 SELECT proc_cid_id, pro_id, cid_id 
                 FROM Procedimento_Cids;
-                `;
+            `;
+
             const [rows] = await db.query(sql);
 
             return response.status(200).json(
@@ -37,7 +38,6 @@ module.exports = {
         try {
             console.log("BODY RECEBIDO:", request.body); 
             const { procedimento, cid } = request.body;
-
             const sql = `
                 INSERT INTO Procedimento_Cids (pro_id, cid_id) 
                 VALUES (?, ?);
@@ -78,7 +78,6 @@ module.exports = {
             console.log("BODY RECEBIDO:", request.body); 
             const { procedimento, cid } = request.body;
             const { id } = request.params;
-
             const sql = `
                 UPDATE Procedimento_Cids SET pro_id = ?, cid_id = ?
                 WHERE proc_cid_id = ?

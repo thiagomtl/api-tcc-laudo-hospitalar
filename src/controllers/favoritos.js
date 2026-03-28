@@ -3,10 +3,7 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarFavorito(request, response) {
         try {
-            
             const { nome } = request.query;
-
-
             const fav_nome = nome ? `%${nome}%` : `%`;
             const sql = `SELECT fav_id, lau_id, med_id, fav_nome 
             FROM Favorito

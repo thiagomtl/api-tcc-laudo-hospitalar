@@ -4,38 +4,22 @@ module.exports = {
 
     async listarLaudo(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { nome } = request.query;
             const lau_nome = nome ? `%${nome}%` : `%`;
             const sql = `
-                SELECT 
-    lau_id,
-    Atendimento.atend_id,
-    Paciente.pac_nome,
-    Escolha_Clinica.cli_descricao,
-    Procedimento_Cids.proc_cid_id,
-    lau_sinais,
-    lau_internacao,
-    lau_resultado,
-    lau_recurso,
-    lau_datapreenc,
-    lau_status
-FROM Laudo
-INNER JOIN Atendimento 
-    ON Laudo.atend_id = Atendimento.atend_id
-INNER JOIN Paciente 
-    ON Atendimento.pac_id = Paciente.pac_id
-INNER JOIN Escolha_Clinica 
-    ON Laudo.cli_id = Escolha_Clinica.cli_id
-INNER JOIN Procedimento_Cids 
-    ON Laudo.proc_cid_id = Procedimento_Cids.proc_cid_id
-WHERE Paciente.pac_nome LIKE ?`;
+                SELECT lau_id, Atendimento.atend_id, Paciente.pac_nome, Escolha_Clinica.cli_descricao, Procedimento_Cids.proc_cid_id, 
+                lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status
+                FROM Laudo
+                INNER JOIN Atendimento ON Laudo.atend_id = Atendimento.atend_id
+                INNER JOIN Paciente  ON Atendimento.pac_id = Paciente.pac_id
+                INNER JOIN Escolha_Clinica  ON Laudo.cli_id = Escolha_Clinica.cli_id
+                INNER JOIN Procedimento_Cids  ON Laudo.proc_cid_id = Procedimento_Cids.proc_cid_id
+                WHERE Paciente.pac_nome LIKE ?
+            `;
 
             const values = [lau_nome]
-
             const [rows] = await db.query(sql, values);
             const nItens = rows.length;
-
 
             return response.status(200).json(
                 {
@@ -59,12 +43,12 @@ WHERE Paciente.pac_nome LIKE ?`;
     },
 
 
+
     async cadastrarLaudo(request, response) { // Cadastrar precisa ser verificado. 24/02/2026 ; 20:36
         try {
             console.log("BODY RECEBIDO:", request.body);
             const { atendimento, escolhaClinica, procedimentoCid, sinais, internacao, resultado, recurso } = request.body;
             const lau_status = 1;
-
             const sql = `
                 INSERT INTO Laudo (atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status)
                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?);

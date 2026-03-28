@@ -4,7 +4,6 @@ module.exports = {
 
     async listarSetor(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { pesquisa } = request.query;
             const setor_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `

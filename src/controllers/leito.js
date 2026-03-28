@@ -3,7 +3,6 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarLeito(request, response) {
         try {
-
             const sql = `
             SELECT 
                 leito_id, set_id, leito_identificacao 

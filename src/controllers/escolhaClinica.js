@@ -4,7 +4,6 @@ module.exports = {
 
     async listarEscolhaClinica(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body); 
             const { pesquisa } = request.query;
             const escolha_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `

@@ -4,7 +4,6 @@ module.exports = {
 
     async listarCarater(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { pesquisa } = request.query;
             const car_listar = pesquisa ? `%${pesquisa}%` : `%`;
             const sql = `
