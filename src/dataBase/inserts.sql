@@ -11,20 +11,31 @@ INSERT INTO Paciente (pac_nome, pac_datanasc, pac_cpf, pac_telefone, pac_datacad
 -- Tabela Convenio
 INSERT INTO Convenio (con_tipo) VALUES
 ('SUS'),
-('Unimed'),
+('UNIMED'),
 ('IAMSPE'),
+('Particular'),
 ('Bradesco Saúde'),
 ('SulAmérica'),
+('CASSI'),
 ('Santa Casa Saúde');
 
 -- Tabela Setor
 INSERT INTO Setor (set_nome) VALUES
-('Emergência'),
-('UTI Adulto'),
-('UTI Pediátrica'),
-('Internação Clínica'),
-('Internação Cirúrgica'),
-('Observação');
+('Pronto Socorro'),
+('UTI A'),
+('UTI A'),
+('UTI B'),
+('UTI C'),
+('Ala Cirurgica Mista'),
+('Ala SUS'),
+('Ala Convênios'),
+('Ala Cirurgica SUS'),
+('Ala Cirurgica Centro'),
+('Ala Cirurgica SUS'),
+('Ala Maternidade'),
+('Ala Particular'),
+('Ala Pediatria'),
+('Ala Particular');
 
 -- Tabela Leito
 INSERT INTO Leito (set_id, leito_identificacao) VALUES
@@ -37,10 +48,6 @@ INSERT INTO Leito (set_id, leito_identificacao) VALUES
 
 -- Tabela Carater
 INSERT INTO Carater (car_tipo) VALUES
-('Eletivo'),
-('Urgência'),
-('Eletivo'),
-('Urgência'),
 ('Eletivo'),
 ('Urgência');
 
@@ -100,12 +107,11 @@ INSERT INTO Mensagem_Chat (usu_id_remetente, usu_id_destinatario, msg_conteudo, 
 
 -- Tabela Escolha_Clinica
 INSERT INTO Escolha_Clinica (cli_descricao) VALUES
-('Cardiologia'),
-('Pediatria'),
-('Ortopedia'),
-('Neurologia'),
-('Oncologia'),
-('Ginecologia');
+('Médica'),
+('Cirúrgica'),
+('Pediátrica'),
+('Obstétrica');
+
 
 -- Tabela Procedimento
 INSERT INTO Procedimento (pro_codigo, pro_descricao) VALUES
@@ -145,9 +151,9 @@ INSERT INTO Laudo (atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao, la
 
 -- Tabela Favorito
 INSERT INTO Favorito (lau_id, med_id, fav_nome) VALUES
-(1, 1, 'Laudo João'),
-(2, 2, 'Laudo Ana'),
-(3, 3, 'Laudo Carlos'),
-(4, 4, 'Laudo Beatriz'),
-(5, 5, 'Laudo Pedro'),
-(6, 6, 'Laudo Marina');
+(1, 1, 'PNEUMONIA'),
+(2, 2, 'DENGUE'),
+(3, 3, 'SEPTICEMIA'),
+(4, 4, 'COLECISTECTOMIA'),
+(5, 5, 'HERNIOPLASTIA UMBILICAL'),
+(6, 6, 'HERNIOPLASTIA EPIGASTRICA');
