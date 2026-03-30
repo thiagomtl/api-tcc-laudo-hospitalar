@@ -21,21 +21,12 @@ INSERT INTO Convenio (con_tipo) VALUES
 
 -- Tabela Setor
 INSERT INTO Setor (set_nome) VALUES
-('Pronto Socorro'),
 ('UTI A'),
-('UTI A'),
-('UTI B'),
-('UTI C'),
-('Ala Cirurgica Mista'),
-('Ala SUS'),
 ('Ala Convênios'),
 ('Ala Cirurgica SUS'),
 ('Ala Cirurgica Centro'),
-('Ala Cirurgica SUS'),
 ('Ala Maternidade'),
-('Ala Particular'),
 ('Ala Pediatria'),
-('Ala Particular');
 
 -- Tabela Leito
 INSERT INTO Leito (set_id, leito_identificacao) VALUES
@@ -48,6 +39,10 @@ INSERT INTO Leito (set_id, leito_identificacao) VALUES
 
 -- Tabela Carater
 INSERT INTO Carater (car_tipo) VALUES
+('Eletivo'),
+('Urgência');
+('Eletivo'),
+('Urgência');
 ('Eletivo'),
 ('Urgência');
 
@@ -111,7 +106,8 @@ INSERT INTO Escolha_Clinica (cli_descricao) VALUES
 ('Cirúrgica'),
 ('Pediátrica'),
 ('Obstétrica');
-
+('Médica'),
+('Cirúrgica'),
 
 -- Tabela Procedimento
 INSERT INTO Procedimento (pro_codigo, pro_descricao) VALUES
