@@ -4,7 +4,7 @@ const router = express.Router();
 const MedicoController = require('../controllers/medico');
 const UsuarioController = require('../controllers/usuarios');
 const FavoritoController = require('../controllers/favoritos');
-const InstituicaoController = require('../controllers/Instituicao');
+const InstituicaoController = require('../controllers/instituicao');
 
 router.get('/medicos', MedicoController.listarMedico);
 router.post('/medicos', MedicoController.cadastrarMedico);
@@ -15,8 +15,10 @@ router.get('/usuarios', UsuarioController.listarUsuario);
 router.post('/usuarios', UsuarioController.cadastrarUsuario);
 router.patch('/usuarios/:id', UsuarioController.editarUsuario);
 router.delete('/usuarios/:id', UsuarioController.apagarUsuario);
-router.delete('/usuarios/del/:id', UsuarioController.ocultarUsuario);
-router.get('/login', UsuarioController.loginUsuario);
+router.patch('/usuarios/del/:id', UsuarioController.ocultarUsuario);
+
+// login como POST para receber email e senha no body
+router.post('/login', UsuarioController.loginUsuario);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
 router.post('/favoritos', FavoritoController.cadastrarFavorito);
@@ -29,4 +31,3 @@ router.patch('/instituicao/:id', InstituicaoController.editarInstituicao);
 router.delete('/instituicao/:id', InstituicaoController.apagarInstituicao);
 
 module.exports = router;
-
