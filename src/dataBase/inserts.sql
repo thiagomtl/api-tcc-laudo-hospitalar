@@ -1,3 +1,73 @@
+-- Inserts para teste de seed
+USE bd_tcc_laudos;
+
+INSERT INTO Convenio (con_tipo) VALUES
+('SUS'),
+('UNIMED');
+
+INSERT INTO Setor (set_nome) VALUES
+('UTI A'),
+('Clínica Médica');
+
+INSERT INTO Leito (set_id, leito_identificacao) VALUES
+(1, 'E01'),
+(2, 'C01');
+
+INSERT INTO Carater (car_tipo) VALUES
+('Eletivo'),
+('Urgência');
+
+INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VALUES
+('Hospital MedSync', 'Hospital MedSync LTDA', '1234567', '12345678000199');
+
+INSERT INTO Usuario (
+    usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao,
+    inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
+) VALUES
+('Administrador', '12345678901', 'admin@medsync.com', '123456', NOW(), 1, '14999999999', NULL, NULL, 'Administrador', 1),
+('Médico Teste', '23456789012', 'medico@medsync.com', '123456', NOW(), 1, '14988888888', NULL, NULL, 'Médico', 1),
+('Faturista Teste', '34567890123', 'faturista@medsync.com', '123456', NOW(), 1, '14977777777', NULL, NULL, 'Faturista', 1);
+
+INSERT INTO Medico (med_crm) VALUES
+('123456SP');
+
+INSERT INTO Paciente (
+    pac_nome, pac_datanasc, pac_cpf, pac_telefone, pac_datacadastro,
+    pac_sexo, pac_num_prontuario, pac_cns, pac_nome_mae, pac_raca,
+    pac_bairro, pac_num_casa, pac_logradouro, pac_cep, pac_uf,
+    pac_municipio, pac_cod_ibge
+) VALUES
+('João da Silva', '1985-06-15', '11122233344', '14991111111', NOW(), 1, 1001, '123456789012345', 'Maria da Silva', 'Branca', 'Centro', '120', 'Rua A', '17600000', 'SP', 'Tupã', 3555002);
+
+INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, med_id, atend_data) VALUES
+(1, 1, 1, 2, 1, NOW());
+
+INSERT INTO Escolha_Clinica (cli_descricao) VALUES
+('Clínica Geral'),
+('Cardiologia');
+
+INSERT INTO Procedimento (pro_codigo, pro_descricao) VALUES
+(1010, 'Consulta clínica'),
+(2020, 'Avaliação cardiológica');
+
+INSERT INTO CID (cid_codigo, cid_descricao) VALUES
+('A00', 'Doença teste 1'),
+('B00', 'Doença teste 2');
+
+INSERT INTO Procedimento_Cids (pro_id, cid_id) VALUES
+(1, 1),
+(2, 2);
+
+INSERT INTO Laudo (
+    atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao,
+    lau_resultado, lau_recurso, lau_datapreenc, lau_status
+) VALUES
+(1, 1, 1, 'Febre e mal-estar', 'Observação clínica', 'Estável', 'Sem recurso', NOW(), 1);
+
+INSERT INTO Favorito (lau_id, med_id, fav_nome) VALUES
+(1, 1, 'Laudo padrão');
+
+
 -- Inserts para popular as tabelas do banco
 -- Tabela Paciente
 INSERT INTO Paciente (pac_nome, pac_datanasc, pac_cpf, pac_telefone, pac_datacadastro, pac_sexo, pac_num_prontuario, pac_cns, pac_nome_mae, pac_raca, pac_bairro, pac_num_casa, pac_logradouro, pac_cep, pac_uf, pac_municipio, pac_cod_ibge) VALUES
@@ -28,7 +98,7 @@ INSERT INTO Setor (set_nome) VALUES
 ('Ala Cirurgica SUS'),
 ('Ala Cirurgica Centro'),
 ('Ala Maternidade'),
-('Ala Pediatria'),
+('Ala Pediatria');
 
 -- Tabela Leito
 INSERT INTO Leito (set_id, leito_identificacao) VALUES
@@ -41,10 +111,6 @@ INSERT INTO Leito (set_id, leito_identificacao) VALUES
 
 -- Tabela Carater
 INSERT INTO Carater (car_tipo) VALUES
-('Eletivo'),
-('Urgência');
-('Eletivo'),
-('Urgência');
 ('Eletivo'),
 ('Urgência');
 

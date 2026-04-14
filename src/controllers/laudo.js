@@ -96,7 +96,7 @@ module.exports = {
             const { id } = request.params;
 
             const sql = `
-                UPDATE Laudo SET lau_sinais = ?, lau_internacao = ?, lau_resultado = ?, lau_recurso = ?, 
+                UPDATE Laudo SET lau_sinais = ?, lau_internacao = ?, lau_resultado = ?, lau_recurso = ? 
                 WHERE lau_id = ?
             `;
 

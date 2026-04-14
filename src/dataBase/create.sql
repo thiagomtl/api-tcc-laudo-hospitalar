@@ -1,27 +1,6 @@
 -- Script de criação das tabelas conforme dicionário de dados
 -- Adaptado para MySQL
 
-CREATE TABLE Paciente (
-    pac_id INT AUTO_INCREMENT PRIMARY KEY,
-    pac_nome VARCHAR(60) NOT NULL,
-    pac_datanasc DATE NOT NULL,
-    pac_cpf CHAR(11) UNIQUE NOT NULL,
-    pac_telefone VARCHAR(15) NOT NULL,
-    pac_datacadastro DATETIME NOT NULL,
-    pac_sexo BIT NOT NULL,
-    pac_num_prontuario INT NOT NULL,
-    pac_cns CHAR(15) NOT NULL,
-    pac_nome_mae VARCHAR(60) NOT NULL,
-    pac_raca VARCHAR(10) NOT NULL,
-    pac_bairro VARCHAR(50) NOT NULL,
-    pac_num_casa VARCHAR(7) NOT NULL,
-    pac_logradouro VARCHAR(120) NOT NULL,
-    pac_cep CHAR(8) NOT NULL,
-    pac_uf CHAR(2) NOT NULL,
-    pac_municipio VARCHAR(50) NOT NULL,
-    pac_cod_ibge INT NOT NULL
-);
-
 CREATE TABLE Convenio (
     con_id INT AUTO_INCREMENT PRIMARY KEY,
     con_tipo VARCHAR(50) NOT NULL
@@ -73,6 +52,27 @@ CREATE TABLE Medico (
     med_crm VARCHAR(8) NOT NULL
 );
 
+CREATE TABLE Paciente (
+    pac_id INT AUTO_INCREMENT PRIMARY KEY,
+    pac_nome VARCHAR(60) NOT NULL,
+    pac_datanasc DATE NOT NULL,
+    pac_cpf CHAR(11) UNIQUE NOT NULL,
+    pac_telefone VARCHAR(15) NOT NULL,
+    pac_datacadastro DATETIME NOT NULL,
+    pac_sexo BIT NOT NULL,
+    pac_num_prontuario INT NOT NULL,
+    pac_cns CHAR(15) NOT NULL,
+    pac_nome_mae VARCHAR(60) NOT NULL,
+    pac_raca VARCHAR(10) NOT NULL,
+    pac_bairro VARCHAR(50) NOT NULL,
+    pac_num_casa VARCHAR(7) NOT NULL,
+    pac_logradouro VARCHAR(120) NOT NULL,
+    pac_cep CHAR(8) NOT NULL,
+    pac_uf CHAR(2) NOT NULL,
+    pac_municipio VARCHAR(50) NOT NULL,
+    pac_cod_ibge INT NOT NULL
+);
+
 CREATE TABLE Atendimento (
     atend_id INT AUTO_INCREMENT PRIMARY KEY,
     pac_id INT NOT NULL,
@@ -86,29 +86,6 @@ CREATE TABLE Atendimento (
     FOREIGN KEY (leito_id) REFERENCES Leito(leito_id),
     FOREIGN KEY (car_id) REFERENCES Carater(car_id),
     FOREIGN KEY (med_id) REFERENCES Medico(med_id)
-);
-
-CREATE TABLE Logs_Acao (
-    log_id INT AUTO_INCREMENT PRIMARY KEY,
-    usu_id INT NOT NULL,
-    log_acao VARCHAR(200) NOT NULL,
-    log_detalhe VARCHAR(30) NOT NULL,
-    log_datahora DATETIME NOT NULL,
-    FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
-);
-
-CREATE TABLE Mensagem_Chat (
-    msg_id INT AUTO_INCREMENT PRIMARY KEY,
-    usu_id_remetente INT NOT NULL,
-    usu_id_destinatario INT NOT NULL,
-    msg_conteudo VARCHAR(500) NULL,
-    msg_arqanexo VARCHAR(255) NULL,
-    msg_datahoraenvio DATETIME NOT NULL,
-    msg_status VARCHAR(10) NOT NULL,
-    msg_resposta INT NULL,
-    FOREIGN KEY (usu_id_remetente) REFERENCES Usuario(usu_id),
-    FOREIGN KEY (usu_id_destinatario) REFERENCES Usuario(usu_id),
-    FOREIGN KEY (msg_resposta) REFERENCES Mensagem_Chat(msg_id)
 );
 
 CREATE TABLE Escolha_Clinica (
@@ -162,4 +139,28 @@ CREATE TABLE Favorito (
     fav_nome VARCHAR(30) NOT NULL,
     FOREIGN KEY (lau_id) REFERENCES Laudo(lau_id),
     FOREIGN KEY (med_id) REFERENCES Medico(med_id)
+);
+
+
+CREATE TABLE Logs_Acao (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    usu_id INT NOT NULL,
+    log_acao VARCHAR(200) NOT NULL,
+    log_detalhe VARCHAR(30) NOT NULL,
+    log_datahora DATETIME NOT NULL,
+    FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
+);
+
+CREATE TABLE Mensagem_Chat (
+    msg_id INT AUTO_INCREMENT PRIMARY KEY,
+    usu_id_remetente INT NOT NULL,
+    usu_id_destinatario INT NOT NULL,
+    msg_conteudo VARCHAR(500) NULL,
+    msg_arqanexo VARCHAR(255) NULL,
+    msg_datahoraenvio DATETIME NOT NULL,
+    msg_status VARCHAR(10) NOT NULL,
+    msg_resposta INT NULL,
+    FOREIGN KEY (usu_id_remetente) REFERENCES Usuario(usu_id),
+    FOREIGN KEY (usu_id_destinatario) REFERENCES Usuario(usu_id),
+    FOREIGN KEY (msg_resposta) REFERENCES Mensagem_Chat(msg_id)
 );
