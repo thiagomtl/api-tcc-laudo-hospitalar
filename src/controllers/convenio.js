@@ -3,7 +3,6 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarConvenio(request, response) {
         try {
-
             const sql = `
             SELECT 
                 con_id, con_tipo 

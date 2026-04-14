@@ -1,4 +1,18 @@
-Luis Fernando ->     CID, Escolha_Clinica, Laudo, Procedimento, Procedimento_Cids
+Luis Fernando
+
+1. CID✅
+2. Escolha_Clinica✅
+3. Procedimento✅
+4. Laudo
+5. Procedimento_Cids
+____________________________________________________________________________
+
+João
+
+1. Carater✅
+2. Setor✅
+3. Paciente
+____________________________________________________________________________
+
 Luis Henrique ->     Usuario, Medico, Favorito, Instituicao
 Thiago ->            Atendimento, Convenio, Leito
-Joao ->              Paciente, Setor, Carater
