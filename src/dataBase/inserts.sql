@@ -17,6 +17,8 @@ INSERT INTO Convenio (con_tipo) VALUES
 ('Bradesco Saúde'),
 ('SulAmérica'),
 ('CASSI'),
+('CABESP'),
+('SPA Saúde'),
 ('Santa Casa Saúde');
 
 -- Tabela Setor
