@@ -3,15 +3,15 @@ const db = require('../dataBase/connection');
 // Função auxiliar para validações
 function validarUsuario(dados) {
     const erros = [];
-    
+
     // Campos obrigatórios
     const camposObrigatorios = ['usu_nome', 'usu_documento', 'usu_email', 'usu_senha', 'inst_id', 'usu_telefone', 'usu_tipo', 'usu_status'];
     camposObrigatorios.forEach(campo => {
-        if (!dados[campo]) {
+        if (dados[campo] === undefined || dados[campo] === null || dados[campo] === '') {
             erros.push(`${campo} é obrigatório`);
         }
     });
-    
+
     // Validações de formato
     if (dados.usu_documento && !/^\d{11}$/.test(dados.usu_documento)) {
         erros.push('Documento deve ter 11 dígitos numéricos');
@@ -22,7 +22,7 @@ function validarUsuario(dados) {
     if (dados.usu_status !== undefined && ![0, 1].includes(dados.usu_status)) {
         erros.push('Status deve ser 0 ou 1');
     }
-    
+
     return erros;
 }
 
@@ -30,11 +30,22 @@ module.exports = {
     async listarUsuario(request, response) {
         try {
 
-            const sql = `SELECT usu_id, usu_nome, usu_documento, usu_email, 
-            usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, 
-            usu_biometria, usu_tipo, usu_status = 1 as usu_status
-            FROM Usuario;
-            `;
+            const sql = `
+        SELECT
+            usu_id,
+            usu_nome,
+            usu_documento,
+            usu_email,
+            usu_senha,
+            usu_datacriacao,
+            inst_id,
+            usu_telefone,
+            usu_foto,
+            usu_biometria,
+            usu_tipo,
+            CAST(usu_status AS UNSIGNED) AS usu_status
+        FROM Usuario
+        `;
 
             const [rows] = await db.query(sql);
 
@@ -99,13 +110,26 @@ module.exports = {
     },
     async cadastrarUsuario(request, response) {
         try {
+            const { nome, documento, senha, email, telefone, tipo, inst_id, foto, biometria, status = 1 } = request.body;
 
-            const { nome, documento, senha, email, telefone, tipo, inst_id, foto, biometria, status } = request.body;
-            
-            const dados = { usu_nome: nome, usu_documento: documento, usu_email: email, usu_senha: senha, inst_id, usu_telefone: telefone, usu_tipo: tipo, usu_status: status };
-            
-            // Validações
+            const dados = {
+                usu_nome: nome,
+                usu_documento: documento,
+                usu_email: email,
+                usu_senha: senha,
+                inst_id,
+                usu_telefone: telefone,
+                usu_tipo: tipo,
+                usu_status: status
+            };
+
+            console.log('BODY RECEBIDO:', request.body);
+            console.log('DADOS PARA VALIDAR:', dados);
+
             const erros = validarUsuario(dados);
+
+            console.log('ERROS DE VALIDACAO:', erros);
+
             if (erros.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
@@ -113,27 +137,36 @@ module.exports = {
                     erros: erros
                 });
             }
-            
-            // Verificar se inst_id existe
-            const [instExistente] = await db.query('SELECT inst_id FROM Instituicao WHERE inst_id = ?', [inst_id]);
+
+            const [instExistente] = await db.query(
+                'SELECT inst_id FROM Instituicao WHERE inst_id = ?',
+                [inst_id]
+            );
+
             if (instExistente.length === 0) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Instituição não encontrada'
                 });
             }
-            
-            // Verificar unicidade do email
-            const [emailExistente] = await db.query('SELECT usu_id FROM Usuario WHERE usu_email = ?', [email]);
+
+            const [emailExistente] = await db.query(
+                'SELECT usu_id FROM Usuario WHERE usu_email = ?',
+                [email]
+            );
+
             if (emailExistente.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Email já cadastrado'
                 });
             }
-            
-            // Verificar unicidade do documento
-            const [docExistente] = await db.query('SELECT usu_id FROM Usuario WHERE usu_documento = ?', [documento]);
+
+            const [docExistente] = await db.query(
+                'SELECT usu_id FROM Usuario WHERE usu_documento = ?',
+                [documento]
+            );
+
             if (docExistente.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
@@ -142,23 +175,22 @@ module.exports = {
             }
 
             const sql = `
-  INSERT INTO Usuario (
-    usu_nome,
-    usu_documento,
-    usu_email,
-    usu_senha,
-    usu_datacriacao,
-    inst_id,
-    usu_telefone,
-    usu_foto,
-    usu_biometria,
-    usu_tipo,
-    usu_status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-`;
+            INSERT INTO Usuario (
+                usu_nome,
+                usu_documento,
+                usu_email,
+                usu_senha,
+                usu_datacriacao,
+                inst_id,
+                usu_telefone,
+                usu_foto,
+                usu_biometria,
+                usu_tipo,
+                usu_status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
 
             const values = [
-
                 nome,
                 documento,
                 email,
@@ -166,62 +198,47 @@ module.exports = {
                 new Date(),
                 inst_id,
                 telefone,
-                foto,
-                biometria,
+                foto || null,
+                biometria || null,
                 tipo,
-                status,
-
-
+                status
             ];
 
-
             const [result] = await db.query(sql, values);
-
 
             const dadosRetorno = {
                 id: result.insertId,
                 nome,
                 documento,
                 email,
-                senha,
                 telefone,
                 tipo,
-                usu_ativo: status,
                 inst_id,
-                foto,
-                biometria,
                 status
-
             };
 
-            return response.status(201).json(
-                {
-                    sucesso: true,
-                    mensagem: 'Cadastro de usuário realizado com sucesso',
-                    dados: dadosRetorno
-
-                }
-            );
+            return response.status(201).json({
+                sucesso: true,
+                mensagem: 'Cadastro de usuário realizado com sucesso',
+                dados: dadosRetorno
+            });
         } catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao cadastrar usuário: ${error.message} `,
-                    dados: error.message
-                }
-            );
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao cadastrar usuário: ${error.message}`,
+                dados: error.message
+            });
         }
-
     },
     async editarUsuario(request, response) {
         try {
 
-            const { nome, documento, senha, email, telefone, tipo,  status, inst_id } = request.body;
+            const { nome, documento, senha, email, telefone, tipo, status, inst_id } = request.body;
 
             const { id } = request.params;
-            
+
             const dados = { usu_nome: nome, usu_documento: documento, usu_email: email, usu_senha: senha, inst_id, usu_telefone: telefone, usu_tipo: tipo, usu_status: status };
-            
+
             // Verificar se usuário existe
             const [usuarioExistente] = await db.query('SELECT usu_id, usu_email, usu_documento FROM Usuario WHERE usu_id = ?', [id]);
             if (usuarioExistente.length === 0) {
@@ -230,7 +247,7 @@ module.exports = {
                     mensagem: 'Usuário não encontrado'
                 });
             }
-            
+
             // Validações
             const erros = validarUsuario(dados);
             if (erros.length > 0) {
@@ -240,7 +257,7 @@ module.exports = {
                     erros: erros
                 });
             }
-            
+
             // Verificar se inst_id existe
             const [instExistente] = await db.query('SELECT inst_id FROM Instituicao WHERE inst_id = ?', [inst_id]);
             if (instExistente.length === 0) {
@@ -249,7 +266,7 @@ module.exports = {
                     mensagem: 'Instituição não encontrada'
                 });
             }
-            
+
             // Verificar unicidade do email se mudou
             if (email !== usuarioExistente[0].usu_email) {
                 const [emailExistente] = await db.query('SELECT usu_id FROM Usuario WHERE usu_email = ? AND usu_id != ?', [email, id]);
@@ -260,7 +277,7 @@ module.exports = {
                     });
                 }
             }
-            
+
             // Verificar unicidade do documento se mudou
             if (documento !== usuarioExistente[0].usu_documento) {
                 const [docExistente] = await db.query('SELECT usu_id FROM Usuario WHERE usu_documento = ? AND usu_id != ?', [documento, id]);
@@ -278,20 +295,20 @@ module.exports = {
              usu_id = ?
              `;
 
-             const values = [nome, documento ,email,  senha, inst_id, telefone, tipo, status,id];
+            const values = [nome, documento, email, senha, inst_id, telefone, tipo, status, id];
 
-            const [result] = await db.query(sql,values);
+            const [result] = await db.query(sql, values);
 
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
-                    sucesso:false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
-            const dadosRetorno ={
+            const dadosRetorno = {
                 id,
                 nome,
                 documento,
@@ -322,11 +339,68 @@ module.exports = {
         }
 
     },
+    async ocultarUsuario(request, response) {
+        try {
+            const { id } = request.params;
+
+            const [usuarioExistente] = await db.query(
+                'SELECT usu_id, usu_status FROM Usuario WHERE usu_id = ?',
+                [id]
+            );
+
+            if (usuarioExistente.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuário não encontrado',
+                    dados: null
+                });
+            }
+
+            if (usuarioExistente[0].usu_status === 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Usuário já está oculto/inativo',
+                    dados: null
+                });
+            }
+
+            const sql = `
+            UPDATE Usuario
+            SET usu_status = 0
+            WHERE usu_id = ?
+        `;
+
+            const [result] = await db.query(sql, [id]);
+
+            if (result.affectedRows === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
+                });
+            }
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `Usuário ${id} ocultado com sucesso`,
+                dados: {
+                    id: Number(id),
+                    status: 0
+                }
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao ocultar usuário: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
     async apagarUsuario(request, response) {
         try {
 
             const { id } = request.params;
-            
+
             // Verificar se usuário existe
             const [usuarioExistente] = await db.query('SELECT usu_id FROM Usuario WHERE usu_id = ?', [id]);
             if (usuarioExistente.length === 0) {
@@ -335,7 +409,7 @@ module.exports = {
                     mensagem: 'Usuário não encontrado'
                 });
             }
-            
+
             // Verificar se há logs relacionados (opcional, dependendo das regras de negócio)
             const [logs] = await db.query('SELECT log_id FROM Logs_Acao WHERE usu_id = ?', [id]);
             if (logs.length > 0) {
@@ -351,11 +425,11 @@ module.exports = {
 
             const [result] = await db.query(sql, values);
 
-            if (result.affectedRows === 0){
+            if (result.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem:`Usuário ${id} não encontrado!`,
-                    dados:null
+                    mensagem: `Usuário ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
@@ -381,4 +455,3 @@ module.exports = {
     }
 }
 
-    
