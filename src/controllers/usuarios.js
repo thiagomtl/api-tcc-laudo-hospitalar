@@ -71,40 +71,41 @@ module.exports = {
     },
     async usuariosLogin(request, response) {
         try {
-
             const { email, senha } = request.body;
 
             const sql = `
-                SELECT
-                    usu_id, usu_nome, usu_tipo
-                FROM 
-                    Usuario
-                WHERE
-                    usu_email = ? AND usu_senha = ? AND usu_status = 1;
-            `;
+            SELECT
+                usu_id,
+                usu_nome,
+                usu_email,
+                usu_tipo,
+                inst_id,
+                CAST(usu_status AS UNSIGNED) AS usu_status
+            FROM Usuario
+            WHERE usu_email = ? AND usu_senha = ? AND usu_status = 1
+        `;
+
             const values = [email, senha];
-
             const [rows] = await db.query(sql, values);
-            const nItens = rows.length;
 
-            if (nItens < 1) {
+            if (rows.length < 1) {
                 return response.status(403).json({
                     sucesso: false,
                     mensagem: 'Login e/ou senha incorretos',
-                    dados: null,
+                    dados: null
                 });
             }
 
             return response.status(200).json({
                 sucesso: true,
                 mensagem: 'Login realizado com sucesso',
-                dados: rows
+                dados: rows[0]
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao realizar login.`,
-                dados: error.message,
+                mensagem: 'Erro ao realizar login.',
+                dados: error.message
             });
         }
     },
@@ -342,6 +343,15 @@ module.exports = {
     async ocultarUsuario(request, response) {
         try {
             const { id } = request.params;
+            const { tipoSolicitante } = request.body;
+
+            if (tipoSolicitante !== 'Administrador') {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Apenas administradores podem ocultar usuários.',
+                    dados: null
+                });
+            }
 
             const [usuarioExistente] = await db.query(
                 'SELECT usu_id, usu_status FROM Usuario WHERE usu_id = ?',
@@ -364,21 +374,10 @@ module.exports = {
                 });
             }
 
-            const sql = `
-            UPDATE Usuario
-            SET usu_status = 0
-            WHERE usu_id = ?
-        `;
-
-            const [result] = await db.query(sql, [id]);
-
-            if (result.affectedRows === 0) {
-                return response.status(404).json({
-                    sucesso: false,
-                    mensagem: `Usuário ${id} não encontrado!`,
-                    dados: null
-                });
-            }
+            await db.query(
+                'UPDATE Usuario SET usu_status = 0 WHERE usu_id = ?',
+                [id]
+            );
 
             return response.status(200).json({
                 sucesso: true,
@@ -392,6 +391,61 @@ module.exports = {
             return response.status(500).json({
                 sucesso: false,
                 mensagem: `Erro ao ocultar usuário: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
+    async ativarUsuario(request, response) {
+        try {
+            const { id } = request.params;
+            const { tipoSolicitante } = request.body;
+
+            if (tipoSolicitante !== 'Administrador') {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Apenas administradores podem ativar usuários.',
+                    dados: null
+                });
+            }
+
+            const [usuarioExistente] = await db.query(
+                'SELECT usu_id, usu_status FROM Usuario WHERE usu_id = ?',
+                [id]
+            );
+
+            if (usuarioExistente.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuário não encontrado',
+                    dados: null
+                });
+            }
+
+            if (usuarioExistente[0].usu_status === 1) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Usuário já está ativo',
+                    dados: null
+                });
+            }
+
+            await db.query(
+                'UPDATE Usuario SET usu_status = 1 WHERE usu_id = ?',
+                [id]
+            );
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `Usuário ${id} ativado com sucesso`,
+                dados: {
+                    id: Number(id),
+                    status: 1
+                }
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao ativar usuário: ${error.message}`,
                 dados: error.message
             });
         }
