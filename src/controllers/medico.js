@@ -4,173 +4,211 @@ module.exports = {
     async listarMedico(request, response) {
         try {
             const sql = `
-                SELECT med_id, med_crm FROM Medico;
+                SELECT 
+                    med_id,
+                    med_crm
+                FROM Medico
             `;
 
             const [rows] = await db.query(sql);
 
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: 'Lista de médico obtida com sucesso',
-                    itens: rows.length,
-                    dados: rows
-
-                }
-            );
-
-        } 
-        
-        catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao listar médico: ${error.message}`,
-                    dados: null
-                }
-            );
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Lista de médicos obtida com sucesso',
+                itens: rows.length,
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao listar médicos: ${error.message}`,
+                dados: null
+            });
         }
     },
-    
+
     async cadastrarMedico(request, response) {
         try {
-
-            const {crm } = request.body;
-           
-
-            const sql =  `
-                   INSERT INTO Medico (med_crm) 
-                   VALUES
-                   (?);
-                    `;
-
-
-    
-            const values = [crm]; 
-
-            const [result] = await db.query(sql, values);
-
-            
-
-            const dados = {
-                id: result.insertId,
-                crm
-                
-            };
-
-            
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: 'Cadastro de médico obtida com sucesso',
-                    dados: dados
-
-                }
-            );
-        } catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao cadastrar médico: ${error.message}`,
-                    dados: error.message
-                }
-            );
-        }
-
-    },
-    async editarMedico(request, response) {
-        try {
-
             const { crm } = request.body;
 
+            if (!crm) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM é obrigatório.',
+                    dados: null
+                });
+            }
+
+            const [crmExistente] = await db.query(
+                `
+                SELECT med_id
+                FROM Medico
+                WHERE med_crm = ?
+                `,
+                [crm]
+            );
+
+            if (crmExistente.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM já cadastrado.',
+                    dados: null
+                });
+            }
+
+            const sql = `
+                INSERT INTO Medico (med_crm)
+                VALUES (?)
+            `;
+
+            const [result] = await db.query(sql, [crm]);
+
+            return response.status(201).json({
+                sucesso: true,
+                mensagem: 'Cadastro de médico realizado com sucesso',
+                dados: {
+                    id: result.insertId,
+                    crm
+                }
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao cadastrar médico: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
+
+    async editarMedico(request, response) {
+        try {
+            const { crm } = request.body;
             const { id } = request.params;
 
-            const sql = ` UPDATE Medico SET 
-             med_crm = ?
-             WHERE 
-             med_id = ?
-             `;
-
-             const values = [crm ,id];
-
-            const [result] = await db.query(sql,values);
-
-
-            if (result.affectedRows === 0){
-                return response.status(404).json({
-                    sucesso:false,
-                    mensagem:`Médico ${id} não encontrado!`,
-                    dados:null
+            if (!crm) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM é obrigatório.',
+                    dados: null
                 });
             }
 
-            const dados ={
-                id,
-                crm
-                
-            };
-
-           
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Médico ${id} atualizado com sucesso`,
-                    dados:dados
-                }
+            const [medicoExistente] = await db.query(
+                `
+                SELECT med_id
+                FROM Medico
+                WHERE med_id = ?
+                `,
+                [id]
             );
-        } catch (error) {
-            return response.status(500).json(
-                {
+
+            if (medicoExistente.length === 0) {
+                return response.status(404).json({
                     sucesso: false,
-                    mensagem: `Erro ao atualizar médico: ${error.message}`,
+                    mensagem: `Médico ${id} não encontrado!`,
                     dados: null
-                }
-            );
-        }
+                });
+            }
 
+            const [crmDuplicado] = await db.query(
+                `
+                SELECT med_id
+                FROM Medico
+                WHERE med_crm = ?
+                  AND med_id != ?
+                `,
+                [crm, id]
+            );
+
+            if (crmDuplicado.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Já existe outro médico com este CRM.',
+                    dados: null
+                });
+            }
+
+            const sql = `
+                UPDATE Medico
+                SET med_crm = ?
+                WHERE med_id = ?
+            `;
+
+            await db.query(sql, [crm, id]);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `Médico ${id} atualizado com sucesso`,
+                dados: {
+                    id: Number(id),
+                    crm
+                }
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar médico: ${error.message}`,
+                dados: error.message
+            });
+        }
     },
+
     async apagarMedico(request, response) {
         try {
+            const { id } = request.params;
 
-             const { id } = request.params;
+            const [medicoExistente] = await db.query(
+                `
+                SELECT med_id
+                FROM Medico
+                WHERE med_id = ?
+                `,
+                [id]
+            );
 
-            const sql = `DELETE FROM Medico where med_id = ?`;
-
-            const values = [id];
-
-            const [result] = await db.query(sql, values);
-
-            if (result.affectedRows === 0){
+            if (medicoExistente.length === 0) {
                 return response.status(404).json({
-                    sucesso:false,
-                    mensagem:`Médico ${id} não encontrado!`,
-                    dados:null
+                    sucesso: false,
+                    mensagem: `Médico ${id} não encontrado!`,
+                    dados: null
                 });
             }
 
-           
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Médico ${id} excluído com sucesso`,
-                    dados: null
-
-                }
+            const [atendimentosVinculados] = await db.query(
+                `
+                SELECT atend_id
+                FROM Atendimento
+                WHERE med_id = ?
+                `,
+                [id]
             );
-        } catch (error) {
-            return response.status(500).json(
-                {
+
+            if (atendimentosVinculados.length > 0) {
+                return response.status(400).json({
                     sucesso: false,
-                    mensagem: `Erro ao apagar médico: ${error.message}`,
+                    mensagem: 'Não é possível excluir o médico porque existem atendimentos vinculados a ele.',
                     dados: null
-                }
-            );
+                });
+            }
+
+            const sql = `
+                DELETE FROM Medico
+                WHERE med_id = ?
+            `;
+
+            await db.query(sql, [id]);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `Médico ${id} excluído com sucesso`,
+                dados: null
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao apagar médico: ${error.message}`,
+                dados: error.message
+            });
         }
-
-    },
-
-
-}
+    }
+};
