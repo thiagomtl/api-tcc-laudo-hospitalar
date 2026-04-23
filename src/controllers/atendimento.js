@@ -397,5 +397,41 @@ module.exports = {
                 dados: error.message
             });
         }
-    }
+    },
+    async listarAtendimentosPendentes(request, response) {
+        try {
+            const sql = `
+            SELECT
+                a.atend_id,
+                p.pac_nome,
+                c.con_tipo,
+                l.leito_identificacao,
+                s.set_nome,
+                a.atend_data
+            FROM Atendimento a
+            INNER JOIN Paciente p ON a.pac_id = p.pac_id
+            INNER JOIN Convenio c ON a.con_id = c.con_id
+            INNER JOIN Leito l ON a.leito_id = l.leito_id
+            INNER JOIN Setor s ON l.set_id = s.set_id
+            LEFT JOIN Laudo lau ON a.atend_id = lau.atend_id
+            WHERE lau.lau_id IS NULL
+            ORDER BY a.atend_data DESC
+        `;
+
+            const [rows] = await db.query(sql);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Lista de atendimentos pendentes obtida com sucesso',
+                itens: rows.length,
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao listar atendimentos pendentes: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
 };
