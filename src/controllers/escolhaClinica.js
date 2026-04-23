@@ -4,28 +4,29 @@ module.exports = {
     async listarEscolhaClinica(request, response) {
         try {
             const { pesquisa } = request.query;
-            const escolha_listar = pesquisa ? `%${pesquisa}%` : `%`;
+            const escolhaListar = pesquisa ? `%${pesquisa}%` : `%`;
 
             const sql = `
-                SELECT cli_id, cli_descricao
+                SELECT
+                    cli_id,
+                    cli_descricao
                 FROM Escolha_Clinica
                 WHERE cli_descricao LIKE ?
-                ORDER BY cli_id DESC;
+                ORDER BY cli_id DESC
             `;
 
-            const values = [escolha_listar];
-            const [rows] = await db.query(sql);
+            const [rows] = await db.query(sql, [escolhaListar]);
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Lista de escolha clínica obtida com sucesso.',
+                mensagem: 'Lista de escolhas clínicas obtida com sucesso.',
                 itens: rows.length,
                 dados: rows
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao listar escolha clínica: ${error.message}`,
+                mensagem: `Erro ao listar escolhas clínicas: ${error.message}`,
                 dados: null
             });
         }
@@ -43,13 +44,29 @@ module.exports = {
                 });
             }
 
+            const [descricaoExistente] = await db.query(
+                `
+                SELECT cli_id
+                FROM Escolha_Clinica
+                WHERE cli_descricao = ?
+                `,
+                [descricao]
+            );
+
+            if (descricaoExistente.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Já existe escolha clínica cadastrada com essa descrição.',
+                    dados: null
+                });
+            }
+
             const sql = `
                 INSERT INTO Escolha_Clinica (cli_descricao)
-                VALUES (?);
+                VALUES (?)
             `;
 
-            const values = [descricao];
-            const [result] = await db.query(sql, values);
+            const [result] = await db.query(sql, [descricao]);
 
             return response.status(201).json({
                 sucesso: true,
@@ -63,7 +80,7 @@ module.exports = {
             return response.status(500).json({
                 sucesso: false,
                 mensagem: `Erro ao cadastrar escolha clínica: ${error.message}`,
-                dados: null
+                dados: error.message
             });
         }
     },
@@ -81,16 +98,16 @@ module.exports = {
                 });
             }
 
-            const sql = `
-                UPDATE Escolha_Clinica
-                SET cli_descricao = ?
-                WHERE cli_id = ?;
-            `;
+            const [escolhaExistente] = await db.query(
+                `
+                SELECT cli_id
+                FROM Escolha_Clinica
+                WHERE cli_id = ?
+                `,
+                [id]
+            );
 
-            const values = [descricao, id];
-            const [result] = await db.query(sql, values);
-
-            if (result.affectedRows === 0) {
+            if (escolhaExistente.length === 0) {
                 return response.status(404).json({
                     sucesso: false,
                     mensagem: `Escolha clínica com ID ${id} não encontrada.`,
@@ -98,11 +115,37 @@ module.exports = {
                 });
             }
 
+            const [descricaoDuplicada] = await db.query(
+                `
+                SELECT cli_id
+                FROM Escolha_Clinica
+                WHERE cli_descricao = ?
+                  AND cli_id != ?
+                `,
+                [descricao, id]
+            );
+
+            if (descricaoDuplicada.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Já existe outra escolha clínica com essa descrição.',
+                    dados: null
+                });
+            }
+
+            const sql = `
+                UPDATE Escolha_Clinica
+                SET cli_descricao = ?
+                WHERE cli_id = ?
+            `;
+
+            await db.query(sql, [descricao, id]);
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: 'Escolha clínica atualizada com sucesso.',
                 dados: {
-                    id,
+                    id: Number(id),
                     descricao
                 }
             });
@@ -110,7 +153,7 @@ module.exports = {
             return response.status(500).json({
                 sucesso: false,
                 mensagem: `Erro ao atualizar escolha clínica: ${error.message}`,
-                dados: null
+                dados: error.message
             });
         }
     },
@@ -119,17 +162,46 @@ module.exports = {
         try {
             const { id } = request.params;
 
-            const sql = `DELETE FROM Escolha_Clinica WHERE cli_id = ?`;
-            const values = [id];
-            const [result] = await db.query(sql, values);
+            const [escolhaExistente] = await db.query(
+                `
+                SELECT cli_id
+                FROM Escolha_Clinica
+                WHERE cli_id = ?
+                `,
+                [id]
+            );
 
-            if (result.affectedRows === 0) {
+            if (escolhaExistente.length === 0) {
                 return response.status(404).json({
                     sucesso: false,
                     mensagem: `Escolha clínica com ID ${id} não encontrada.`,
                     dados: null
                 });
             }
+
+            const [laudosVinculados] = await db.query(
+                `
+                SELECT lau_id
+                FROM Laudo
+                WHERE cli_id = ?
+                `,
+                [id]
+            );
+
+            if (laudosVinculados.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Não é possível excluir a escolha clínica porque existem laudos vinculados a ela.',
+                    dados: null
+                });
+            }
+
+            const sql = `
+                DELETE FROM Escolha_Clinica
+                WHERE cli_id = ?
+            `;
+
+            await db.query(sql, [id]);
 
             return response.status(200).json({
                 sucesso: true,
@@ -140,7 +212,7 @@ module.exports = {
             return response.status(500).json({
                 sucesso: false,
                 mensagem: `Erro ao excluir escolha clínica: ${error.message}`,
-                dados: null
+                dados: error.message
             });
         }
     }

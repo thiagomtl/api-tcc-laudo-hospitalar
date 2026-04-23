@@ -5,135 +5,180 @@ module.exports = {
     async listarCid(request, response) {
         try {
             const { pesquisa } = request.query;
-            const cid_listar = pesquisa ? `%${pesquisa}%` : `%`;
+            const filtro = pesquisa ? `%${pesquisa}%` : `%`;
+
             const sql = `
-                SELECT cid_id, cid_codigo, cid_descricao 
+                SELECT
+                    cid_id,
+                    cid_codigo,
+                    cid_descricao
                 FROM CID
-                WHERE cid_descricao LIKE ? OR cid_codigo LIKE ?;
+                WHERE cid_descricao LIKE ? OR cid_codigo LIKE ?
+                ORDER BY cid_id DESC
             `;
 
-            const values = [cid_listar, cid_listar];
-            const [rows] = await db.query(sql, values);
-            const nItens = rows.length;
+            const [rows] = await db.query(sql, [filtro, filtro]);
 
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Lista de cid obtida com sucesso`,
-                    nItens,
-                    dados: rows
-                }
-            )
-        }
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Lista de CIDs obtida com sucesso',
+                itens: rows.length,
+                dados: rows
+            });
 
-        catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao listar cid: ${error.message}`,
-                    dados: null
-                }
-            )
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao listar CID: ${error.message}`,
+                dados: null
+            });
         }
     },
-
 
     async cadastrarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
+
+            if (!codigo || !descricao) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Código e descrição são obrigatórios.',
+                    dados: null
+                });
+            }
+
+            const [codigoExistente] = await db.query(
+                `
+                SELECT cid_id
+                FROM CID
+                WHERE cid_codigo = ?
+                `,
+                [codigo]
+            );
+
+            if (codigoExistente.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Já existe CID com esse código.',
+                    dados: null
+                });
+            }
+
             const sql = `
-                INSERT INTO CID (cid_codigo, cid_descricao) 
-                VALUES (?, ?);
+                INSERT INTO CID (cid_codigo, cid_descricao)
+                VALUES (?, ?)
             `;
 
-            const values = [codigo, descricao];
-            const [result] = await db.query(sql, values);
+            const [result] = await db.query(sql, [codigo, descricao]);
 
-            const dados = {
-                id: result.insertId,
-                codigo,
-                descricao
-            };
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Cadastro de cid realizado com sucesso`,
-                    dados: dados
+            return response.status(201).json({
+                sucesso: true,
+                mensagem: 'CID cadastrado com sucesso',
+                dados: {
+                    id: result.insertId,
+                    codigo,
+                    descricao
                 }
-            )
-        }
+            });
 
-        catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao cadastrar cid: ${error.message}`,
-                    dados: null
-                }
-            )
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao cadastrar CID: ${error.message}`,
+                dados: error.message
+            });
         }
     },
-
 
     async editarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { codigo, descricao } = request.body;
             const { id } = request.params;
+
+            if (!codigo || !descricao) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Código e descrição são obrigatórios.',
+                    dados: null
+                });
+            }
+
+            const [cidAtual] = await db.query(
+                `
+                SELECT cid_id
+                FROM CID
+                WHERE cid_id = ?
+                `,
+                [id]
+            );
+
+            if (cidAtual.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: `CID com ID ${id} não encontrado.`,
+                    dados: null
+                });
+            }
+
+            const [codigoDuplicado] = await db.query(
+                `
+                SELECT cid_id
+                FROM CID
+                WHERE cid_codigo = ?
+                  AND cid_id != ?
+                `,
+                [codigo, id]
+            );
+
+            if (codigoDuplicado.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Já existe outro CID com esse código.',
+                    dados: null
+                });
+            }
+
             const sql = `
-                UPDATE CID SET cid_codigo = ?, cid_descricao = ?
+                UPDATE CID
+                SET cid_codigo = ?, cid_descricao = ?
                 WHERE cid_id = ?
             `;
 
-            const values = [codigo, descricao, id];
-            const [result] = await db.query(sql, values);
+            await db.query(sql, [codigo, descricao, id]);
 
-            if (result.affectedRows === 0) {
-                return response.status(404).json({
-                    sucesso: false,
-                    mensagem: `CID com ID ${id} não encontrado.`,
-                    dados: null
-                });
-            }
-
-            const dados = {
-                id,
-                codigo,
-                descricao
-            }
-
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Atualização de cid realizado com sucesso`,
-                    dados: dados
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `CID com ID ${id} atualizado com sucesso`,
+                dados: {
+                    id: Number(id),
+                    codigo,
+                    descricao
                 }
-            )
-        }
+            });
 
-        catch (error) {
-            return response.status(500).json(
-                {
-                    sucesso: false,
-                    mensagem: `Erro ao atualizar cid: ${error.message}`,
-                    dados: null
-                }
-            )
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar CID: ${error.message}`,
+                dados: error.message
+            });
         }
     },
-
 
     async apagarCid(request, response) {
         try {
-            console.log("BODY RECEBIDO:", request.body);
             const { id } = request.params;
-            const sql = `DELETE FROM CID WHERE cid_id = ?`;
-            const values = [ id ];
-            const [result] = await db.query(sql, values);
 
-            if (result.affectedRows === 0) {
+            const [cidExistente] = await db.query(
+                `
+                SELECT cid_id
+                FROM CID
+                WHERE cid_id = ?
+                `,
+                [id]
+            );
+
+            if (cidExistente.length === 0) {
                 return response.status(404).json({
                     sucesso: false,
                     mensagem: `CID com ID ${id} não encontrado.`,
@@ -141,23 +186,42 @@ module.exports = {
                 });
             }
 
-            return response.status(200).json(
-                {
-                    sucesso: true,
-                    mensagem: `Exclusão de cid realizado com sucesso`,
-                    dados: null
-                }
-            )
-        }
+            const [vinculo] = await db.query(
+                `
+                SELECT cid_id
+                FROM Procedimento_Cids
+                WHERE cid_id = ?
+                `,
+                [id]
+            );
 
-        catch (error) {
-            return response.status(500).json(
-                {
+            if (vinculo.length > 0) {
+                return response.status(400).json({
                     sucesso: false,
-                    mensagem: `Erro ao excluir cid: ${error.message}`,
+                    mensagem: 'Não é possível excluir o CID pois ele está vinculado a procedimentos.',
                     dados: null
-                }
-            )
+                });
+            }
+
+            const sql = `
+                DELETE FROM CID
+                WHERE cid_id = ?
+            `;
+
+            await db.query(sql, [id]);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: `CID com ID ${id} excluído com sucesso`,
+                dados: null
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao excluir CID: ${error.message}`,
+                dados: error.message
+            });
         }
-    },
-}
+    }
+};
