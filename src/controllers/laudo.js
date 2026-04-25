@@ -7,29 +7,39 @@ module.exports = {
             const nomePaciente = nome ? `%${nome}%` : `%`;
 
             const sql = `
-                SELECT
-                    lau.lau_id,
-                    atd.atend_id,
-                    pac.pac_nome,
-                    cli.cli_descricao,
-                    pc.proc_cid_id,
-                    lau.lau_sinais,
-                    lau.lau_internacao,
-                    lau.lau_resultado,
-                    lau.lau_recurso,
-                    lau.lau_datapreenc,
-                    CAST(lau.lau_status AS UNSIGNED) AS lau_status
-                FROM Laudo lau
-                INNER JOIN Atendimento atd
-                    ON lau.atend_id = atd.atend_id
-                INNER JOIN Paciente pac
-                    ON atd.pac_id = pac.pac_id
-                INNER JOIN Escolha_Clinica cli
-                    ON lau.cli_id = cli.cli_id
-                INNER JOIN Procedimento_Cids pc
-                    ON lau.proc_cid_id = pc.proc_cid_id
-                WHERE pac.pac_nome LIKE ?
-            `;
+        SELECT
+            lau.lau_id,
+            atd.atend_id,
+            pac.pac_nome,
+            conv.con_tipo,
+            lei.leito_identificacao,
+            seto.set_nome,
+            cli.cli_descricao,
+            pc.proc_cid_id,
+            lau.lau_sinais,
+            lau.lau_internacao,
+            lau.lau_resultado,
+            lau.lau_recurso,
+            lau.lau_datapreenc,
+            CAST(lau.lau_status AS UNSIGNED) AS lau_status
+        FROM Laudo lau
+        INNER JOIN Atendimento atd
+            ON lau.atend_id = atd.atend_id
+        INNER JOIN Paciente pac
+            ON atd.pac_id = pac.pac_id
+        INNER JOIN Convenio conv
+            ON atd.con_id = conv.con_id
+        INNER JOIN Leito lei
+            ON atd.leito_id = lei.leito_id
+        INNER JOIN Setor seto
+            ON lei.set_id = seto.set_id
+        INNER JOIN Escolha_Clinica cli
+            ON lau.cli_id = cli.cli_id
+        INNER JOIN Procedimento_Cids pc
+            ON lau.proc_cid_id = pc.proc_cid_id
+        WHERE pac.pac_nome LIKE ?
+        ORDER BY lau.lau_datapreenc DESC
+    `;
 
             const [rows] = await db.query(sql, [nomePaciente]);
 

@@ -1,4 +1,5 @@
 const db = require('../dataBase/connection');
+const jwt = require('jsonwebtoken');
 
 // Função auxiliar para validações
 function validarUsuario(dados) {
@@ -96,10 +97,29 @@ module.exports = {
                 });
             }
 
+            const usuario = rows[0];
+
+            const token = jwt.sign(
+                {
+                    id: usuario.usu_id,
+                    nome: usuario.usu_nome,
+                    email: usuario.usu_email,
+                    tipo: usuario.usu_tipo,
+                    inst_id: usuario.inst_id
+                },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: '8h'
+                }
+            );
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: 'Login realizado com sucesso',
-                dados: rows[0]
+                dados: {
+                    usuario,
+                    token
+                }
             });
         } catch (error) {
             return response.status(500).json({

@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const {
+    autenticarToken,
+    somenteAdministrador
+} = require('../middlewares/auth');
 
 const MedicoController = require('../controllers/medico');
 const UsuarioController = require('../controllers/usuarios');
@@ -11,7 +15,12 @@ router.post('/medicos', MedicoController.cadastrarMedico);
 router.patch('/medicos/:id', MedicoController.editarMedico);
 router.delete('/medicos/:id', MedicoController.apagarMedico);
 
-router.get('/usuarios', UsuarioController.listarUsuario);
+router.get(
+    '/usuarios',
+    autenticarToken,
+    somenteAdministrador,
+    UsuarioController.listarUsuario
+);
 router.post('/usuarios', UsuarioController.cadastrarUsuario);
 router.patch('/usuarios/:id', UsuarioController.editarUsuario);
 router.delete('/usuarios/:id', UsuarioController.apagarUsuario);
