@@ -1,5 +1,6 @@
 const db = require('../dataBase/connection');
 const jwt = require('jsonwebtoken');
+const bcrypt = require("bcryptjs");
 
 // Função auxiliar para validações
 function validarUsuario(dados) {
@@ -79,15 +80,15 @@ module.exports = {
                 usu_id,
                 usu_nome,
                 usu_email,
+                usu_senha,
                 usu_tipo,
                 inst_id,
                 CAST(usu_status AS UNSIGNED) AS usu_status
             FROM Usuario
-            WHERE usu_email = ? AND usu_senha = ? AND usu_status = 1
+            WHERE usu_email = ? AND usu_status = 1
         `;
 
-            const values = [email, senha];
-            const [rows] = await db.query(sql, values);
+            const [rows] = await db.query(sql, [email]);
 
             if (rows.length < 1) {
                 return response.status(403).json({
@@ -99,6 +100,18 @@ module.exports = {
 
             const usuario = rows[0];
 
+            const senhaValida = await bcrypt.compare(senha, usuario.usu_senha);
+
+            if (!senhaValida) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Login e/ou senha incorretos',
+                    dados: null
+                });
+            }
+
+            delete usuario.usu_senha;
+
             const token = jwt.sign(
                 {
                     id: usuario.usu_id,
@@ -108,9 +121,7 @@ module.exports = {
                     inst_id: usuario.inst_id
                 },
                 process.env.JWT_SECRET,
-                {
-                    expiresIn: '8h'
-                }
+                { expiresIn: '8h' }
             );
 
             return response.status(200).json({
@@ -132,12 +143,12 @@ module.exports = {
     async cadastrarUsuario(request, response) {
         try {
             const { nome, documento, senha, email, telefone, tipo, inst_id, foto, biometria, status = 1 } = request.body;
-
+            const senhaCriptografada = await bcrypt.hash(senha, 10);
             const dados = {
                 usu_nome: nome,
                 usu_documento: documento,
                 usu_email: email,
-                usu_senha: senha,
+                usu_senha: senhaCriptografada,
                 inst_id,
                 usu_telefone: telefone,
                 usu_tipo: tipo,
@@ -215,7 +226,7 @@ module.exports = {
                 nome,
                 documento,
                 email,
-                senha,
+                senhaCriptografada,
                 new Date(),
                 inst_id,
                 telefone,
