@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const { autenticarToken, somenteMedico } = require('../middlewares/auth');
+
 const CidController = require('../controllers/cid');
 const LaudoController = require('../controllers/laudo');
 const ProcedimentoController = require('../controllers/procedimento');
@@ -13,7 +15,7 @@ router.patch('/cid/:id', CidController.editarCid);
 router.delete('/cid/:id', CidController.apagarCid);
 
 router.get('/laudo', LaudoController.listarLaudo);
-router.post('/laudo', LaudoController.cadastrarLaudo);
+router.post('/laudo', autenticarToken, somenteMedico,LaudoController.cadastrarLaudo);
 router.patch('/laudo/:id', LaudoController.editarLaudo);
 router.delete('/laudo/:id', LaudoController.apagarLaudo);
 
