@@ -5,20 +5,20 @@ module.exports = {
     async listarProcedimentoCid(request, response) {
         try {
             const sql = `
-                SELECT
+                SELECT 
                     pc.proc_cid_id,
                     pc.pro_id,
+                    pc.cid_id,
                     p.pro_codigo,
                     p.pro_descricao,
-                    pc.cid_id,
                     c.cid_codigo,
                     c.cid_descricao
                 FROM Procedimento_Cids pc
                 INNER JOIN Procedimento p ON pc.pro_id = p.pro_id
                 INNER JOIN CID c ON pc.cid_id = c.cid_id
-                ORDER BY pc.proc_cid_id DESC
+                ORDER BY pc.proc_cid_id DESC;
             `;
-
+            
             const [rows] = await db.query(sql);
 
             return response.status(200).json({

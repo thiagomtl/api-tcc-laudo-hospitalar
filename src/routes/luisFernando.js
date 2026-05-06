@@ -14,10 +14,10 @@ router.post('/cid', CidController.cadastrarCid);
 router.patch('/cid/:id', CidController.editarCid);
 router.delete('/cid/:id', CidController.apagarCid);
 
-router.get('/laudo', LaudoController.listarLaudo);
-router.post('/laudo', autenticarToken, somenteMedico,LaudoController.cadastrarLaudo);
-router.patch('/laudo/:id', LaudoController.editarLaudo);
-router.delete('/laudo/:id', LaudoController.apagarLaudo);
+router.get('/laudo', autenticarToken, LaudoController.listarLaudo);
+router.post('/laudo', autenticarToken, somenteMedico, LaudoController.cadastrarLaudo);
+router.patch('/laudo/:id', autenticarToken, LaudoController.editarLaudo);
+router.delete('/laudo/:id', autenticarToken, LaudoController.apagarLaudo);
 
 router.get('/procedimento', ProcedimentoController.listarProcedimento);
 router.post('/procedimento', ProcedimentoController.cadastrarProcedimento);
