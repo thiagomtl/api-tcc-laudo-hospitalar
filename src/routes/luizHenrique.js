@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const DashboardController = require('../controllers/dashboard');
 const {autenticarToken, somenteAdministrador} = require('../middlewares/auth');
 
 const MedicoController = require('../controllers/medico');
@@ -20,6 +21,8 @@ router.patch('/usuarios/ocultar/:id', autenticarToken, somenteAdministrador, Usu
 router.patch('/usuarios/ativar/:id', autenticarToken, somenteAdministrador, UsuarioController.ativarUsuario);
 
 router.post('/login', UsuarioController.usuariosLogin);
+
+router.get('/dashboard/resumo', autenticarToken, DashboardController.resumoDashboard);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
 router.post('/favoritos', FavoritoController.cadastrarFavorito);
