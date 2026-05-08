@@ -63,14 +63,15 @@ module.exports = {
             const {
                 atendimento,
                 escolhaClinica,
-                procedimentoCid,
+                cid,
+                procedimento,
                 sinais,
                 internacao,
                 resultado,
                 recurso
             } = request.body;
 
-            if (!atendimento || !escolhaClinica || !procedimentoCid || !sinais) {
+            if (!atendimento || !escolhaClinica || !cid || !procedimento || !sinais) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Atendimento, escolha clínica, procedimento CID e sinais são obrigatórios.',
@@ -150,14 +151,16 @@ module.exports = {
                 INSERT INTO Laudo (
                     atend_id,
                     cli_id,
-                    proc_cid_id,
+                    cid_id,
+                    pro_id,
                     lau_sinais,
                     lau_internacao,
                     lau_resultado,
                     lau_recurso,
                     lau_datapreenc,
                     lau_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
             `;
 
             const values = [

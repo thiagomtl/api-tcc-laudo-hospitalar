@@ -4,6 +4,9 @@ module.exports = {
 
     async listarProcedimentoCid(request, response) {
         try {
+            const { pesquisa } = request.query;
+            const filtro = pesquisa ? `%${pesquisa}%` : `%`;
+
             const sql = `
                 SELECT 
                     pc.proc_cid_id,
@@ -16,10 +19,20 @@ module.exports = {
                 FROM Procedimento_Cids pc
                 INNER JOIN Procedimento p ON pc.pro_id = p.pro_id
                 INNER JOIN CID c ON pc.cid_id = c.cid_id
+                WHERE 
+                    c.cid_codigo LIKE ?
+                    OR c.cid_descricao LIKE ?
+                    OR p.pro_codigo LIKE ?
+                    OR p.pro_descricao LIKE ?
                 ORDER BY pc.proc_cid_id DESC;
             `;
-            
-            const [rows] = await db.query(sql);
+
+            const [rows] = await db.query(sql, [
+                filtro,
+                filtro,
+                filtro,
+                filtro
+            ]);
 
             return response.status(200).json({
                 sucesso: true,
@@ -27,6 +40,7 @@ module.exports = {
                 itens: rows.length,
                 dados: rows
             });
+
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
@@ -49,11 +63,7 @@ module.exports = {
             }
 
             const [procedimentoExistente] = await db.query(
-                `
-                SELECT pro_id
-                FROM Procedimento
-                WHERE pro_id = ?
-                `,
+                `SELECT pro_id FROM Procedimento WHERE pro_id = ?`,
                 [procedimento]
             );
 
@@ -66,11 +76,7 @@ module.exports = {
             }
 
             const [cidExistente] = await db.query(
-                `
-                SELECT cid_id
-                FROM CID
-                WHERE cid_id = ?
-                `,
+                `SELECT cid_id FROM CID WHERE cid_id = ?`,
                 [cid]
             );
 
@@ -140,11 +146,7 @@ module.exports = {
             }
 
             const [vinculoAtual] = await db.query(
-                `
-                SELECT proc_cid_id
-                FROM Procedimento_Cids
-                WHERE proc_cid_id = ?
-                `,
+                `SELECT proc_cid_id FROM Procedimento_Cids WHERE proc_cid_id = ?`,
                 [id]
             );
 
@@ -157,11 +159,7 @@ module.exports = {
             }
 
             const [procedimentoExistente] = await db.query(
-                `
-                SELECT pro_id
-                FROM Procedimento
-                WHERE pro_id = ?
-                `,
+                `SELECT pro_id FROM Procedimento WHERE pro_id = ?`,
                 [procedimento]
             );
 
@@ -174,11 +172,7 @@ module.exports = {
             }
 
             const [cidExistente] = await db.query(
-                `
-                SELECT cid_id
-                FROM CID
-                WHERE cid_id = ?
-                `,
+                `SELECT cid_id FROM CID WHERE cid_id = ?`,
                 [cid]
             );
 
@@ -241,11 +235,7 @@ module.exports = {
             const { id } = request.params;
 
             const [vinculoExistente] = await db.query(
-                `
-                SELECT proc_cid_id
-                FROM Procedimento_Cids
-                WHERE proc_cid_id = ?
-                `,
+                `SELECT proc_cid_id FROM Procedimento_Cids WHERE proc_cid_id = ?`,
                 [id]
             );
 
@@ -258,11 +248,7 @@ module.exports = {
             }
 
             const [laudosVinculados] = await db.query(
-                `
-                SELECT lau_id
-                FROM Laudo
-                WHERE proc_cid_id = ?
-                `,
+                `SELECT lau_id FROM Laudo WHERE proc_cid_id = ?`,
                 [id]
             );
 
