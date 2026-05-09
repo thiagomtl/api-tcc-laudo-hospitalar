@@ -7,39 +7,46 @@ module.exports = {
             const nomePaciente = nome ? `%${nome}%` : `%`;
 
             const sql = `
-        SELECT
-            lau.lau_id,
-            atd.atend_id,
-            pac.pac_nome,
-            conv.con_tipo,
-            lei.leito_identificacao,
-            seto.set_nome,
-            cli.cli_descricao,
-            pc.proc_cid_id,
-            lau.lau_sinais,
-            lau.lau_internacao,
-            lau.lau_resultado,
-            lau.lau_recurso,
-            lau.lau_datapreenc,
-            CAST(lau.lau_status AS UNSIGNED) AS lau_status
-        FROM Laudo lau
-        INNER JOIN Atendimento atd
-            ON lau.atend_id = atd.atend_id
-        INNER JOIN Paciente pac
-            ON atd.pac_id = pac.pac_id
-        INNER JOIN Convenio conv
-            ON atd.con_id = conv.con_id
-        INNER JOIN Leito lei
-            ON atd.leito_id = lei.leito_id
-        INNER JOIN Setor seto
-            ON lei.set_id = seto.set_id
-        INNER JOIN Escolha_Clinica cli
-            ON lau.cli_id = cli.cli_id
-        INNER JOIN Procedimento_Cids pc
-            ON lau.proc_cid_id = pc.proc_cid_id
-        WHERE pac.pac_nome LIKE ?
-        ORDER BY lau.lau_datapreenc DESC
-    `;
+                SELECT
+                    lau.lau_id,
+                    atd.atend_id,
+                    pac.pac_nome,
+                    conv.con_tipo,
+                    lei.leito_identificacao,
+                    seto.set_nome,
+                    cli.cli_descricao,
+                    cid.cid_id,
+                    cid.cid_codigo,
+                    cid.cid_descricao,
+                    pro.pro_id,
+                    pro.pro_codigo,
+                    pro.pro_descricao,
+                    lau.lau_sinais,
+                    lau.lau_internacao,
+                    lau.lau_resultado,
+                    lau.lau_recurso,
+                    lau.lau_datapreenc,
+                    CAST(lau.lau_status AS UNSIGNED) AS lau_status
+                FROM Laudo lau
+                INNER JOIN Atendimento atd
+                    ON lau.atend_id = atd.atend_id
+                INNER JOIN Paciente pac
+                    ON atd.pac_id = pac.pac_id
+                INNER JOIN Convenio conv
+                    ON atd.con_id = conv.con_id
+                INNER JOIN Leito lei
+                    ON atd.leito_id = lei.leito_id
+                INNER JOIN Setor seto
+                    ON lei.set_id = seto.set_id
+                INNER JOIN Escolha_Clinica cli
+                    ON lau.cli_id = cli.cli_id
+                INNER JOIN CID cid
+                    ON lau.cid_id = cid.cid_id
+                INNER JOIN Procedimento pro
+                    ON lau.pro_id = pro.pro_id
+                WHERE pac.pac_nome LIKE ?
+                ORDER BY lau.lau_datapreenc DESC
+            `;
 
             const [rows] = await db.query(sql, [nomePaciente]);
 
@@ -74,7 +81,7 @@ module.exports = {
             if (!atendimento || !escolhaClinica || !cid || !procedimento || !sinais) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Atendimento, escolha clínica, procedimento CID e sinais são obrigatórios.',
+                    mensagem: 'Atendimento, escolha clínica, CID, procedimento e sinais são obrigatórios.',
                     dados: null
                 });
             }
@@ -113,19 +120,36 @@ module.exports = {
                 });
             }
 
-            const [procedimentoCidExistente] = await db.query(
+            const [cidExistente] = await db.query(
                 `
-                SELECT proc_cid_id
-                FROM Procedimento_Cids
-                WHERE proc_cid_id = ?
+                SELECT cid_id
+                FROM CID
+                WHERE cid_id = ?
                 `,
-                [procedimentoCid]
+                [cid]
             );
 
-            if (procedimentoCidExistente.length === 0) {
+            if (cidExistente.length === 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Procedimento CID não encontrado.',
+                    mensagem: 'CID não encontrado.',
+                    dados: null
+                });
+            }
+
+            const [procedimentoExistente] = await db.query(
+                `
+                SELECT pro_id
+                FROM Procedimento
+                WHERE pro_id = ?
+                `,
+                [procedimento]
+            );
+
+            if (procedimentoExistente.length === 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Procedimento não encontrado.',
                     dados: null
                 });
             }
@@ -159,14 +183,15 @@ module.exports = {
                     lau_recurso,
                     lau_datapreenc,
                     lau_status
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
             `;
 
             const values = [
                 atendimento,
                 escolhaClinica,
-                procedimentoCid,
+                cid,
+                procedimento,
                 sinais,
                 internacao || null,
                 resultado || null,
@@ -183,7 +208,8 @@ module.exports = {
                     id: result.insertId,
                     atendimento,
                     escolhaClinica,
-                    procedimentoCid,
+                    cid,
+                    procedimento,
                     sinais,
                     internacao,
                     resultado,
@@ -202,7 +228,15 @@ module.exports = {
 
     async editarLaudo(request, response) {
         try {
-            const { sinais, internacao, resultado, recurso } = request.body;
+            const {
+                cid,
+                procedimento,
+                sinais,
+                internacao,
+                resultado,
+                recurso
+            } = request.body;
+
             const { id } = request.params;
 
             if (!sinais) {
@@ -230,9 +264,49 @@ module.exports = {
                 });
             }
 
+            if (cid) {
+                const [cidExistente] = await db.query(
+                    `
+                    SELECT cid_id
+                    FROM CID
+                    WHERE cid_id = ?
+                    `,
+                    [cid]
+                );
+
+                if (cidExistente.length === 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CID não encontrado.',
+                        dados: null
+                    });
+                }
+            }
+
+            if (procedimento) {
+                const [procedimentoExistente] = await db.query(
+                    `
+                    SELECT pro_id
+                    FROM Procedimento
+                    WHERE pro_id = ?
+                    `,
+                    [procedimento]
+                );
+
+                if (procedimentoExistente.length === 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'Procedimento não encontrado.',
+                        dados: null
+                    });
+                }
+            }
+
             const sql = `
                 UPDATE Laudo
                 SET
+                    cid_id = COALESCE(?, cid_id),
+                    pro_id = COALESCE(?, pro_id),
                     lau_sinais = ?,
                     lau_internacao = ?,
                     lau_resultado = ?,
@@ -241,6 +315,8 @@ module.exports = {
             `;
 
             const values = [
+                cid || null,
+                procedimento || null,
                 sinais,
                 internacao || null,
                 resultado || null,
@@ -255,6 +331,8 @@ module.exports = {
                 mensagem: 'Atualização de laudo realizada com sucesso',
                 dados: {
                     id: Number(id),
+                    cid: cid || null,
+                    procedimento: procedimento || null,
                     sinais,
                     internacao,
                     resultado,

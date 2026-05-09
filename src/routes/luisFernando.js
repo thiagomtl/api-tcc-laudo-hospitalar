@@ -13,6 +13,8 @@ router.get('/cid', CidController.listarCid);
 router.post('/cid', CidController.cadastrarCid);
 router.patch('/cid/:id', CidController.editarCid);
 router.delete('/cid/:id', CidController.apagarCid);
+router.get('/cid/codigo/:codigo', CidController.buscarCidPorCodigo);
+router.get('/procedimento/codigo/:codigo',ProcedimentoController.buscarProcedimentoPorCodigo);
 
 router.get('/laudo', autenticarToken, LaudoController.listarLaudo);
 router.post('/laudo', autenticarToken, somenteMedico, LaudoController.cadastrarLaudo);

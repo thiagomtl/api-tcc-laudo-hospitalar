@@ -223,5 +223,43 @@ module.exports = {
                 dados: error.message
             });
         }
-    }
+    },
+    async buscarCidPorCodigo(request, response) {
+        try {
+            const { codigo } = request.params;
+
+            const sql = `
+            SELECT 
+                cid_id,
+                cid_codigo,
+                cid_descricao
+            FROM CID
+            WHERE cid_codigo = ?
+            LIMIT 1
+        `;
+
+            const [rows] = await db.query(sql, [codigo]);
+
+            if (rows.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'CID não encontrado.',
+                    dados: null
+                });
+            }
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'CID encontrado com sucesso.',
+                dados: rows[0]
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao buscar CID: ${error.message}`,
+                dados: null
+            });
+        }
+    },
 };

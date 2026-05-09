@@ -223,5 +223,43 @@ module.exports = {
                 dados: error.message
             });
         }
-    }
+    },
+    async buscarProcedimentoPorCodigo(request, response) {
+        try {
+            const { codigo } = request.params;
+
+            const sql = `
+            SELECT 
+                pro_id,
+                pro_codigo,
+                pro_descricao
+            FROM Procedimento
+            WHERE pro_codigo = ?
+            LIMIT 1
+        `;
+
+            const [rows] = await db.query(sql, [codigo]);
+
+            if (rows.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Procedimento não encontrado.',
+                    dados: null
+                });
+            }
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Procedimento encontrado com sucesso.',
+                dados: rows[0]
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao buscar procedimento: ${error.message}`,
+                dados: null
+            });
+        }
+    },
 };
