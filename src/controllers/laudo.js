@@ -7,46 +7,80 @@ module.exports = {
             const nomePaciente = nome ? `%${nome}%` : `%`;
 
             const sql = `
-                SELECT
-                    lau.lau_id,
-                    atd.atend_id,
-                    pac.pac_nome,
-                    conv.con_tipo,
-                    lei.leito_identificacao,
-                    seto.set_nome,
-                    cli.cli_descricao,
-                    cid.cid_id,
-                    cid.cid_codigo,
-                    cid.cid_descricao,
-                    pro.pro_id,
-                    pro.pro_codigo,
-                    pro.pro_descricao,
-                    lau.lau_sinais,
-                    lau.lau_internacao,
-                    lau.lau_resultado,
-                    lau.lau_recurso,
-                    lau.lau_datapreenc,
-                    CAST(lau.lau_status AS UNSIGNED) AS lau_status
-                FROM Laudo lau
-                INNER JOIN Atendimento atd
-                    ON lau.atend_id = atd.atend_id
-                INNER JOIN Paciente pac
-                    ON atd.pac_id = pac.pac_id
-                INNER JOIN Convenio conv
-                    ON atd.con_id = conv.con_id
-                INNER JOIN Leito lei
-                    ON atd.leito_id = lei.leito_id
-                INNER JOIN Setor seto
-                    ON lei.set_id = seto.set_id
-                INNER JOIN Escolha_Clinica cli
-                    ON lau.cli_id = cli.cli_id
-                INNER JOIN CID cid
-                    ON lau.cid_id = cid.cid_id
-                INNER JOIN Procedimento pro
-                    ON lau.pro_id = pro.pro_id
-                WHERE pac.pac_nome LIKE ?
-                ORDER BY lau.lau_datapreenc DESC
-            `;
+            SELECT
+                lau.lau_id,
+                atd.atend_id,
+
+                pac.pac_id,
+                pac.pac_nome,
+                pac.pac_datanasc,
+                pac.pac_cpf,
+                pac.pac_telefone,
+                pac.pac_sexo,
+                pac.pac_num_prontuario,
+                pac.pac_cns,
+                pac.pac_nome_mae,
+                pac.pac_raca,
+                pac.pac_bairro,
+                pac.pac_num_casa,
+                pac.pac_logradouro,
+                pac.pac_cep,
+                pac.pac_uf,
+                pac.pac_municipio,
+                pac.pac_cod_ibge,
+
+                conv.con_tipo,
+                lei.leito_identificacao,
+                seto.set_nome,
+                cli.cli_descricao,
+
+                cid.cid_id,
+                cid.cid_codigo,
+                cid.cid_descricao,
+
+                pro.pro_id,
+                pro.pro_codigo,
+                pro.pro_descricao,
+
+                med.med_id,
+                med.med_nome,
+                med.med_crm,
+                med.med_cpf,
+
+                inst.inst_id,
+                inst.inst_nome,
+                inst.inst_cnes,
+
+                lau.lau_sinais,
+                lau.lau_internacao,
+                lau.lau_resultado,
+                lau.lau_recurso,
+                lau.lau_datapreenc,
+                CAST(lau.lau_status AS UNSIGNED) AS lau_status
+            FROM Laudo lau
+            INNER JOIN Atendimento atd
+                ON lau.atend_id = atd.atend_id
+            INNER JOIN Paciente pac
+                ON atd.pac_id = pac.pac_id
+            INNER JOIN Convenio conv
+                ON atd.con_id = conv.con_id
+            INNER JOIN Leito lei
+                ON atd.leito_id = lei.leito_id
+            INNER JOIN Setor seto
+                ON lei.set_id = seto.set_id
+            INNER JOIN Escolha_Clinica cli
+                ON lau.cli_id = cli.cli_id
+            INNER JOIN CID cid
+                ON lau.cid_id = cid.cid_id
+            INNER JOIN Procedimento pro
+                ON lau.pro_id = pro.pro_id
+            INNER JOIN Medico med
+                ON atd.med_id = med.med_id
+            LEFT JOIN Instituicao inst
+                ON inst.inst_id = 1
+            WHERE pac.pac_nome LIKE ?
+            ORDER BY lau.lau_datapreenc DESC
+        `;
 
             const [rows] = await db.query(sql, [nomePaciente]);
 
