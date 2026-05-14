@@ -3,10 +3,16 @@ const db = require('../dataBase/connection');
 module.exports = {
     async listarLaudo(request, response) {
         try {
-            const { nome } = request.query;
-            const nomePaciente = nome ? `%${nome}%` : `%`;
+            const {
+                nome,
+                convenio,
+                setor,
+                medico,
+                dataInicio,
+                dataFim
+            } = request.query;
 
-            const sql = `
+            let sql = `
             SELECT
                 lau.lau_id,
                 atd.atend_id,
@@ -57,39 +63,85 @@ module.exports = {
                 lau.lau_recurso,
                 lau.lau_datapreenc,
                 CAST(lau.lau_status AS UNSIGNED) AS lau_status
+
             FROM Laudo lau
+
             INNER JOIN Atendimento atd
                 ON lau.atend_id = atd.atend_id
+
             INNER JOIN Paciente pac
                 ON atd.pac_id = pac.pac_id
+
             INNER JOIN Convenio conv
                 ON atd.con_id = conv.con_id
+
             INNER JOIN Leito lei
                 ON atd.leito_id = lei.leito_id
+
             INNER JOIN Setor seto
                 ON lei.set_id = seto.set_id
+
             INNER JOIN Escolha_Clinica cli
                 ON lau.cli_id = cli.cli_id
+
             INNER JOIN CID cid
                 ON lau.cid_id = cid.cid_id
+
             INNER JOIN Procedimento pro
                 ON lau.pro_id = pro.pro_id
+
             INNER JOIN Medico med
                 ON atd.med_id = med.med_id
+
             LEFT JOIN Instituicao inst
                 ON inst.inst_id = 1
-            WHERE pac.pac_nome LIKE ?
-            ORDER BY lau.lau_datapreenc DESC
+
+            WHERE 1 = 1
         `;
 
-            const [rows] = await db.query(sql, [nomePaciente]);
+            const params = [];
+
+            if (nome) {
+                sql += ` AND pac.pac_nome LIKE ? `;
+                params.push(`%${nome}%`);
+            }
+
+            if (convenio) {
+                sql += ` AND conv.con_tipo LIKE ? `;
+                params.push(`%${convenio}%`);
+            }
+
+            if (setor) {
+                sql += ` AND seto.set_nome LIKE ? `;
+                params.push(`%${setor}%`);
+            }
+
+            if (medico) {
+                sql += ` AND med.med_nome LIKE ? `;
+                params.push(`%${medico}%`);
+            }
+
+            if (dataInicio) {
+                sql += ` AND DATE(lau.lau_datapreenc) >= ? `;
+                params.push(dataInicio);
+            }
+
+            if (dataFim) {
+                sql += ` AND DATE(lau.lau_datapreenc) <= ? `;
+                params.push(dataFim);
+            }
+
+            sql += ` ORDER BY lau.lau_datapreenc DESC `;
+
+            const [rows] = await db.query(sql, params);
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Lista de laudos obtida com sucesso',
+                mensagem: "Lista de laudos obtida com sucesso",
                 itens: rows.length,
                 dados: rows
             });
+
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
