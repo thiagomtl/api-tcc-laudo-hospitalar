@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
+// const { autenticarToken } = require('../middlewares/auth');
+
 const AtendimentoController = require('../controllers/atendimento');
 const ConvenioController = require('../controllers/convenio');
 const LeitoController = require('../controllers/leito');
+const LogsAcaoController = require("../controllers/logsAcao");
 
 router.get('/atendimento', AtendimentoController.listarAtendimento);
 router.get('/atendimento/listar-atend', AtendimentoController.listarAtend); // rota extra para obter lista ascendente de IDs

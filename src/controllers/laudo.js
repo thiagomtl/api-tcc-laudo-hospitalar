@@ -1,4 +1,5 @@
 const db = require('../dataBase/connection');
+const { registrarLog } = require("./logsAcao");
 
 module.exports = {
     async listarLaudo(request, response) {
@@ -286,6 +287,13 @@ module.exports = {
             ];
 
             const [result] = await db.query(sql, values);
+            console.log("CHEGOU NO LOG DO LAUDO");
+            console.log("USUÁRIO:", request.usuario);
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || null,
+                acao: "CADASTRO_LAUDO",
+                descricao: `Laudo cadastrado para o atendimento ${atendimento}`
+            });
 
             return response.status(201).json({
                 sucesso: true,

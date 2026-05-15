@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const DashboardController = require('../controllers/dashboard');
 const {autenticarToken, somenteAdministrador} = require('../middlewares/auth');
+const LogsAcaoController = require("../controllers/logsAcao");
 
 const MedicoController = require('../controllers/medico');
 const UsuarioController = require('../controllers/usuarios');
@@ -22,6 +23,8 @@ router.patch('/usuarios/ativar/:id', autenticarToken, somenteAdministrador, Usua
 
 router.post('/login', UsuarioController.usuariosLogin);
 
+router.get("/logs", LogsAcaoController.listarLogs);
+
 router.get('/dashboard/resumo', autenticarToken, DashboardController.resumoDashboard);
 
 router.get('/favoritos', FavoritoController.listarFavorito);
@@ -33,5 +36,6 @@ router.get('/instituicao', InstituicaoController.listarInstituicao);
 router.post('/instituicao', InstituicaoController.cadastrarInstituicao);
 router.patch('/instituicao/:id', InstituicaoController.editarInstituicao);
 router.delete('/instituicao/:id', InstituicaoController.apagarInstituicao);
+
 
 module.exports = router;
