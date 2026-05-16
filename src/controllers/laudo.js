@@ -290,7 +290,7 @@ module.exports = {
             console.log("CHEGOU NO LOG DO LAUDO");
             console.log("USUÁRIO:", request.usuario);
             await registrarLog({
-                usuarioId: request.usuario?.usu_id || null,
+                usuarioId: request.usuario?.id || null,
                 acao: "CADASTRO_LAUDO",
                 descricao: `Laudo cadastrado para o atendimento ${atendimento}`
             });
