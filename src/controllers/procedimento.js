@@ -262,4 +262,38 @@ module.exports = {
             });
         }
     },
+    async buscarProcedimento(request, response) {
+        try {
+            const { termo } = request.query;
+
+            const sql = `
+            SELECT 
+                pro_id,
+                pro_codigo,
+                pro_descricao
+            FROM Procedimento
+            WHERE pro_codigo LIKE ?
+               OR pro_descricao LIKE ?
+            ORDER BY pro_codigo ASC
+            LIMIT 20
+        `;
+
+            const busca = `%${termo || ""}%`;
+
+            const [rows] = await db.query(sql, [busca, busca]);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: "Procedimentos encontrados com sucesso",
+                itens: rows.length,
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao buscar procedimento: ${error.message}`,
+                dados: null
+            });
+        }
+    }
 };

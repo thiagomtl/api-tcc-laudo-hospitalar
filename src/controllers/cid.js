@@ -262,4 +262,38 @@ module.exports = {
             });
         }
     },
+    async buscarCid(request, response) {
+        try {
+            const { termo } = request.query;
+
+            const sql = `
+            SELECT 
+                cid_id,
+                cid_codigo,
+                cid_descricao
+            FROM CID
+            WHERE cid_codigo LIKE ?
+               OR cid_descricao LIKE ?
+            ORDER BY cid_codigo ASC
+            LIMIT 20
+        `;
+
+            const busca = `%${termo || ""}%`;
+
+            const [rows] = await db.query(sql, [busca, busca]);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: "CIDs encontrados com sucesso",
+                itens: rows.length,
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao buscar CID: ${error.message}`,
+                dados: null
+            });
+        }
+    }
 };

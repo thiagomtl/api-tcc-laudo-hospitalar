@@ -13,8 +13,9 @@ router.get('/cid', CidController.listarCid);
 router.post('/cid', CidController.cadastrarCid);
 router.patch('/cid/:id', CidController.editarCid);
 router.delete('/cid/:id', CidController.apagarCid);
+router.get('/cid/buscar', CidController.buscarCid);
 router.get('/cid/codigo/:codigo', CidController.buscarCidPorCodigo);
-router.get('/procedimento/codigo/:codigo',ProcedimentoController.buscarProcedimentoPorCodigo);
+router.get('/procedimento/codigo/:codigo', ProcedimentoController.buscarProcedimentoPorCodigo);
 
 router.get('/laudo', autenticarToken, LaudoController.listarLaudo);
 router.post('/laudo', autenticarToken, somenteMedico, LaudoController.cadastrarLaudo);
@@ -25,6 +26,7 @@ router.get('/procedimento', ProcedimentoController.listarProcedimento);
 router.post('/procedimento', ProcedimentoController.cadastrarProcedimento);
 router.patch('/procedimento/:id', ProcedimentoController.editarProcedimento);
 router.delete('/procedimento/:id', ProcedimentoController.apagarProcedimento);
+router.get('/procedimento/buscar', ProcedimentoController.buscarProcedimento);
 
 router.get('/escolha-clinica', EscolhaClinicaController.listarEscolhaClinica);
 router.post('/escolha-clinica', EscolhaClinicaController.cadastrarEscolhaClinica);
