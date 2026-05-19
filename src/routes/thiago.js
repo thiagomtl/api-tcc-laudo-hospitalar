@@ -1,28 +1,34 @@
 const express = require('express');
 const router = express.Router();
 
-// const { autenticarToken } = require('../middlewares/auth');
+const {
+  autenticarToken,
+  somenteAdministrador
+} = require('../middlewares/auth');
 
 const AtendimentoController = require('../controllers/atendimento');
 const ConvenioController = require('../controllers/convenio');
 const LeitoController = require('../controllers/leito');
-const LogsAcaoController = require("../controllers/logsAcao");
 
-router.get('/atendimento', AtendimentoController.listarAtendimento);
-router.get('/atendimento/listar-atend', AtendimentoController.listarAtend); // rota extra para obter lista ascendente de IDs
-router.get('/atendimento/pendentes', AtendimentoController.listarAtendimentosPendentes);
-router.post('/atendimento', AtendimentoController.cadastrarAtendimento);
-router.patch('/atendimento/:id', AtendimentoController.editarAtendimento);
-router.delete('/atendimento/:id', AtendimentoController.apagarAtendimento);
+// ATENDIMENTO
+router.get('/atendimento', autenticarToken, AtendimentoController.listarAtendimento);
+router.get('/atendimento/listar-atend', autenticarToken, AtendimentoController.listarAtend);
+router.get('/atendimento/pendentes', autenticarToken, AtendimentoController.listarAtendimentosPendentes);
 
-router.get('/convenio', ConvenioController.listarConvenio);
-router.post('/convenio', ConvenioController.cadastrarConvenio);
-router.patch('/convenio/:id', ConvenioController.editarConvenio);
-router.delete('/convenio/:id', ConvenioController.apagarConvenio);
+router.post('/atendimento', autenticarToken, somenteAdministrador, AtendimentoController.cadastrarAtendimento);
+router.patch('/atendimento/:id', autenticarToken, somenteAdministrador, AtendimentoController.editarAtendimento);
+router.delete('/atendimento/:id', autenticarToken, somenteAdministrador, AtendimentoController.apagarAtendimento);
 
-router.get('/leito', LeitoController.listarLeito);
-router.post('/leito', LeitoController.cadastrarLeito);
-router.patch('/leito/:id', LeitoController.editarLeito);
-router.delete('/leito/:id', LeitoController.apagarLeito);
+// CONVÊNIO
+router.get('/convenio', autenticarToken, ConvenioController.listarConvenio);
+router.post('/convenio', autenticarToken, somenteAdministrador, ConvenioController.cadastrarConvenio);
+router.patch('/convenio/:id', autenticarToken, somenteAdministrador, ConvenioController.editarConvenio);
+router.delete('/convenio/:id', autenticarToken, somenteAdministrador, ConvenioController.apagarConvenio);
+
+// LEITO
+router.get('/leito', autenticarToken, LeitoController.listarLeito);
+router.post('/leito', autenticarToken, somenteAdministrador, LeitoController.cadastrarLeito);
+router.patch('/leito/:id', autenticarToken, somenteAdministrador, LeitoController.editarLeito);
+router.delete('/leito/:id', autenticarToken, somenteAdministrador, LeitoController.apagarLeito);
 
 module.exports = router;

@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const { autenticarToken, somenteMedico } = require('../middlewares/auth');
+const {
+  autenticarToken,
+  somenteAdministrador,
+  somenteMedico
+} = require('../middlewares/auth');
 
 const CidController = require('../controllers/cid');
 const LaudoController = require('../controllers/laudo');
@@ -9,33 +13,42 @@ const ProcedimentoController = require('../controllers/procedimento');
 const EscolhaClinicaController = require('../controllers/escolhaClinica');
 const ProcedimentoCidController = require('../controllers/procedimentoCids');
 
-router.get('/cid', CidController.listarCid);
-router.post('/cid', CidController.cadastrarCid);
-router.patch('/cid/:id', CidController.editarCid);
-router.delete('/cid/:id', CidController.apagarCid);
-router.get('/cid/buscar', CidController.buscarCid);
-router.get('/cid/codigo/:codigo', CidController.buscarCidPorCodigo);
-router.get('/procedimento/codigo/:codigo', ProcedimentoController.buscarProcedimentoPorCodigo);
+// CID
+router.get('/cid', autenticarToken, CidController.listarCid);
+router.get('/cid/buscar', autenticarToken, CidController.buscarCid);
+router.get('/cid/codigo/:codigo', autenticarToken, CidController.buscarCidPorCodigo);
 
+router.post('/cid', autenticarToken, somenteAdministrador, CidController.cadastrarCid);
+router.patch('/cid/:id', autenticarToken, somenteAdministrador, CidController.editarCid);
+router.delete('/cid/:id', autenticarToken, somenteAdministrador, CidController.apagarCid);
+
+// LAUDO
 router.get('/laudo', autenticarToken, LaudoController.listarLaudo);
 router.post('/laudo', autenticarToken, somenteMedico, LaudoController.cadastrarLaudo);
-router.patch('/laudo/:id', autenticarToken, LaudoController.editarLaudo);
-router.delete('/laudo/:id', autenticarToken, LaudoController.apagarLaudo);
+router.patch('/laudo/:id', autenticarToken, somenteMedico, LaudoController.editarLaudo);
+router.delete('/laudo/:id', autenticarToken, somenteAdministrador, LaudoController.apagarLaudo);
 
-router.get('/procedimento', ProcedimentoController.listarProcedimento);
-router.post('/procedimento', ProcedimentoController.cadastrarProcedimento);
-router.patch('/procedimento/:id', ProcedimentoController.editarProcedimento);
-router.delete('/procedimento/:id', ProcedimentoController.apagarProcedimento);
-router.get('/procedimento/buscar', ProcedimentoController.buscarProcedimento);
+// PROCEDIMENTO
+router.get('/procedimento', autenticarToken, ProcedimentoController.listarProcedimento);
+router.get('/procedimento/buscar', autenticarToken, ProcedimentoController.buscarProcedimento);
+router.get('/procedimento/codigo/:codigo', autenticarToken, ProcedimentoController.buscarProcedimentoPorCodigo);
 
-router.get('/escolha-clinica', EscolhaClinicaController.listarEscolhaClinica);
-router.post('/escolha-clinica', EscolhaClinicaController.cadastrarEscolhaClinica);
-router.patch('/escolha-clinica/:id', EscolhaClinicaController.editarEscolhaClinica);
-router.delete('/escolha-clinica/:id', EscolhaClinicaController.apagarEscolhaClinica);
+router.post('/procedimento', autenticarToken, somenteAdministrador, ProcedimentoController.cadastrarProcedimento);
+router.patch('/procedimento/:id', autenticarToken, somenteAdministrador, ProcedimentoController.editarProcedimento);
+router.delete('/procedimento/:id', autenticarToken, somenteAdministrador, ProcedimentoController.apagarProcedimento);
 
-router.get('/procedimento-cids', ProcedimentoCidController.listarProcedimentoCid);
-router.post('/procedimento-cids', ProcedimentoCidController.cadastrarProcedimentoCid);
-router.patch('/procedimento-cids/:id', ProcedimentoCidController.editarProcedimentoCid);
-router.delete('/procedimento-cids/:id', ProcedimentoCidController.apagarProcedimentoCid);
+// ESCOLHA CLÍNICA
+router.get('/escolha-clinica', autenticarToken, EscolhaClinicaController.listarEscolhaClinica);
+
+router.post('/escolha-clinica', autenticarToken, somenteAdministrador, EscolhaClinicaController.cadastrarEscolhaClinica);
+router.patch('/escolha-clinica/:id', autenticarToken, somenteAdministrador, EscolhaClinicaController.editarEscolhaClinica);
+router.delete('/escolha-clinica/:id', autenticarToken, somenteAdministrador, EscolhaClinicaController.apagarEscolhaClinica);
+
+// PROCEDIMENTO + CID
+router.get('/procedimento-cids', autenticarToken, ProcedimentoCidController.listarProcedimentoCid);
+
+router.post('/procedimento-cids', autenticarToken, somenteAdministrador, ProcedimentoCidController.cadastrarProcedimentoCid);
+router.patch('/procedimento-cids/:id', autenticarToken, somenteAdministrador, ProcedimentoCidController.editarProcedimentoCid);
+router.delete('/procedimento-cids/:id', autenticarToken, somenteAdministrador, ProcedimentoCidController.apagarProcedimentoCid);
 
 module.exports = router;

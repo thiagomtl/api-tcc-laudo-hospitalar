@@ -1,23 +1,31 @@
 const express = require('express');
 const router = express.Router();
 
+const {
+  autenticarToken,
+  somenteAdministrador
+} = require('../middlewares/auth');
+
 const SetorController = require('../controllers/setor');
 const CaraterController = require('../controllers/carater');
 const PacienteController = require('../controllers/paciente');
 
-router.get('/setor', SetorController.listarSetor);
-router.post('/setor', SetorController.cadastrarSetor);
-router.patch('/setor/:id', SetorController.editarSetor);
-router.delete('/setor/:id', SetorController.apagarSetor);
+// SETOR
+router.get('/setor', autenticarToken, SetorController.listarSetor);
+router.post('/setor', autenticarToken, somenteAdministrador, SetorController.cadastrarSetor);
+router.patch('/setor/:id', autenticarToken, somenteAdministrador, SetorController.editarSetor);
+router.delete('/setor/:id', autenticarToken, somenteAdministrador, SetorController.apagarSetor);
 
-router.get('/carater', CaraterController.listarCarater);
-router.post('/carater', CaraterController.cadastrarCarater);
-router.patch('/carater/:id', CaraterController.editarCarater);
-router.delete('/carater/:id', CaraterController.apagarCarater);
+// CARÁTER
+router.get('/carater', autenticarToken, CaraterController.listarCarater);
+router.post('/carater', autenticarToken, somenteAdministrador, CaraterController.cadastrarCarater);
+router.patch('/carater/:id', autenticarToken, somenteAdministrador, CaraterController.editarCarater);
+router.delete('/carater/:id', autenticarToken, somenteAdministrador, CaraterController.apagarCarater);
 
-router.get('/paciente', PacienteController.listarPaciente);
-router.post('/paciente', PacienteController.cadastrarPaciente);
-router.patch('/paciente/:id', PacienteController.editarPaciente);
-router.delete('/paciente/:id', PacienteController.apagarPaciente);
+// PACIENTE
+router.get('/paciente', autenticarToken, PacienteController.listarPaciente);
+router.post('/paciente', autenticarToken, PacienteController.cadastrarPaciente);
+router.patch('/paciente/:id', autenticarToken, PacienteController.editarPaciente);
+router.delete('/paciente/:id', autenticarToken, somenteAdministrador, PacienteController.apagarPaciente);
 
 module.exports = router;
