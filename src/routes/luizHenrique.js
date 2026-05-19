@@ -9,6 +9,8 @@ const UsuarioController = require('../controllers/usuarios');
 const FavoritoController = require('../controllers/favoritos');
 const InstituicaoController = require('../controllers/instituicao');
 
+router.get('/perfil', autenticarToken, UsuarioController.perfilUsuario);
+
 router.get('/medicos', MedicoController.listarMedico);
 router.post('/medicos', MedicoController.cadastrarMedico);
 router.patch('/medicos/:id', MedicoController.editarMedico);
