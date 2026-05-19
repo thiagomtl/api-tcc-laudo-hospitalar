@@ -38,6 +38,64 @@ function validarUsuario(dados) {
 }
 
 module.exports = {
+    async perfilUsuario(request, response) {
+        try {
+            const usuarioId = request.usuario.id;
+
+            const [colunasCrm] = await db.query(
+                "SHOW COLUMNS FROM Usuario LIKE 'usu_crm'"
+            );
+            const campoCrm = colunasCrm.length > 0 ? ', u.usu_crm' : '';
+
+            const sql = `
+                SELECT
+                    u.usu_id,
+                    u.usu_nome,
+                    u.usu_documento,
+                    u.usu_email,
+                    u.usu_datacriacao,
+                    u.inst_id,
+                    u.usu_telefone,
+                    u.usu_foto,
+                    u.usu_biometria,
+                    u.usu_tipo,
+                    CAST(u.usu_status AS UNSIGNED) AS usu_status,
+                    i.inst_nome${campoCrm}
+                FROM Usuario u
+                LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
+                WHERE u.usu_id = ?
+            `;
+
+            const [rows] = await db.query(sql, [usuarioId]);
+
+            if (rows.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado',
+                    dados: null
+                });
+            }
+
+            const usuario = rows[0];
+
+            if (usuario.usu_crm === undefined) {
+                usuario.usu_crm = null;
+            }
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Perfil obtido com sucesso',
+                dados: usuario
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao obter perfil: ${error.message}`,
+                dados: null
+            });
+        }
+    },
+
     async listarUsuario(request, response) {
         try {
             const sql = `
