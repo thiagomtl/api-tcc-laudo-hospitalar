@@ -40,62 +40,58 @@ function validarUsuario(dados) {
 module.exports = {
     async perfilUsuario(request, response) {
         try {
-            const usuarioId = request.usuario.id;
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
 
-            const [colunasCrm] = await db.query(
-                "SHOW COLUMNS FROM Usuario LIKE 'usu_crm'"
-            );
-            const campoCrm = colunasCrm.length > 0 ? ', u.usu_crm' : '';
-
-            const sql = `
-                SELECT
-                    u.usu_id,
-                    u.usu_nome,
-                    u.usu_documento,
-                    u.usu_email,
-                    u.usu_datacriacao,
-                    u.inst_id,
-                    u.usu_telefone,
-                    u.usu_foto,
-                    u.usu_biometria,
-                    u.usu_tipo,
-                    CAST(u.usu_status AS UNSIGNED) AS usu_status,
-                    i.inst_nome${campoCrm}
-                FROM Usuario u
-                LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
-                WHERE u.usu_id = ?
-            `;
-
-            const [rows] = await db.query(sql, [usuarioId]);
-
-            if (rows.length === 0) {
-                return response.status(404).json({
+            if (!usuarioId) {
+                return response.status(401).json({
                     sucesso: false,
-                    mensagem: 'Usuario nao encontrado',
+                    mensagem: "Usuário não autenticado.",
                     dados: null
                 });
             }
 
-            const usuario = rows[0];
+            const [rows] = await db.query(
+                `
+            SELECT
+                usu_id,
+                usu_nome,
+                usu_documento,
+                usu_email,
+                usu_datacriacao,
+                inst_id,
+                usu_telefone,
+                usu_foto,
+                usu_biometria,
+                usu_tipo,
+                CAST(usu_status AS UNSIGNED) AS usu_status
+            FROM Usuario
+            WHERE usu_id = ?
+            `,
+                [usuarioId]
+            );
 
-            if (usuario.usu_crm === undefined) {
-                usuario.usu_crm = null;
+            if (rows.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: "Usuário não encontrado.",
+                    dados: null
+                });
             }
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Perfil obtido com sucesso',
-                dados: usuario
+                mensagem: "Perfil obtido com sucesso.",
+                dados: rows[0]
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao obter perfil: ${error.message}`,
+                mensagem: `Erro ao buscar perfil: ${error.message}`,
                 dados: null
             });
         }
     },
-
+    
     async listarUsuario(request, response) {
         try {
             const sql = `
@@ -225,18 +221,6 @@ module.exports = {
                 status = 1
             } = request.body;
 
-            const erros = validarUsuario(dadosValidacao);
-
-            if (erros.length > 0) {
-                return response.status(400).json({
-                    sucesso: false,
-                    mensagem: 'Erros de validação',
-                    erros
-                });
-            }
-
-            const senhaCriptografada = await bcrypt.hash(senha, 10);
-
             const dadosValidacao = {
                 usu_nome: nome,
                 usu_documento: documento,
@@ -247,6 +231,16 @@ module.exports = {
                 usu_tipo: tipo,
                 usu_status: Number(status)
             };
+
+            const erros = validarUsuario(dadosValidacao);
+
+            if (erros.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Erros de validação',
+                    erros
+                });
+            }
 
             const [instExistente] = await db.query(
                 'SELECT inst_id FROM Instituicao WHERE inst_id = ?',
@@ -286,6 +280,8 @@ module.exports = {
                     dados: null
                 });
             }
+
+            const senhaCriptografada = await bcrypt.hash(senha, 10);
 
             const sql = `
                 INSERT INTO Usuario (
@@ -605,15 +601,10 @@ module.exports = {
                 });
             }
 
-            const erros = validarUsuario(dadosValidacao);
-
-            if (erros.length > 0) {
-                return response.status(400).json({
-                    sucesso: false,
-                    mensagem: 'Erros de validação',
-                    erros
-                });
-            }
+            const [logs] = await db.query(
+                'SELECT log_id FROM logs_acao WHERE usu_id = ?',
+                [id]
+            );
 
             if (logs.length > 0) {
                 return response.status(400).json({
