@@ -34,6 +34,7 @@ module.exports = {
                 datanasc: pacienteEntrada.datanasc,
                 cpf: normalizarCpf(pacienteEntrada.cpf),
                 telefone: pacienteEntrada.telefone,
+                datacadastro: pacienteEntrada.datacadastro,
                 sexo: pacienteEntrada.sexo,
                 num_prontuario: pacienteEntrada.num_prontuario,
                 cns: pacienteEntrada.cns,
@@ -118,6 +119,7 @@ module.exports = {
                         pac_datanasc = ?,
                         pac_cpf = ?,
                         pac_telefone = ?,
+                        pac_datacadastro = ?,
                         pac_sexo = ?,
                         pac_num_prontuario = ?,
                         pac_cns = ?,
@@ -137,6 +139,7 @@ module.exports = {
                         primeiroValor(paciente.datanasc, pacienteAtual.pac_datanasc),
                         paciente.cpf,
                         primeiroValor(paciente.telefone, pacienteAtual.pac_telefone),
+                        primeiroValor(paciente.datacadastro, pacienteAtual.pac_datacadastro),
                         primeiroValor(paciente.sexo, pacienteAtual.pac_sexo),
                         paciente.num_prontuario,
                         primeiroValor(paciente.cns, pacienteAtual.pac_cns),
@@ -173,13 +176,14 @@ module.exports = {
                         pac_uf,
                         pac_municipio,
                         pac_cod_ibge
-                    ) VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `,
                     [
                         paciente.nome,
                         paciente.datanasc || null,
                         paciente.cpf,
                         paciente.telefone || null,
+                        paciente.datacadastro || new Date(),
                         paciente.sexo ?? null,
                         paciente.num_prontuario,
                         paciente.cns || null,
