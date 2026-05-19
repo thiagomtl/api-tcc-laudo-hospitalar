@@ -124,6 +124,7 @@ module.exports = {
 
             const token = jwt.sign(
                 {
+                    usu_id: usuario.usu_id,
                     id: usuario.usu_id,
                     nome: usuario.usu_nome,
                     email: usuario.usu_email,
@@ -166,6 +167,16 @@ module.exports = {
                 status = 1
             } = request.body;
 
+            const erros = validarUsuario(dadosValidacao);
+
+            if (erros.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Erros de validação',
+                    erros
+                });
+            }
+
             const senhaCriptografada = await bcrypt.hash(senha, 10);
 
             const dadosValidacao = {
@@ -178,16 +189,6 @@ module.exports = {
                 usu_tipo: tipo,
                 usu_status: Number(status)
             };
-
-            const erros = validarUsuario(dadosValidacao);
-
-            if (erros.length > 0) {
-                return response.status(400).json({
-                    sucesso: false,
-                    mensagem: 'Erros de validação',
-                    erros
-                });
-            }
 
             const [instExistente] = await db.query(
                 'SELECT inst_id FROM Instituicao WHERE inst_id = ?',
@@ -546,10 +547,15 @@ module.exports = {
                 });
             }
 
-            const [logs] = await db.query(
-                'SELECT log_id FROM Logs_Acao WHERE usu_id = ?',
-                [id]
-            );
+            const erros = validarUsuario(dadosValidacao);
+
+            if (erros.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Erros de validação',
+                    erros
+                });
+            }
 
             if (logs.length > 0) {
                 return response.status(400).json({

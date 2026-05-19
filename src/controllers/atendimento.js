@@ -400,29 +400,75 @@ module.exports = {
     },
     async listarAtendimentosPendentes(request, response) {
         try {
-            const sql = `
+            const {
+                nome,
+                convenio,
+                setor,
+                medico,
+                dataInicio,
+                dataFim
+            } = request.query;
+
+            let sql = `
             SELECT
-                a.atend_id,
-                p.pac_nome,
-                c.con_tipo,
-                l.leito_identificacao,
-                s.set_nome,
-                a.atend_data
-            FROM Atendimento a
-            INNER JOIN Paciente p ON a.pac_id = p.pac_id
-            INNER JOIN Convenio c ON a.con_id = c.con_id
-            INNER JOIN Leito l ON a.leito_id = l.leito_id
-            INNER JOIN Setor s ON l.set_id = s.set_id
-            LEFT JOIN Laudo lau ON a.atend_id = lau.atend_id
+                atd.atend_id,
+                pac.pac_id,
+                pac.pac_nome,
+                conv.con_tipo,
+                lei.leito_identificacao,
+                seto.set_nome,
+                med.med_id,
+                med.med_nome,
+                atd.atend_data
+            FROM Atendimento atd
+            INNER JOIN Paciente pac ON atd.pac_id = pac.pac_id
+            INNER JOIN Convenio conv ON atd.con_id = conv.con_id
+            INNER JOIN Leito lei ON atd.leito_id = lei.leito_id
+            INNER JOIN Setor seto ON lei.set_id = seto.set_id
+            INNER JOIN Medico med ON atd.med_id = med.med_id
+            LEFT JOIN Laudo lau ON lau.atend_id = atd.atend_id
             WHERE lau.lau_id IS NULL
-            ORDER BY a.atend_data DESC
         `;
 
-            const [rows] = await db.query(sql);
+            const params = [];
+
+            if (nome) {
+                sql += ` AND pac.pac_nome LIKE ? `;
+                params.push(`%${nome}%`);
+            }
+
+            if (convenio) {
+                sql += ` AND conv.con_tipo LIKE ? `;
+                params.push(`%${convenio}%`);
+            }
+
+            if (setor) {
+                sql += ` AND seto.set_nome LIKE ? `;
+                params.push(`%${setor}%`);
+            }
+
+            if (medico) {
+                sql += ` AND med.med_nome LIKE ? `;
+                params.push(`%${medico}%`);
+            }
+
+            if (dataInicio) {
+                sql += ` AND DATE(atd.atend_data) >= ? `;
+                params.push(dataInicio);
+            }
+
+            if (dataFim) {
+                sql += ` AND DATE(atd.atend_data) <= ? `;
+                params.push(dataFim);
+            }
+
+            sql += ` ORDER BY atd.atend_data DESC `;
+
+            const [rows] = await db.query(sql, params);
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Lista de atendimentos pendentes obtida com sucesso',
+                mensagem: "Lista de atendimentos pendentes obtida com sucesso",
                 itens: rows.length,
                 dados: rows
             });
