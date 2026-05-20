@@ -44,6 +44,45 @@ function usuarioEhMedico(tipo) {
         .toLowerCase() === 'medico';
 }
 
+function usuarioPodeAlterarCrm(tipo) {
+    const tipoNormalizado = String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    return tipoNormalizado === 'medico';
+}
+
+async function buscarPerfilPorId(usuarioId) {
+    const [rows] = await db.query(
+        `
+        SELECT
+            u.usu_id,
+            u.usu_nome,
+            u.usu_documento,
+            u.usu_email,
+            u.usu_datacriacao,
+            u.inst_id,
+            u.usu_telefone,
+            u.usu_foto,
+            u.usu_biometria,
+            u.usu_tipo,
+            CAST(u.usu_status AS UNSIGNED) AS usu_status,
+            i.inst_nome,
+            m.med_id,
+            m.med_crm,
+            m.med_crm AS usu_crm
+        FROM Usuario u
+        LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
+        LEFT JOIN Medico m ON m.usu_id = u.usu_id
+        WHERE u.usu_id = ?
+        `,
+        [usuarioId]
+    );
+
+    return rows[0] || null;
+}
+
 module.exports = {
     async perfilUsuario(request, response) {
         try {
@@ -101,6 +140,121 @@ module.exports = {
                 sucesso: false,
                 mensagem: `Erro ao buscar perfil: ${error.message}`,
                 dados: null
+            });
+        }
+    },
+
+    async editarPerfil(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const perfilAtual = await buscarPerfilPorId(usuarioId);
+
+            if (!perfilAtual) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            const { telefone, crm } = request.body;
+            const telefoneLimpo = String(telefone || '').replace(/\D/g, '');
+            const crmFoiEnviado = crm !== undefined && crm !== null;
+            const crmLimpo = String(crm || '').trim().toUpperCase();
+            const podeAlterarCrm = usuarioPodeAlterarCrm(perfilAtual.usu_tipo);
+
+            if (!/^\d{10,11}$/.test(telefoneLimpo)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Telefone deve ter 10 ou 11 digitos.',
+                    dados: null
+                });
+            }
+
+            if (crmFoiEnviado && !podeAlterarCrm) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Este usuario nao pode alterar CRM.',
+                    dados: null
+                });
+            }
+
+            if (usuarioEhMedico(perfilAtual.usu_tipo) && !crmLimpo) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM e obrigatorio para usuario medico.',
+                    dados: null
+                });
+            }
+
+            if (crmFoiEnviado && crmLimpo.length > 8) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM deve ter ate 8 caracteres.',
+                    dados: null
+                });
+            }
+
+            if (podeAlterarCrm && crmLimpo) {
+                const [crmDuplicado] = await db.query(
+                    'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
+                    [crmLimpo, usuarioId]
+                );
+
+                if (crmDuplicado.length > 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM ja cadastrado para outro usuario.',
+                        dados: null
+                    });
+                }
+            }
+
+            await db.query(
+                `
+                UPDATE Usuario
+                SET
+                    usu_telefone = ?
+                WHERE usu_id = ?
+                `,
+                [telefoneLimpo, usuarioId]
+            );
+
+            if (podeAlterarCrm && crmLimpo) {
+                if (perfilAtual.med_id) {
+                    await db.query(
+                        'UPDATE Medico SET med_crm = ? WHERE usu_id = ?',
+                        [crmLimpo, usuarioId]
+                    );
+                } else {
+                    await db.query(
+                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                        [usuarioId, crmLimpo]
+                    );
+                }
+            }
+
+            const perfilAtualizado = await buscarPerfilPorId(usuarioId);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Perfil atualizado com sucesso.',
+                dados: perfilAtualizado
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar perfil: ${error.message}`,
+                dados: error.message
             });
         }
     },
