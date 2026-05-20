@@ -1,6 +1,7 @@
 const db = require('../dataBase/connection');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { registrarLog } = require("./logsAcao");
 
 function validarUsuario(dados) {
     const erros = [];
@@ -91,7 +92,7 @@ module.exports = {
             });
         }
     },
-    
+
     async listarUsuario(request, response) {
         try {
             const sql = `
@@ -188,6 +189,12 @@ module.exports = {
                 process.env.JWT_SECRET,
                 { expiresIn: '8h' }
             );
+
+            await registrarLog({
+                usuarioId: usuario.usu_id,
+                acao: "LOGIN",
+                descricao: `Usuário ${usuario.usu_nome} realizou login`
+            });
 
             return response.status(200).json({
                 sucesso: true,
@@ -313,6 +320,12 @@ module.exports = {
             ];
 
             const [result] = await db.query(sql, values);
+
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+                acao: "CADASTRO_USUARIO",
+                descricao: `Usuário cadastrado: ${nome}`
+            });
 
             return response.status(201).json({
                 sucesso: true,
@@ -459,6 +472,12 @@ module.exports = {
 
             const [result] = await db.query(sql, values);
 
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+                acao: "EDICAO_USUARIO",
+                descricao: `Usuário editado: ID ${id}`
+            });
+
             if (result.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
@@ -520,6 +539,12 @@ module.exports = {
                 [id]
             );
 
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+                acao: "OCULTAR_USUARIO",
+                descricao: `Usuário ocultado: ID ${id}`
+            });
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: `Usuário ${id} ocultado com sucesso`,
@@ -567,6 +592,12 @@ module.exports = {
                 [id]
             );
 
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+                acao: "ATIVAR_USUARIO",
+                descricao: `Usuário ativado: ID ${id}`
+            });
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: `Usuário ${id} ativado com sucesso`,
@@ -589,7 +620,11 @@ module.exports = {
             const { id } = request.params;
 
             const [usuarioExistente] = await db.query(
-                'SELECT usu_id FROM Usuario WHERE usu_id = ?',
+                `
+            SELECT usu_id, usu_nome
+            FROM Usuario
+            WHERE usu_id = ?
+            `,
                 [id]
             );
 
@@ -600,6 +635,8 @@ module.exports = {
                     dados: null
                 });
             }
+
+            const usuarioApagado = usuarioExistente[0];
 
             const [logs] = await db.query(
                 'SELECT log_id FROM logs_acao WHERE usu_id = ?',
@@ -618,6 +655,12 @@ module.exports = {
                 'DELETE FROM Usuario WHERE usu_id = ?',
                 [id]
             );
+
+            await registrarLog({
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+                acao: "APAGAR_USUARIO",
+                descricao: `Usuário excluído: ${usuarioApagado.usu_nome} - ID ${id}`
+            });
 
             return response.status(200).json({
                 sucesso: true,
