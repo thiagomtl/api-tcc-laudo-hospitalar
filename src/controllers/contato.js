@@ -13,16 +13,18 @@ function escaparHtml(valor) {
         .replace(/'/g, '&#039;');
 }
 
+function primeiroValor(...valores) {
+    return valores.find((valor) => !campoVazio(valor));
+}
+
 module.exports = {
     async enviarContato(request, response) {
         try {
-            const {
-                nome,
-                email,
-                telefone,
-                assunto = 'Contato pelo site',
-                mensagem
-            } = request.body;
+            const nome = primeiroValor(request.body.nome, request.body.name);
+            const email = primeiroValor(request.body.email, request.body.e_mail, request.body.mail);
+            const telefone = primeiroValor(request.body.telefone, request.body.phone, request.body.celular);
+            const assunto = primeiroValor(request.body.assunto, request.body.subject) || 'Contato pelo site';
+            const mensagem = primeiroValor(request.body.mensagem, request.body.message, request.body.texto);
 
             const camposObrigatorios = [];
 
