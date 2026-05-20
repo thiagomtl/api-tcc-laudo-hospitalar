@@ -90,7 +90,8 @@ Status	usu_status	BIT				Ativo/Inativo
 
 Quadro 10 - Tabela Médico
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Médico	med_id	INT	-	x	x	
+ID Médico	med_id	INT		x		Auto incremento
+ID Usuário	usu_id	INT			x	Usuário vinculado ao médico
 CRM	med_crm	VARCHAR	8			Registro profissional único
 
 Quadro 11 - Tabela Mensagem_Chat

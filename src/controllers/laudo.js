@@ -50,9 +50,9 @@ module.exports = {
                 pro.pro_descricao,
 
                 med.med_id,
-                med.med_nome,
+                u.usu_nome AS med_nome,
                 med.med_crm,
-                med.med_cpf,
+                u.usu_documento AS med_cpf,
 
                 inst.inst_id,
                 inst.inst_nome,
@@ -94,6 +94,9 @@ module.exports = {
             INNER JOIN Medico med
                 ON atd.med_id = med.med_id
 
+            INNER JOIN Usuario u
+                ON med.usu_id = u.usu_id
+
             LEFT JOIN Instituicao inst
                 ON inst.inst_id = 1
 
@@ -118,7 +121,7 @@ module.exports = {
             }
 
             if (medico) {
-                sql += ` AND med.med_nome LIKE ? `;
+                sql += ` AND u.usu_nome LIKE ? `;
                 params.push(`%${medico}%`);
             }
 

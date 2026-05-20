@@ -1,11 +1,16 @@
 const db = require('../dataBase/connection');
+const { criarNotificacao } = require('../utils/notificacoes');
 
 function normalizarCpf(cpf) {
     return String(cpf || '').replace(/\D/g, '');
 }
 
 function primeiroValor(...valores) {
-    return valores.find((valor) => valor !== undefined);
+    return valores.find((valor) => valor !== undefined && valor !== null);
+}
+
+function camposAusentes(objeto, campos) {
+    return campos.filter((campo) => objeto[campo] === undefined || objeto[campo] === null || objeto[campo] === '');
 }
 
 async function validarReferencia(connection, tabela, coluna, valor, mensagem) {
@@ -56,10 +61,30 @@ module.exports = {
                 medico: atendimentoEntrada.medico
             };
 
-            if (!paciente.nome || !paciente.cpf || !paciente.num_prontuario) {
+            const camposObrigatoriosPaciente = [
+                'nome',
+                'datanasc',
+                'cpf',
+                'telefone',
+                'sexo',
+                'num_prontuario',
+                'cns',
+                'nome_mae',
+                'raca',
+                'bairro',
+                'num_casa',
+                'logradouro',
+                'cep',
+                'uf',
+                'municipio',
+                'cod_ibge'
+            ];
+            const camposPacienteAusentes = camposAusentes(paciente, camposObrigatoriosPaciente);
+
+            if (camposPacienteAusentes.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Nome, CPF e numero de prontuario do paciente sao obrigatorios.',
+                    mensagem: `Campos obrigatorios do paciente ausentes: ${camposPacienteAusentes.join(', ')}.`,
                     dados: null
                 });
             }
@@ -72,10 +97,12 @@ module.exports = {
                 });
             }
 
-            if (!atendimento.convenio || !atendimento.leito || !atendimento.carater || !atendimento.medico) {
+            const camposAtendimentoAusentes = camposAusentes(atendimento, ['convenio', 'leito', 'carater', 'medico']);
+
+            if (camposAtendimentoAusentes.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Convenio, leito, carater e medico sao obrigatorios.',
+                    mensagem: `Campos obrigatorios do atendimento ausentes: ${camposAtendimentoAusentes.join(', ')}.`,
                     dados: null
                 });
             }
@@ -225,6 +252,28 @@ module.exports = {
 
             await connection.commit();
 
+            const notificacao = criarNotificacao({
+                tipo: 'ATENDIMENTO_PENDENTE',
+                titulo: 'Novo paciente recebido',
+                mensagem: `${paciente.nome} chegou em laudos pendentes.`,
+                dados: {
+                    paciente: {
+                        id: pacienteId,
+                        nome: paciente.nome,
+                        cpf: paciente.cpf,
+                        num_prontuario: paciente.num_prontuario,
+                        criado: pacienteCriado
+                    },
+                    atendimento: {
+                        id: resultAtendimento.insertId,
+                        convenio: atendimento.convenio,
+                        leito: atendimento.leito,
+                        carater: atendimento.carater,
+                        medico: atendimento.medico
+                    }
+                }
+            });
+
             return response.status(201).json({
                 sucesso: true,
                 mensagem: 'Atendimento pendente criado com sucesso.',
@@ -239,7 +288,8 @@ module.exports = {
                         leito: atendimento.leito,
                         carater: atendimento.carater,
                         medico: atendimento.medico
-                    }
+                    },
+                    notificacao
                 }
             });
         } catch (error) {

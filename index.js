@@ -9,6 +9,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (request, response) => {
     response.send('API do sistema de laudos hospitalares online');

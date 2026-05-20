@@ -434,7 +434,7 @@ module.exports = {
                 lei.leito_identificacao,
                 seto.set_nome,
                 med.med_id,
-                med.med_nome,
+                u.usu_nome AS med_nome,
                 atd.atend_data
             FROM Atendimento atd
             INNER JOIN Paciente pac ON atd.pac_id = pac.pac_id
@@ -442,6 +442,7 @@ module.exports = {
             INNER JOIN Leito lei ON atd.leito_id = lei.leito_id
             INNER JOIN Setor seto ON lei.set_id = seto.set_id
             INNER JOIN Medico med ON atd.med_id = med.med_id
+            INNER JOIN Usuario u ON med.usu_id = u.usu_id
             LEFT JOIN Laudo lau ON lau.atend_id = atd.atend_id
             WHERE lau.lau_id IS NULL
         `;
@@ -464,7 +465,7 @@ module.exports = {
             }
 
             if (medico) {
-                sql += ` AND med.med_nome LIKE ? `;
+                sql += ` AND u.usu_nome LIKE ? `;
                 params.push(`%${medico}%`);
             }
 

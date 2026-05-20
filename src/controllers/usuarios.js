@@ -38,6 +38,52 @@ function validarUsuario(dados) {
     return erros;
 }
 
+function usuarioEhMedico(tipo) {
+    return String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase() === 'medico';
+}
+
+function usuarioPodeAlterarCrm(tipo) {
+    const tipoNormalizado = String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    return tipoNormalizado === 'medico';
+}
+
+async function buscarPerfilPorId(usuarioId) {
+    const [rows] = await db.query(
+        `
+        SELECT
+            u.usu_id,
+            u.usu_nome,
+            u.usu_documento,
+            u.usu_email,
+            u.usu_datacriacao,
+            u.inst_id,
+            u.usu_telefone,
+            u.usu_foto,
+            u.usu_biometria,
+            u.usu_tipo,
+            CAST(u.usu_status AS UNSIGNED) AS usu_status,
+            i.inst_nome,
+            m.med_id,
+            m.med_crm,
+            m.med_crm AS usu_crm
+        FROM Usuario u
+        LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
+        LEFT JOIN Medico m ON m.usu_id = u.usu_id
+        WHERE u.usu_id = ?
+        `,
+        [usuarioId]
+    );
+
+    return rows[0] || null;
+}
+
 module.exports = {
     async perfilUsuario(request, response) {
         try {
@@ -54,19 +100,25 @@ module.exports = {
             const [rows] = await db.query(
                 `
             SELECT
-                usu_id,
-                usu_nome,
-                usu_documento,
-                usu_email,
-                usu_datacriacao,
-                inst_id,
-                usu_telefone,
-                usu_foto,
-                usu_biometria,
-                usu_tipo,
-                CAST(usu_status AS UNSIGNED) AS usu_status
-            FROM Usuario
-            WHERE usu_id = ?
+                u.usu_id,
+                u.usu_nome,
+                u.usu_documento,
+                u.usu_email,
+                u.usu_datacriacao,
+                u.inst_id,
+                u.usu_telefone,
+                u.usu_foto,
+                u.usu_biometria,
+                u.usu_tipo,
+                CAST(u.usu_status AS UNSIGNED) AS usu_status,
+                i.inst_nome,
+                m.med_id,
+                m.med_crm,
+                m.med_crm AS usu_crm
+            FROM Usuario u
+            LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
+            LEFT JOIN Medico m ON m.usu_id = u.usu_id
+            WHERE u.usu_id = ?
             `,
                 [usuarioId]
             );
@@ -97,18 +149,21 @@ module.exports = {
         try {
             const sql = `
                 SELECT
-                    usu_id,
-                    usu_nome,
-                    usu_documento,
-                    usu_email,
-                    usu_datacriacao,
-                    inst_id,
-                    usu_telefone,
-                    usu_foto,
-                    usu_biometria,
-                    usu_tipo,
-                    CAST(usu_status AS UNSIGNED) AS usu_status
-                FROM Usuario
+                    u.usu_id,
+                    u.usu_nome,
+                    u.usu_documento,
+                    u.usu_email,
+                    u.usu_datacriacao,
+                    u.inst_id,
+                    u.usu_telefone,
+                    u.usu_foto,
+                    u.usu_biometria,
+                    u.usu_tipo,
+                    CAST(u.usu_status AS UNSIGNED) AS usu_status,
+                    m.med_id,
+                    m.med_crm
+                FROM Usuario u
+                LEFT JOIN Medico m ON m.usu_id = u.usu_id
             `;
 
             const [rows] = await db.query(sql);
@@ -142,15 +197,18 @@ module.exports = {
 
             const sql = `
                 SELECT
-                    usu_id,
-                    usu_nome,
-                    usu_email,
-                    usu_senha,
-                    usu_tipo,
-                    inst_id,
-                    CAST(usu_status AS UNSIGNED) AS usu_status
-                FROM Usuario
-                WHERE usu_email = ? AND usu_status = 1
+                    u.usu_id,
+                    u.usu_nome,
+                    u.usu_email,
+                    u.usu_senha,
+                    u.usu_tipo,
+                    u.inst_id,
+                    CAST(u.usu_status AS UNSIGNED) AS usu_status,
+                    m.med_id,
+                    m.med_crm
+                FROM Usuario u
+                LEFT JOIN Medico m ON m.usu_id = u.usu_id
+                WHERE u.usu_email = ? AND u.usu_status = 1
             `;
 
             const [rows] = await db.query(sql, [email]);
@@ -184,7 +242,8 @@ module.exports = {
                     nome: usuario.usu_nome,
                     email: usuario.usu_email,
                     tipo: usuario.usu_tipo,
-                    inst_id: usuario.inst_id
+                    inst_id: usuario.inst_id,
+                    med_id: usuario.med_id || null
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: '8h' }
@@ -225,7 +284,8 @@ module.exports = {
                 inst_id,
                 foto,
                 biometria,
-                status = 1
+                status = 1,
+                crm
             } = request.body;
 
             const dadosValidacao = {
@@ -240,6 +300,10 @@ module.exports = {
             };
 
             const erros = validarUsuario(dadosValidacao);
+
+            if (usuarioEhMedico(tipo) && !crm) {
+                erros.push('CRM e obrigatorio para usuario medico');
+            }
 
             if (erros.length > 0) {
                 return response.status(400).json({
@@ -286,6 +350,21 @@ module.exports = {
                     mensagem: 'Documento já cadastrado',
                     dados: null
                 });
+            }
+
+            if (usuarioEhMedico(tipo)) {
+                const [crmExistente] = await db.query(
+                    'SELECT med_id FROM Medico WHERE med_crm = ?',
+                    [crm]
+                );
+
+                if (crmExistente.length > 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM ja cadastrado',
+                        dados: null
+                    });
+                }
             }
 
             const senhaCriptografada = await bcrypt.hash(senha, 10);
@@ -337,6 +416,7 @@ module.exports = {
                     email,
                     telefone,
                     tipo,
+                    crm: usuarioEhMedico(tipo) ? crm : null,
                     inst_id,
                     status: Number(status)
                 }
@@ -360,7 +440,8 @@ module.exports = {
                 telefone,
                 tipo,
                 status,
-                inst_id
+                inst_id,
+                crm
             } = request.body;
 
             const { id } = request.params;
@@ -442,6 +523,36 @@ module.exports = {
                 }
             }
 
+            const [medicoDoUsuario] = await db.query(
+                'SELECT med_id, med_crm FROM Medico WHERE usu_id = ?',
+                [id]
+            );
+
+            if (usuarioEhMedico(tipo)) {
+                if (!crm && medicoDoUsuario.length === 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM e obrigatorio para usuario medico',
+                        dados: null
+                    });
+                }
+
+                if (crm) {
+                    const [crmDuplicado] = await db.query(
+                        'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
+                        [crm, id]
+                    );
+
+                    if (crmDuplicado.length > 0) {
+                        return response.status(400).json({
+                            sucesso: false,
+                            mensagem: 'CRM ja cadastrado para outro medico',
+                            dados: null
+                        });
+                    }
+                }
+            }
+
             const senhaCriptografada = await bcrypt.hash(senha, 10);
 
             const sql = `
@@ -486,6 +597,20 @@ module.exports = {
                 });
             }
 
+            if (usuarioEhMedico(tipo)) {
+                if (medicoDoUsuario.length > 0 && crm) {
+                    await db.query(
+                        'UPDATE Medico SET med_crm = ? WHERE usu_id = ?',
+                        [crm, id]
+                    );
+                } else if (medicoDoUsuario.length === 0) {
+                    await db.query(
+                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                        [id, crm]
+                    );
+                }
+            }
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: `Usuário ${id} atualizado com sucesso!`,
@@ -496,6 +621,7 @@ module.exports = {
                     email,
                     telefone,
                     tipo,
+                    crm: usuarioEhMedico(tipo) ? (crm || medicoDoUsuario[0]?.med_crm || null) : null,
                     inst_id,
                     status: Number(status)
                 }
@@ -639,7 +765,7 @@ module.exports = {
             const usuarioApagado = usuarioExistente[0];
 
             const [logs] = await db.query(
-                'SELECT log_id FROM logs_acao WHERE usu_id = ?',
+                'SELECT log_id FROM Logs_Acao WHERE usu_id = ?',
                 [id]
             );
 
@@ -649,6 +775,56 @@ module.exports = {
                     mensagem: 'Não é possível excluir usuário com logs de ação registrados',
                     dados: null
                 });
+            }
+
+            const [mensagens] = await db.query(
+                `
+                SELECT msg_id
+                FROM Mensagem_Chat
+                WHERE usu_id_remetente = ?
+                   OR usu_id_destinatario = ?
+                `,
+                [id, id]
+            );
+
+            if (mensagens.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Nao e possivel excluir usuario com mensagens registradas',
+                    dados: null
+                });
+            }
+
+            const [medico] = await db.query(
+                'SELECT med_id FROM Medico WHERE usu_id = ?',
+                [id]
+            );
+
+            if (medico.length > 0) {
+                const medId = medico[0].med_id;
+
+                const [atendimentos] = await db.query(
+                    'SELECT atend_id FROM Atendimento WHERE med_id = ?',
+                    [medId]
+                );
+
+                const [favoritos] = await db.query(
+                    'SELECT fav_id FROM Favorito WHERE med_id = ?',
+                    [medId]
+                );
+
+                if (atendimentos.length > 0 || favoritos.length > 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'Nao e possivel excluir usuario medico com atendimentos ou favoritos vinculados',
+                        dados: null
+                    });
+                }
+
+                await db.query(
+                    'DELETE FROM Medico WHERE med_id = ?',
+                    [medId]
+                );
             }
 
             await db.query(
