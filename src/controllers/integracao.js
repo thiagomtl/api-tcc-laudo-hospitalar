@@ -5,7 +5,11 @@ function normalizarCpf(cpf) {
 }
 
 function primeiroValor(...valores) {
-    return valores.find((valor) => valor !== undefined);
+    return valores.find((valor) => valor !== undefined && valor !== null);
+}
+
+function camposAusentes(objeto, campos) {
+    return campos.filter((campo) => objeto[campo] === undefined || objeto[campo] === null || objeto[campo] === '');
 }
 
 async function validarReferencia(connection, tabela, coluna, valor, mensagem) {
@@ -56,10 +60,30 @@ module.exports = {
                 medico: atendimentoEntrada.medico
             };
 
-            if (!paciente.nome || !paciente.cpf || !paciente.num_prontuario) {
+            const camposObrigatoriosPaciente = [
+                'nome',
+                'datanasc',
+                'cpf',
+                'telefone',
+                'sexo',
+                'num_prontuario',
+                'cns',
+                'nome_mae',
+                'raca',
+                'bairro',
+                'num_casa',
+                'logradouro',
+                'cep',
+                'uf',
+                'municipio',
+                'cod_ibge'
+            ];
+            const camposPacienteAusentes = camposAusentes(paciente, camposObrigatoriosPaciente);
+
+            if (camposPacienteAusentes.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Nome, CPF e numero de prontuario do paciente sao obrigatorios.',
+                    mensagem: `Campos obrigatorios do paciente ausentes: ${camposPacienteAusentes.join(', ')}.`,
                     dados: null
                 });
             }
@@ -72,10 +96,12 @@ module.exports = {
                 });
             }
 
-            if (!atendimento.convenio || !atendimento.leito || !atendimento.carater || !atendimento.medico) {
+            const camposAtendimentoAusentes = camposAusentes(atendimento, ['convenio', 'leito', 'carater', 'medico']);
+
+            if (camposAtendimentoAusentes.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Convenio, leito, carater e medico sao obrigatorios.',
+                    mensagem: `Campos obrigatorios do atendimento ausentes: ${camposAtendimentoAusentes.join(', ')}.`,
                     dados: null
                 });
             }
