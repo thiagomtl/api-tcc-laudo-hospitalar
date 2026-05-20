@@ -28,8 +28,8 @@ INSERT INTO Usuario (
 ('Médico Teste', '23456789012', 'medico@medsync.com', '123456', NOW(), 1, '14988888888', NULL, NULL, 'Médico', 1),
 ('Faturista Teste', '34567890123', 'faturista@medsync.com', '123456', NOW(), 1, '14977777777', NULL, NULL, 'Faturista', 1);
 
-INSERT INTO Medico (med_crm) VALUES
-('123456SP');
+INSERT INTO Medico (usu_id, med_crm) VALUES
+((SELECT usu_id FROM Usuario WHERE usu_email = 'medico@medsync.com'), '123456SP');
 
 INSERT INTO Paciente (
     pac_nome, pac_datanasc, pac_cpf, pac_telefone, pac_datacadastro,
@@ -133,13 +133,11 @@ INSERT INTO Usuario (usu_nome, usu_documento, usu_email, usu_senha, usu_datacria
 ('Marina Costa', '654987321', 'marina@hospital.com', 'senha987', '2025-10-10 09:25:00', 6, '61944444444', 'marinacosta.png', NULL, 'Médico', 1);
 
 -- Tabela Medico
-INSERT INTO Medico (med_crm) VALUES
-('1234567'),
-('2345678'),
-('3456789'),
-('4567890'),
-('5678901'),
-('6789012');
+INSERT INTO Medico (usu_id, med_crm) VALUES
+((SELECT usu_id FROM Usuario WHERE usu_email = 'paulo@hospital.com'), '1234567'),
+((SELECT usu_id FROM Usuario WHERE usu_email = 'carla@hospital.com'), '2345678'),
+((SELECT usu_id FROM Usuario WHERE usu_email = 'fernanda@hospital.com'), '3456789'),
+((SELECT usu_id FROM Usuario WHERE usu_email = 'marina@hospital.com'), '4567890');
 
 -- Tabela Atendimento
 INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, med_id, atend_data) VALUES
@@ -148,7 +146,7 @@ INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, med_id, atend_data) V
 (3, 3, 3, 3, 3, '2025-10-10 10:20:00'),
 (4, 4, 4, 4, 4, '2025-10-10 10:30:00'),
 (5, 5, 5, 5, 5, '2025-10-10 10:40:00'),
-(6, 6, 6, 6, 6, '2025-10-10 10:50:00');
+(6, 6, 6, 6, 1, '2025-10-10 10:50:00');
 
 -- Tabela Logs_Acao
 INSERT INTO Logs_Acao (usu_id, log_acao, log_detalhe, log_datahora) VALUES
@@ -10552,4 +10550,4 @@ INSERT INTO Favorito (lau_id, med_id, fav_nome) VALUES
 (3, 3, 'SEPTICEMIA'),
 (4, 4, 'COLECISTECTOMIA'),
 (5, 5, 'HERNIOPLASTIA UMBILICAL'),
-(6, 6, 'HERNIOPLASTIA EPIGASTRICA');
+(6, 5, 'HERNIOPLASTIA EPIGASTRICA');

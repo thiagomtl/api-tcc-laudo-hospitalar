@@ -49,7 +49,9 @@ CREATE TABLE Usuario (
 
 CREATE TABLE Medico (
     med_id INT AUTO_INCREMENT PRIMARY KEY,
-    med_crm VARCHAR(8) NOT NULL
+    usu_id INT NOT NULL UNIQUE,
+    med_crm VARCHAR(8) NOT NULL UNIQUE,
+    FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
 );
 
 CREATE TABLE Paciente (

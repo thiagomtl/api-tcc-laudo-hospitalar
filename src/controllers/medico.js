@@ -4,24 +4,28 @@ module.exports = {
     async listarMedico(request, response) {
         try {
             const sql = `
-                SELECT 
-                    med_id,
-                    med_crm
-                FROM Medico
+                SELECT
+                    m.med_id,
+                    m.usu_id,
+                    u.usu_nome AS med_nome,
+                    u.usu_documento AS med_cpf,
+                    m.med_crm
+                FROM Medico m
+                INNER JOIN Usuario u ON u.usu_id = m.usu_id
             `;
 
             const [rows] = await db.query(sql);
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Lista de médicos obtida com sucesso',
+                mensagem: 'Lista de medicos obtida com sucesso',
                 itens: rows.length,
                 dados: rows
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao listar médicos: ${error.message}`,
+                mensagem: `Erro ao listar medicos: ${error.message}`,
                 dados: null
             });
         }
@@ -29,12 +33,48 @@ module.exports = {
 
     async cadastrarMedico(request, response) {
         try {
-            const { crm } = request.body;
+            const { usu_id, crm } = request.body;
 
-            if (!crm) {
+            if (!usu_id || !crm) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'CRM é obrigatório.',
+                    mensagem: 'Usuario e CRM sao obrigatorios.',
+                    dados: null
+                });
+            }
+
+            const [usuarioExistente] = await db.query(
+                `
+                SELECT usu_id
+                FROM Usuario
+                WHERE usu_id = ?
+                  AND usu_tipo IN ('Médico', 'Medico')
+                  AND usu_status = 1
+                `,
+                [usu_id]
+            );
+
+            if (usuarioExistente.length === 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Usuario medico nao encontrado.',
+                    dados: null
+                });
+            }
+
+            const [usuarioVinculado] = await db.query(
+                `
+                SELECT med_id
+                FROM Medico
+                WHERE usu_id = ?
+                `,
+                [usu_id]
+            );
+
+            if (usuarioVinculado.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Este usuario ja esta vinculado a um medico.',
                     dados: null
                 });
             }
@@ -51,30 +91,31 @@ module.exports = {
             if (crmExistente.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'CRM já cadastrado.',
+                    mensagem: 'CRM ja cadastrado.',
                     dados: null
                 });
             }
 
             const sql = `
-                INSERT INTO Medico (med_crm)
-                VALUES (?)
+                INSERT INTO Medico (usu_id, med_crm)
+                VALUES (?, ?)
             `;
 
-            const [result] = await db.query(sql, [crm]);
+            const [result] = await db.query(sql, [usu_id, crm]);
 
             return response.status(201).json({
                 sucesso: true,
-                mensagem: 'Cadastro de médico realizado com sucesso',
+                mensagem: 'Cadastro de medico realizado com sucesso',
                 dados: {
                     id: result.insertId,
+                    usu_id: Number(usu_id),
                     crm
                 }
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao cadastrar médico: ${error.message}`,
+                mensagem: `Erro ao cadastrar medico: ${error.message}`,
                 dados: error.message
             });
         }
@@ -82,20 +123,20 @@ module.exports = {
 
     async editarMedico(request, response) {
         try {
-            const { crm } = request.body;
+            const { usu_id, crm } = request.body;
             const { id } = request.params;
 
             if (!crm) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'CRM é obrigatório.',
+                    mensagem: 'CRM e obrigatorio.',
                     dados: null
                 });
             }
 
             const [medicoExistente] = await db.query(
                 `
-                SELECT med_id
+                SELECT med_id, usu_id
                 FROM Medico
                 WHERE med_id = ?
                 `,
@@ -105,9 +146,48 @@ module.exports = {
             if (medicoExistente.length === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem: `Médico ${id} não encontrado!`,
+                    mensagem: `Medico ${id} nao encontrado!`,
                     dados: null
                 });
+            }
+
+            if (usu_id) {
+                const [usuarioExistente] = await db.query(
+                    `
+                    SELECT usu_id
+                    FROM Usuario
+                    WHERE usu_id = ?
+                      AND usu_tipo IN ('Médico', 'Medico')
+                      AND usu_status = 1
+                    `,
+                    [usu_id]
+                );
+
+                if (usuarioExistente.length === 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'Usuario medico nao encontrado.',
+                        dados: null
+                    });
+                }
+
+                const [usuarioVinculado] = await db.query(
+                    `
+                    SELECT med_id
+                    FROM Medico
+                    WHERE usu_id = ?
+                      AND med_id != ?
+                    `,
+                    [usu_id, id]
+                );
+
+                if (usuarioVinculado.length > 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'Este usuario ja esta vinculado a outro medico.',
+                        dados: null
+                    });
+                }
             }
 
             const [crmDuplicado] = await db.query(
@@ -123,31 +203,36 @@ module.exports = {
             if (crmDuplicado.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Já existe outro médico com este CRM.',
+                    mensagem: 'Ja existe outro medico com este CRM.',
                     dados: null
                 });
             }
 
+            const usuarioId = usu_id || medicoExistente[0].usu_id;
+
             const sql = `
                 UPDATE Medico
-                SET med_crm = ?
+                SET
+                    usu_id = ?,
+                    med_crm = ?
                 WHERE med_id = ?
             `;
 
-            await db.query(sql, [crm, id]);
+            await db.query(sql, [usuarioId, crm, id]);
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: `Médico ${id} atualizado com sucesso`,
+                mensagem: `Medico ${id} atualizado com sucesso`,
                 dados: {
                     id: Number(id),
+                    usu_id: Number(usuarioId),
                     crm
                 }
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao atualizar médico: ${error.message}`,
+                mensagem: `Erro ao atualizar medico: ${error.message}`,
                 dados: error.message
             });
         }
@@ -169,7 +254,7 @@ module.exports = {
             if (medicoExistente.length === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem: `Médico ${id} não encontrado!`,
+                    mensagem: `Medico ${id} nao encontrado!`,
                     dados: null
                 });
             }
@@ -183,10 +268,19 @@ module.exports = {
                 [id]
             );
 
-            if (atendimentosVinculados.length > 0) {
+            const [favoritosVinculados] = await db.query(
+                `
+                SELECT fav_id
+                FROM Favorito
+                WHERE med_id = ?
+                `,
+                [id]
+            );
+
+            if (atendimentosVinculados.length > 0 || favoritosVinculados.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Não é possível excluir o médico porque existem atendimentos vinculados a ele.',
+                    mensagem: 'Nao e possivel excluir o medico porque existem atendimentos ou favoritos vinculados a ele.',
                     dados: null
                 });
             }
@@ -200,13 +294,13 @@ module.exports = {
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: `Médico ${id} excluído com sucesso`,
+                mensagem: `Medico ${id} excluido com sucesso`,
                 dados: null
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: `Erro ao apagar médico: ${error.message}`,
+                mensagem: `Erro ao apagar medico: ${error.message}`,
                 dados: error.message
             });
         }
