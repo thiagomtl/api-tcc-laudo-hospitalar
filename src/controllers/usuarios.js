@@ -258,6 +258,118 @@ module.exports = {
             });
         }
     },
+
+    async alterarEmail(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const {
+                emailAtual,
+                novoEmail,
+                confirmarNovoEmail
+            } = request.body;
+
+            const emailAtualLimpo = String(emailAtual || '').trim().toLowerCase();
+            const novoEmailLimpo = String(novoEmail || '').trim().toLowerCase();
+            const confirmarNovoEmailLimpo = String(confirmarNovoEmail || '').trim().toLowerCase();
+            const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailAtualLimpo || !novoEmailLimpo || !confirmarNovoEmailLimpo) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Todos os campos sao obrigatorios.',
+                    dados: null
+                });
+            }
+
+            if (!emailValido.test(emailAtualLimpo) || !emailValido.test(novoEmailLimpo)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Informe um e-mail valido.',
+                    dados: null
+                });
+            }
+
+            if (novoEmailLimpo !== confirmarNovoEmailLimpo) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O novo e-mail e a confirmacao precisam ser iguais.',
+                    dados: null
+                });
+            }
+
+            const [usuarios] = await db.query(
+                'SELECT usu_id, usu_email FROM Usuario WHERE usu_id = ?',
+                [usuarioId]
+            );
+
+            if (usuarios.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            const usuario = usuarios[0];
+
+            if (String(usuario.usu_email || '').trim().toLowerCase() !== emailAtualLimpo) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'E-mail atual incorreto.',
+                    dados: null
+                });
+            }
+
+            if (emailAtualLimpo === novoEmailLimpo) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O novo e-mail deve ser diferente do e-mail atual.',
+                    dados: null
+                });
+            }
+
+            const [emailExistente] = await db.query(
+                'SELECT usu_id FROM Usuario WHERE LOWER(usu_email) = ? AND usu_id != ?',
+                [novoEmailLimpo, usuarioId]
+            );
+
+            if (emailExistente.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Este e-mail ja esta cadastrado para outro usuario.',
+                    dados: null
+                });
+            }
+
+            await db.query(
+                'UPDATE Usuario SET usu_email = ? WHERE usu_id = ?',
+                [novoEmailLimpo, usuarioId]
+            );
+
+            const perfilAtualizado = await buscarPerfilPorId(usuarioId);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'E-mail atualizado com sucesso.',
+                dados: perfilAtualizado
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar e-mail: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
     
     async listarUsuario(request, response) {
         try {
