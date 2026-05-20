@@ -145,6 +145,338 @@ module.exports = {
         }
     },
 
+    async editarPerfil(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const { telefone, crm } = request.body;
+            const telefoneNumeros = String(telefone || '').replace(/\D/g, '');
+            const perfilAtual = await buscarPerfilPorId(usuarioId);
+
+            if (!perfilAtual) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Telefone deve ter DDD e 10 ou 11 digitos.',
+                    dados: null
+                });
+            }
+
+            if (crm !== undefined && !usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'CRM nao pode ser alterado neste perfil.',
+                    dados: null
+                });
+            }
+
+            await db.query(
+                'UPDATE Usuario SET usu_telefone = ? WHERE usu_id = ?',
+                [telefoneNumeros, usuarioId]
+            );
+
+            if (crm !== undefined && usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
+                const crmTratado = String(crm || '').trim().toUpperCase();
+
+                if (!crmTratado) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM e obrigatorio para usuario medico.',
+                        dados: null
+                    });
+                }
+
+                if (crmTratado.length > 8) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM deve ter ate 8 caracteres.',
+                        dados: null
+                    });
+                }
+
+                const [crmDuplicado] = await db.query(
+                    'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
+                    [crmTratado, usuarioId]
+                );
+
+                if (crmDuplicado.length > 0) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM ja cadastrado para outro medico.',
+                        dados: null
+                    });
+                }
+
+                const [medicoDoUsuario] = await db.query(
+                    'SELECT med_id FROM Medico WHERE usu_id = ?',
+                    [usuarioId]
+                );
+
+                if (medicoDoUsuario.length > 0) {
+                    await db.query(
+                        'UPDATE Medico SET med_crm = ? WHERE usu_id = ?',
+                        [crmTratado, usuarioId]
+                    );
+                } else {
+                    await db.query(
+                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                        [usuarioId, crmTratado]
+                    );
+                }
+            }
+
+            await registrarLog({
+                usuarioId,
+                acao: 'EDICAO_PERFIL',
+                descricao: `Usuario atualizou o proprio perfil: ID ${usuarioId}`
+            });
+
+            const perfilAtualizado = await buscarPerfilPorId(usuarioId);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Perfil atualizado com sucesso.',
+                dados: perfilAtualizado
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar perfil: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
+
+    async alterarEmail(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const { emailAtual, novoEmail, confirmarNovoEmail } = request.body;
+            const emailAtualTratado = String(emailAtual || '').trim().toLowerCase();
+            const novoEmailTratado = String(novoEmail || '').trim().toLowerCase();
+            const confirmarNovoEmailTratado = String(confirmarNovoEmail || '').trim().toLowerCase();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailAtualTratado || !novoEmailTratado || !confirmarNovoEmailTratado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Todos os campos devem ser preenchidos.',
+                    dados: null
+                });
+            }
+
+            if (!emailRegex.test(novoEmailTratado)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Novo email invalido.',
+                    dados: null
+                });
+            }
+
+            if (novoEmailTratado !== confirmarNovoEmailTratado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O novo email e a confirmacao precisam ser iguais.',
+                    dados: null
+                });
+            }
+
+            const [usuarioAtual] = await db.query(
+                'SELECT usu_id, usu_email FROM Usuario WHERE usu_id = ?',
+                [usuarioId]
+            );
+
+            if (usuarioAtual.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            if (String(usuarioAtual[0].usu_email || '').trim().toLowerCase() !== emailAtualTratado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Email atual incorreto.',
+                    dados: null
+                });
+            }
+
+            if (emailAtualTratado === novoEmailTratado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O novo email deve ser diferente do email atual.',
+                    dados: null
+                });
+            }
+
+            const [emailDuplicado] = await db.query(
+                'SELECT usu_id FROM Usuario WHERE LOWER(usu_email) = ? AND usu_id != ?',
+                [novoEmailTratado, usuarioId]
+            );
+
+            if (emailDuplicado.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Email ja cadastrado para outro usuario.',
+                    dados: null
+                });
+            }
+
+            await db.query(
+                'UPDATE Usuario SET usu_email = ? WHERE usu_id = ?',
+                [novoEmailTratado, usuarioId]
+            );
+
+            await registrarLog({
+                usuarioId,
+                acao: 'ALTERACAO_EMAIL',
+                descricao: `Usuario alterou o proprio email: ID ${usuarioId}`
+            });
+
+            const perfilAtualizado = await buscarPerfilPorId(usuarioId);
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Email alterado com sucesso.',
+                dados: perfilAtualizado
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao alterar email: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
+
+    async alterarSenha(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const { senhaAtual, novaSenha, confirmarNovaSenha } = request.body;
+
+            if (!senhaAtual || !novaSenha || !confirmarNovaSenha) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Todos os campos devem ser preenchidos.',
+                    dados: null
+                });
+            }
+
+            if (String(novaSenha).length < 6) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha deve ter pelo menos 6 caracteres.',
+                    dados: null
+                });
+            }
+
+            if (novaSenha !== confirmarNovaSenha) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha e a confirmacao precisam ser iguais.',
+                    dados: null
+                });
+            }
+
+            const [usuarioAtual] = await db.query(
+                'SELECT usu_id, usu_senha FROM Usuario WHERE usu_id = ?',
+                [usuarioId]
+            );
+
+            if (usuarioAtual.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            const senhaAtualValida = await bcrypt.compare(
+                String(senhaAtual),
+                usuarioAtual[0].usu_senha
+            );
+
+            if (!senhaAtualValida) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Senha atual incorreta.',
+                    dados: null
+                });
+            }
+
+            const novaSenhaIgualAtual = await bcrypt.compare(
+                String(novaSenha),
+                usuarioAtual[0].usu_senha
+            );
+
+            if (novaSenhaIgualAtual) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha deve ser diferente da senha atual.',
+                    dados: null
+                });
+            }
+
+            const novaSenhaHash = await bcrypt.hash(String(novaSenha), 10);
+
+            await db.query(
+                'UPDATE Usuario SET usu_senha = ? WHERE usu_id = ?',
+                [novaSenhaHash, usuarioId]
+            );
+
+            await registrarLog({
+                usuarioId,
+                acao: 'ALTERACAO_SENHA',
+                descricao: `Usuario alterou a propria senha: ID ${usuarioId}`
+            });
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Senha alterada com sucesso.',
+                dados: null
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao alterar senha: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
+
     async listarUsuario(request, response) {
         try {
             const sql = `
@@ -399,6 +731,13 @@ module.exports = {
             ];
 
             const [result] = await db.query(sql, values);
+
+            if (usuarioEhMedico(tipo)) {
+                await db.query(
+                    'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                    [result.insertId, crm]
+                );
+            }
 
             await registrarLog({
                 usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
