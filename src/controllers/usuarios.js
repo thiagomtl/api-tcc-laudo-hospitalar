@@ -370,6 +370,101 @@ module.exports = {
             });
         }
     },
+
+    async alterarSenha(request, response) {
+        try {
+            const usuarioId = request.usuario?.usu_id || request.usuario?.id;
+
+            if (!usuarioId) {
+                return response.status(401).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao autenticado.',
+                    dados: null
+                });
+            }
+
+            const {
+                senhaAtual,
+                novaSenha,
+                confirmarNovaSenha
+            } = request.body;
+
+            if (!senhaAtual || !novaSenha || !confirmarNovaSenha) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Todos os campos sao obrigatorios.',
+                    dados: null
+                });
+            }
+
+            if (novaSenha !== confirmarNovaSenha) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha e a confirmacao precisam ser iguais.',
+                    dados: null
+                });
+            }
+
+            if (String(novaSenha).length < 6) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha deve ter pelo menos 6 caracteres.',
+                    dados: null
+                });
+            }
+
+            if (senhaAtual === novaSenha) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A nova senha deve ser diferente da senha atual.',
+                    dados: null
+                });
+            }
+
+            const [usuarios] = await db.query(
+                'SELECT usu_id, usu_senha FROM Usuario WHERE usu_id = ?',
+                [usuarioId]
+            );
+
+            if (usuarios.length === 0) {
+                return response.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Usuario nao encontrado.',
+                    dados: null
+                });
+            }
+
+            const usuario = usuarios[0];
+            const senhaAtualValida = await bcrypt.compare(senhaAtual, usuario.usu_senha);
+
+            if (!senhaAtualValida) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Senha atual incorreta.',
+                    dados: null
+                });
+            }
+
+            const senhaCriptografada = await bcrypt.hash(novaSenha, 10);
+
+            await db.query(
+                'UPDATE Usuario SET usu_senha = ? WHERE usu_id = ?',
+                [senhaCriptografada, usuarioId]
+            );
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: 'Senha atualizada com sucesso.',
+                dados: null
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao atualizar senha: ${error.message}`,
+                dados: error.message
+            });
+        }
+    },
     
     async listarUsuario(request, response) {
         try {

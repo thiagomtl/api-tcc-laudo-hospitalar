@@ -12,6 +12,7 @@ const InstituicaoController = require('../controllers/instituicao');
 router.get('/perfil', autenticarToken, UsuarioController.perfilUsuario);
 router.patch('/perfil', autenticarToken, UsuarioController.editarPerfil);
 router.patch('/alterar-email', autenticarToken, UsuarioController.alterarEmail);
+router.patch('/alterar-senha', autenticarToken, UsuarioController.alterarSenha);
 
 router.get('/medicos', MedicoController.listarMedico);
 router.post('/medicos', MedicoController.cadastrarMedico);
