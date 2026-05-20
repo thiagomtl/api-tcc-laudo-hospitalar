@@ -1,4 +1,5 @@
 const db = require('../dataBase/connection');
+const { criarNotificacao } = require('../utils/notificacoes');
 
 function normalizarCpf(cpf) {
     return String(cpf || '').replace(/\D/g, '');
@@ -251,6 +252,28 @@ module.exports = {
 
             await connection.commit();
 
+            const notificacao = criarNotificacao({
+                tipo: 'ATENDIMENTO_PENDENTE',
+                titulo: 'Novo paciente recebido',
+                mensagem: `${paciente.nome} chegou em laudos pendentes.`,
+                dados: {
+                    paciente: {
+                        id: pacienteId,
+                        nome: paciente.nome,
+                        cpf: paciente.cpf,
+                        num_prontuario: paciente.num_prontuario,
+                        criado: pacienteCriado
+                    },
+                    atendimento: {
+                        id: resultAtendimento.insertId,
+                        convenio: atendimento.convenio,
+                        leito: atendimento.leito,
+                        carater: atendimento.carater,
+                        medico: atendimento.medico
+                    }
+                }
+            });
+
             return response.status(201).json({
                 sucesso: true,
                 mensagem: 'Atendimento pendente criado com sucesso.',
@@ -265,7 +288,8 @@ module.exports = {
                         leito: atendimento.leito,
                         carater: atendimento.carater,
                         medico: atendimento.medico
-                    }
+                    },
+                    notificacao
                 }
             });
         } catch (error) {
