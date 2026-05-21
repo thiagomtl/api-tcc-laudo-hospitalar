@@ -48,6 +48,32 @@ async function enviarEmailSistema({ assunto, texto, html, replyTo }) {
     };
 }
 
+async function enviarEmailPara({ para, assunto, texto, html, replyTo }) {
+    if (!emailConfigurado()) {
+        return {
+            enviado: false,
+            motivo: 'Configuracao de e-mail incompleta no .env.'
+        };
+    }
+
+    const transporter = criarTransporter();
+
+    const info = await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: para,
+        subject: assunto,
+        replyTo,
+        text: texto,
+        html
+    });
+
+    return {
+        enviado: true,
+        messageId: info.messageId
+    };
+}
+
 module.exports = {
-    enviarEmailSistema
+    enviarEmailSistema,
+    enviarEmailPara
 };
