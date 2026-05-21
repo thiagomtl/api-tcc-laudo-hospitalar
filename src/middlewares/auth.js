@@ -1,5 +1,12 @@
 const jwt = require('jsonwebtoken');
 
+function normalizarTipoUsuario(tipo) {
+    return String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
 function autenticarToken(request, response, next) {
     const authHeader = request.headers.authorization;
 
@@ -47,7 +54,7 @@ function autenticarToken(request, response, next) {
 }
 
 function somenteAdministrador(request, response, next) {
-    if (request.usuario.tipo !== 'Administrador') {
+    if (normalizarTipoUsuario(request.usuario?.tipo) !== 'administrador') {
         return response.status(403).json({
             sucesso: false,
             mensagem: 'Acesso permitido apenas para administradores.',
@@ -59,7 +66,7 @@ function somenteAdministrador(request, response, next) {
 }
 
 function somenteMedico(request, response, next) {
-    if (request.usuario.tipo !== 'Médico') {
+    if (normalizarTipoUsuario(request.usuario?.tipo) !== 'medico') {
         return response.status(403).json({
             sucesso: false,
             mensagem: 'Acesso permitido apenas para médicos.',
@@ -71,7 +78,7 @@ function somenteMedico(request, response, next) {
 }
 
 function somenteFaturista(request, response, next) {
-    if (request.usuario.tipo !== 'Faturista') {
+    if (normalizarTipoUsuario(request.usuario?.tipo) !== 'faturista') {
         return response.status(403).json({
             sucesso: false,
             mensagem: 'Acesso permitido apenas para faturistas.',

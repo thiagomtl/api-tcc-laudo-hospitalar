@@ -38,20 +38,48 @@ function validarUsuario(dados) {
     return erros;
 }
 
-function usuarioEhMedico(tipo) {
+function normalizarTipoUsuario(tipo) {
     return String(tipo || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase() === 'medico';
+        .toLowerCase();
+}
+
+function usuarioEhMedico(tipo) {
+    return normalizarTipoUsuario(tipo) === 'medico';
 }
 
 function usuarioPodeAlterarCrm(tipo) {
-    const tipoNormalizado = String(tipo || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
+    return normalizarTipoUsuario(tipo) === 'medico';
+}
 
-    return tipoNormalizado === 'medico';
+function tipoUsuarioParaResposta(tipo) {
+    const tipoNormalizado = normalizarTipoUsuario(tipo);
+
+    if (tipoNormalizado === 'administrador') {
+        return 'Administrador';
+    }
+
+    if (tipoNormalizado === 'faturista') {
+        return 'Faturista';
+    }
+
+    if (tipoNormalizado === 'medico') {
+        return 'Médico';
+    }
+
+    return tipo;
+}
+
+function usuarioParaResposta(usuario) {
+    if (!usuario) {
+        return usuario;
+    }
+
+    return {
+        ...usuario,
+        usu_tipo: tipoUsuarioParaResposta(usuario.usu_tipo)
+    };
 }
 
 async function buscarPerfilPorId(usuarioId) {
@@ -81,7 +109,7 @@ async function buscarPerfilPorId(usuarioId) {
         [usuarioId]
     );
 
-    return rows[0] || null;
+    return usuarioParaResposta(rows[0] || null);
 }
 
 module.exports = {
@@ -134,7 +162,7 @@ module.exports = {
             return response.status(200).json({
                 sucesso: true,
                 mensagem: "Perfil obtido com sucesso.",
-                dados: rows[0]
+                dados: usuarioParaResposta(rows[0])
             });
         } catch (error) {
             return response.status(500).json({
@@ -504,7 +532,7 @@ module.exports = {
                 sucesso: true,
                 mensagem: 'Lista de usuário obtida com sucesso',
                 itens: rows.length,
-                dados: rows
+                dados: rows.map(usuarioParaResposta)
             });
         } catch (error) {
             return response.status(500).json({
@@ -553,7 +581,7 @@ module.exports = {
                 });
             }
 
-            const usuario = rows[0];
+            const usuario = usuarioParaResposta(rows[0]);
 
             const senhaValida = await bcrypt.compare(senha, usuario.usu_senha);
 
@@ -754,7 +782,7 @@ module.exports = {
                     documento,
                     email,
                     telefone,
-                    tipo,
+                    tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? crm : null,
                     inst_id,
                     status: Number(status)
@@ -959,7 +987,7 @@ module.exports = {
                     documento,
                     email,
                     telefone,
-                    tipo,
+                    tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? (crm || medicoDoUsuario[0]?.med_crm || null) : null,
                     inst_id,
                     status: Number(status)
