@@ -9,6 +9,7 @@ const integracao = require('./integracao');
 const notificacao = require('./notificacao');
 const contato = require('./contato');
 const codigoConfirmacao = require('./codigoConfirmacao');
+const recuperacaoSenha = require('./recuperacaoSenha');
 
 router.use('/', thiago);
 router.use('/', luizHenrique);
@@ -18,5 +19,6 @@ router.use('/', integracao);
 router.use('/', notificacao);
 router.use('/', contato);
 router.use('/', codigoConfirmacao);
+router.use('/', recuperacaoSenha);
 
 module.exports = router;
