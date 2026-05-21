@@ -72,9 +72,9 @@ INSERT INTO Usuario (
     usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao,
     inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
 ) VALUES
-('Ana Almeida', '10000000001', 'ana.almeida@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
-('Bruno Costa', '10000000002', 'bruno.costa@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:05:00', 2, '14990000002', NULL, NULL, 'Faturista', 1),
-('Carla Dias', '10000000003', 'carla.dias@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:10:00', 3, '14990000003', NULL, NULL, 'Médico', 1),
+('Ana Almeida', '10000000001', 'adm@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
+('Bruno Costa', '10000000002', 'fat@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:05:00', 2, '14990000002', NULL, NULL, 'Faturista', 1),
+('Carla Dias', '10000000003', 'med@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:10:00', 3, '14990000003', NULL, NULL, 'Médico', 1),
 ('Diego Martins', '10000000004', 'diego.martins@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:15:00', 4, '14990000004', NULL, NULL, 'Médico', 1),
 ('Elisa Rocha', '10000000005', 'elisa.rocha@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:20:00', 5, '14990000005', NULL, NULL, 'Médico', 1),
 ('Fabio Lima', '10000000006', 'fabio.lima@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:25:00', 6, '14990000006', NULL, NULL, 'Médico', 1),

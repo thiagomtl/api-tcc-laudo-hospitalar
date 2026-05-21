@@ -153,7 +153,7 @@ CREATE TABLE Logs_Acao (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     usu_id INT NOT NULL,
     log_acao VARCHAR(200) NOT NULL,
-    log_detalhe VARCHAR(30) NOT NULL,
+    log_detalhe VARCHAR(255) NOT NULL,
     log_datahora DATETIME NOT NULL,
     FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
 );

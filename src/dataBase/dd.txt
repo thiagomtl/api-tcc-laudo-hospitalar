@@ -68,7 +68,7 @@ Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
 ID Log	log_id	INT		x		Auto incremento
 ID Usuário	usu_id	INT			x	Usuário
 Ação	log_acao	VARCHAR	200			
-Detalhe	log_detalhe	VARCHAR	30			
+Detalhe	log_detalhe	VARCHAR	255			
 Data e Hora	log_datahora	DATETIME				Registrado automaticamente
 
 Quadro 9 - Tabela Usuário

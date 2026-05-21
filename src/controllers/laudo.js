@@ -1,6 +1,17 @@
 const db = require('../dataBase/connection');
 const { registrarLog } = require("./logsAcao");
 
+function normalizarTipoUsuario(tipo) {
+    return String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
+function usuarioEhMedico(usuario) {
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
+}
+
 module.exports = {
     async listarLaudo(request, response) {
         try {
@@ -51,6 +62,7 @@ module.exports = {
 
                 med.med_id,
                 u.usu_nome AS med_nome,
+                u.usu_email AS med_email,
                 med.med_crm,
                 u.usu_documento AS med_cpf,
 
@@ -121,8 +133,13 @@ module.exports = {
             }
 
             if (medico) {
-                sql += ` AND u.usu_nome LIKE ? `;
-                params.push(`%${medico}%`);
+                sql += ` AND (
+                    u.usu_nome LIKE ?
+                    OR u.usu_email LIKE ?
+                    OR med.med_crm LIKE ?
+                    OR med.med_id = ?
+                ) `;
+                params.push(`%${medico}%`, `%${medico}%`, `%${medico}%`, Number(medico) || 0);
             }
 
             if (dataInicio) {
@@ -133,6 +150,16 @@ module.exports = {
             if (dataFim) {
                 sql += ` AND DATE(lau.lau_datapreenc) <= ? `;
                 params.push(dataFim);
+            }
+
+            if (usuarioEhMedico(request.usuario)) {
+                if (request.usuario.med_id) {
+                    sql += ` AND med.med_id = ? `;
+                    params.push(request.usuario.med_id);
+                } else {
+                    sql += ` AND med.usu_id = ? `;
+                    params.push(request.usuario.usu_id || request.usuario.id);
+                }
             }
 
             sql += ` ORDER BY lau.lau_datapreenc DESC `;

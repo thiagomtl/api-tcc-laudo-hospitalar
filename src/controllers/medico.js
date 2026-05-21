@@ -9,9 +9,12 @@ module.exports = {
                     m.usu_id,
                     u.usu_nome AS med_nome,
                     u.usu_documento AS med_cpf,
+                    u.usu_email AS med_email,
+                    u.usu_tipo,
                     m.med_crm
                 FROM Medico m
                 INNER JOIN Usuario u ON u.usu_id = m.usu_id
+                WHERE u.usu_tipo IN ('Médico', 'Medico')
             `;
 
             const [rows] = await db.query(sql);
@@ -45,7 +48,7 @@ module.exports = {
 
             const [usuarioExistente] = await db.query(
                 `
-                SELECT usu_id
+                SELECT usu_id, usu_nome, usu_documento
                 FROM Usuario
                 WHERE usu_id = ?
                   AND usu_tipo IN ('Médico', 'Medico')
@@ -97,11 +100,16 @@ module.exports = {
             }
 
             const sql = `
-                INSERT INTO Medico (usu_id, med_crm)
-                VALUES (?, ?)
+                INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm)
+                VALUES (?, ?, ?, ?)
             `;
 
-            const [result] = await db.query(sql, [usu_id, crm]);
+            const [result] = await db.query(sql, [
+                usu_id,
+                usuarioExistente[0].usu_nome,
+                usuarioExistente[0].usu_documento,
+                crm
+            ]);
 
             return response.status(201).json({
                 sucesso: true,
@@ -154,7 +162,7 @@ module.exports = {
             if (usu_id) {
                 const [usuarioExistente] = await db.query(
                     `
-                    SELECT usu_id
+                    SELECT usu_id, usu_nome, usu_documento
                     FROM Usuario
                     WHERE usu_id = ?
                       AND usu_tipo IN ('Médico', 'Medico')
@@ -210,15 +218,42 @@ module.exports = {
 
             const usuarioId = usu_id || medicoExistente[0].usu_id;
 
+            const [usuarioMedico] = await db.query(
+                `
+                SELECT usu_id, usu_nome, usu_documento
+                FROM Usuario
+                WHERE usu_id = ?
+                  AND usu_tipo IN ('Médico', 'Medico')
+                  AND usu_status = 1
+                `,
+                [usuarioId]
+            );
+
+            if (usuarioMedico.length === 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Usuario medico nao encontrado.',
+                    dados: null
+                });
+            }
+
             const sql = `
                 UPDATE Medico
                 SET
                     usu_id = ?,
+                    med_nome = ?,
+                    med_cpf = ?,
                     med_crm = ?
                 WHERE med_id = ?
             `;
 
-            await db.query(sql, [usuarioId, crm, id]);
+            await db.query(sql, [
+                usuarioId,
+                usuarioMedico[0].usu_nome,
+                usuarioMedico[0].usu_documento,
+                crm,
+                id
+            ]);
 
             return response.status(200).json({
                 sucesso: true,

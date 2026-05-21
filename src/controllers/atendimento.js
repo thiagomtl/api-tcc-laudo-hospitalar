@@ -1,5 +1,16 @@
 const db = require('../dataBase/connection');
 
+function normalizarTipoUsuario(tipo) {
+    return String(tipo || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
+function usuarioEhMedico(usuario) {
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
+}
+
 module.exports = {
     async listarAtendimento(request, response) {
         try {
@@ -435,6 +446,7 @@ module.exports = {
                 seto.set_nome,
                 med.med_id,
                 u.usu_nome AS med_nome,
+                u.usu_email AS med_email,
                 atd.atend_data
             FROM Atendimento atd
             INNER JOIN Paciente pac ON atd.pac_id = pac.pac_id
@@ -465,8 +477,13 @@ module.exports = {
             }
 
             if (medico) {
-                sql += ` AND u.usu_nome LIKE ? `;
-                params.push(`%${medico}%`);
+                sql += ` AND (
+                    u.usu_nome LIKE ?
+                    OR u.usu_email LIKE ?
+                    OR med.med_crm LIKE ?
+                    OR med.med_id = ?
+                ) `;
+                params.push(`%${medico}%`, `%${medico}%`, `%${medico}%`, Number(medico) || 0);
             }
 
             if (dataInicio) {
@@ -477,6 +494,16 @@ module.exports = {
             if (dataFim) {
                 sql += ` AND DATE(atd.atend_data) <= ? `;
                 params.push(dataFim);
+            }
+
+            if (usuarioEhMedico(request.usuario)) {
+                if (request.usuario.med_id) {
+                    sql += ` AND med.med_id = ? `;
+                    params.push(request.usuario.med_id);
+                } else {
+                    sql += ` AND med.usu_id = ? `;
+                    params.push(request.usuario.usu_id || request.usuario.id);
+                }
             }
 
             sql += ` ORDER BY atd.atend_data DESC `;

@@ -78,7 +78,8 @@ function usuarioParaResposta(usuario) {
 
     return {
         ...usuario,
-        usu_tipo: tipoUsuarioParaResposta(usuario.usu_tipo)
+        usu_tipo: tipoUsuarioParaResposta(usuario.usu_tipo),
+        tipo: tipoUsuarioParaResposta(usuario.usu_tipo || usuario.tipo)
     };
 }
 
@@ -262,8 +263,8 @@ module.exports = {
                     );
                 } else {
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                        [usuarioId, crmTratado]
+                        'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
+                        [usuarioId, perfilAtual.usu_nome, perfilAtual.usu_documento, crmTratado]
                     );
                 }
             }
@@ -762,8 +763,8 @@ module.exports = {
 
             if (usuarioEhMedico(tipo)) {
                 await db.query(
-                    'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                    [result.insertId, crm]
+                    'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
+                    [result.insertId, nome, documento, crm]
                 );
             }
 
@@ -965,15 +966,15 @@ module.exports = {
             }
 
             if (usuarioEhMedico(tipo)) {
-                if (medicoDoUsuario.length > 0 && crm) {
+                if (medicoDoUsuario.length > 0) {
                     await db.query(
-                        'UPDATE Medico SET med_crm = ? WHERE usu_id = ?',
-                        [crm, id]
+                        'UPDATE Medico SET med_nome = ?, med_cpf = ?, med_crm = COALESCE(?, med_crm) WHERE usu_id = ?',
+                        [nome, documento, crm || null, id]
                     );
                 } else if (medicoDoUsuario.length === 0) {
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                        [id, crm]
+                        'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
+                        [id, nome, documento, crm]
                     );
                 }
             }
