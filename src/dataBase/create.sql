@@ -50,6 +50,8 @@ CREATE TABLE Usuario (
 CREATE TABLE Medico (
     med_id INT AUTO_INCREMENT PRIMARY KEY,
     usu_id INT NOT NULL UNIQUE,
+    med_nome VARCHAR(100) NOT NULL,
+    med_cpf CHAR(11) NOT NULL UNIQUE,
     med_crm VARCHAR(8) NOT NULL UNIQUE,
     FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
 );
@@ -119,7 +121,8 @@ CREATE TABLE Laudo (
     lau_id INT AUTO_INCREMENT PRIMARY KEY,
     atend_id INT NOT NULL,
     cli_id INT NOT NULL,
-    proc_cid_id INT NOT NULL,
+    cid_id INT NOT NULL,
+    pro_id INT NOT NULL,
     lau_sinais VARCHAR(1024) NOT NULL,
     lau_internacao VARCHAR(1024) NOT NULL,
     lau_resultado VARCHAR(512) NOT NULL,
@@ -130,8 +133,10 @@ CREATE TABLE Laudo (
         REFERENCES Atendimento (atend_id),
     FOREIGN KEY (cli_id)
         REFERENCES Escolha_Clinica (cli_id),
-    FOREIGN KEY (proc_cid_id)
-        REFERENCES Procedimento_Cids (proc_cid_id)
+    FOREIGN KEY (cid_id)
+        REFERENCES CID (cid_id),
+    FOREIGN KEY (pro_id)
+        REFERENCES Procedimento (pro_id)
 );
 
 CREATE TABLE Favorito (
