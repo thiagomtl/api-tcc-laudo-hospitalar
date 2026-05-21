@@ -263,8 +263,8 @@ module.exports = {
                     );
                 } else {
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
-                        [usuarioId, perfilAtual.usu_nome, perfilAtual.usu_documento, crmTratado]
+                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                        [usuarioId, crmTratado]
                     );
                 }
             }
@@ -763,8 +763,8 @@ module.exports = {
 
             if (usuarioEhMedico(tipo)) {
                 await db.query(
-                    'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
-                    [result.insertId, nome, documento, crm]
+                    'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                    [result.insertId, crm]
                 );
             }
 
@@ -968,13 +968,13 @@ module.exports = {
             if (usuarioEhMedico(tipo)) {
                 if (medicoDoUsuario.length > 0) {
                     await db.query(
-                        'UPDATE Medico SET med_nome = ?, med_cpf = ?, med_crm = COALESCE(?, med_crm) WHERE usu_id = ?',
-                        [nome, documento, crm || null, id]
+                        'UPDATE Medico SET med_crm = COALESCE(?, med_crm) WHERE usu_id = ?',
+                        [crm || null, id]
                     );
                 } else if (medicoDoUsuario.length === 0) {
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm) VALUES (?, ?, ?, ?)',
-                        [id, nome, documento, crm]
+                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
+                        [id, crm]
                     );
                 }
             }

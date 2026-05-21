@@ -497,13 +497,8 @@ module.exports = {
             }
 
             if (usuarioEhMedico(request.usuario)) {
-                if (request.usuario.med_id) {
-                    sql += ` AND med.med_id = ? `;
-                    params.push(request.usuario.med_id);
-                } else {
-                    sql += ` AND med.usu_id = ? `;
-                    params.push(request.usuario.usu_id || request.usuario.id);
-                }
+                sql += ` AND med.usu_id = ? `;
+                params.push(request.usuario.usu_id || request.usuario.id);
             }
 
             sql += ` ORDER BY atd.atend_data DESC `;

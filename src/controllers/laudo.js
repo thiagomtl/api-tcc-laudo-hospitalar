@@ -153,13 +153,8 @@ module.exports = {
             }
 
             if (usuarioEhMedico(request.usuario)) {
-                if (request.usuario.med_id) {
-                    sql += ` AND med.med_id = ? `;
-                    params.push(request.usuario.med_id);
-                } else {
-                    sql += ` AND med.usu_id = ? `;
-                    params.push(request.usuario.usu_id || request.usuario.id);
-                }
+                sql += ` AND med.usu_id = ? `;
+                params.push(request.usuario.usu_id || request.usuario.id);
             }
 
             sql += ` ORDER BY lau.lau_datapreenc DESC `;
@@ -205,9 +200,12 @@ module.exports = {
 
             const [atendimentoExistente] = await db.query(
                 `
-                SELECT atend_id
-                FROM Atendimento
-                WHERE atend_id = ?
+                SELECT
+                    atd.atend_id,
+                    med.usu_id
+                FROM Atendimento atd
+                INNER JOIN Medico med ON med.med_id = atd.med_id
+                WHERE atd.atend_id = ?
                 `,
                 [atendimento]
             );
@@ -218,6 +216,18 @@ module.exports = {
                     mensagem: 'Atendimento não encontrado.',
                     dados: null
                 });
+            }
+
+            if (usuarioEhMedico(request.usuario)) {
+                const usuarioId = request.usuario.usu_id || request.usuario.id;
+
+                if (Number(atendimentoExistente[0].usu_id) !== Number(usuarioId)) {
+                    return response.status(403).json({
+                        sucesso: false,
+                        mensagem: 'Este atendimento nao pertence ao medico autenticado.',
+                        dados: null
+                    });
+                }
             }
 
             const [clinicaExistente] = await db.query(

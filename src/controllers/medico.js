@@ -48,7 +48,7 @@ module.exports = {
 
             const [usuarioExistente] = await db.query(
                 `
-                SELECT usu_id, usu_nome, usu_documento
+                SELECT usu_id
                 FROM Usuario
                 WHERE usu_id = ?
                   AND usu_tipo IN ('Médico', 'Medico')
@@ -100,16 +100,11 @@ module.exports = {
             }
 
             const sql = `
-                INSERT INTO Medico (usu_id, med_nome, med_cpf, med_crm)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO Medico (usu_id, med_crm)
+                VALUES (?, ?)
             `;
 
-            const [result] = await db.query(sql, [
-                usu_id,
-                usuarioExistente[0].usu_nome,
-                usuarioExistente[0].usu_documento,
-                crm
-            ]);
+            const [result] = await db.query(sql, [usu_id, crm]);
 
             return response.status(201).json({
                 sucesso: true,
@@ -162,7 +157,7 @@ module.exports = {
             if (usu_id) {
                 const [usuarioExistente] = await db.query(
                     `
-                    SELECT usu_id, usu_nome, usu_documento
+                    SELECT usu_id
                     FROM Usuario
                     WHERE usu_id = ?
                       AND usu_tipo IN ('Médico', 'Medico')
@@ -220,7 +215,7 @@ module.exports = {
 
             const [usuarioMedico] = await db.query(
                 `
-                SELECT usu_id, usu_nome, usu_documento
+                SELECT usu_id
                 FROM Usuario
                 WHERE usu_id = ?
                   AND usu_tipo IN ('Médico', 'Medico')
@@ -241,16 +236,12 @@ module.exports = {
                 UPDATE Medico
                 SET
                     usu_id = ?,
-                    med_nome = ?,
-                    med_cpf = ?,
                     med_crm = ?
                 WHERE med_id = ?
             `;
 
             await db.query(sql, [
                 usuarioId,
-                usuarioMedico[0].usu_nome,
-                usuarioMedico[0].usu_documento,
                 crm,
                 id
             ]);
