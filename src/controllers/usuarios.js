@@ -53,6 +53,16 @@ function usuarioPodeAlterarCrm(tipo) {
     return normalizarTipoUsuario(tipo) === 'medico';
 }
 
+function obterUsuarioAutenticadoId(request) {
+    return request.usuario?.usu_id || request.usuario?.id || null;
+}
+
+function usuarioAutenticadoEhAlvo(request, usuarioId) {
+    const usuarioAutenticadoId = obterUsuarioAutenticadoId(request);
+
+    return usuarioAutenticadoId !== null && Number(usuarioAutenticadoId) === Number(usuarioId);
+}
+
 function tipoUsuarioParaResposta(tipo) {
     const tipoNormalizado = normalizarTipoUsuario(tipo);
 
@@ -815,7 +825,7 @@ module.exports = {
             const { id } = request.params;
 
             const [usuarioExistente] = await db.query(
-                'SELECT usu_id, usu_email, usu_documento FROM Usuario WHERE usu_id = ?',
+                'SELECT usu_id, usu_email, usu_documento, CAST(usu_status AS UNSIGNED) AS usu_status FROM Usuario WHERE usu_id = ?',
                 [id]
             );
 
@@ -857,6 +867,17 @@ module.exports = {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Instituição não encontrada',
+                    dados: null
+                });
+            }
+
+            if (
+                usuarioAutenticadoEhAlvo(request, id) &&
+                Number(status) !== Number(usuarioExistente[0].usu_status)
+            ) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Nao e possivel alterar o status do proprio usuario',
                     dados: null
                 });
             }
@@ -1007,6 +1028,14 @@ module.exports = {
         try {
             const { id } = request.params;
 
+            if (usuarioAutenticadoEhAlvo(request, id)) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Nao e possivel ocultar o proprio usuario',
+                    dados: null
+                });
+            }
+
             const [usuarioExistente] = await db.query(
                 'SELECT usu_id, CAST(usu_status AS UNSIGNED) AS usu_status FROM Usuario WHERE usu_id = ?',
                 [id]
@@ -1060,6 +1089,14 @@ module.exports = {
         try {
             const { id } = request.params;
 
+            if (usuarioAutenticadoEhAlvo(request, id)) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Nao e possivel ativar o proprio usuario',
+                    dados: null
+                });
+            }
+
             const [usuarioExistente] = await db.query(
                 'SELECT usu_id, CAST(usu_status AS UNSIGNED) AS usu_status FROM Usuario WHERE usu_id = ?',
                 [id]
@@ -1112,6 +1149,14 @@ module.exports = {
     async apagarUsuario(request, response) {
         try {
             const { id } = request.params;
+
+            if (usuarioAutenticadoEhAlvo(request, id)) {
+                return response.status(403).json({
+                    sucesso: false,
+                    mensagem: 'Nao e possivel excluir o proprio usuario',
+                    dados: null
+                });
+            }
 
             const [usuarioExistente] = await db.query(
                 `
