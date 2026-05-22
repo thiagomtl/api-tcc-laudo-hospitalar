@@ -531,9 +531,11 @@ module.exports = {
                     u.usu_biometria,
                     u.usu_tipo,
                     CAST(u.usu_status AS UNSIGNED) AS usu_status,
+                    i.inst_nome,
                     m.med_id,
                     m.med_crm
                 FROM Usuario u
+                LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
             `;
 
@@ -685,7 +687,7 @@ module.exports = {
             }
 
             const [instExistente] = await db.query(
-                'SELECT inst_id FROM Instituicao WHERE inst_id = ?',
+                'SELECT inst_id, inst_nome FROM Instituicao WHERE inst_id = ?',
                 [inst_id]
             );
 
@@ -796,6 +798,7 @@ module.exports = {
                     tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? crm : null,
                     inst_id,
+                    inst_nome: instExistente[0].inst_nome,
                     status: Number(status)
                 }
             });
@@ -859,7 +862,7 @@ module.exports = {
             }
 
             const [instExistente] = await db.query(
-                'SELECT inst_id FROM Instituicao WHERE inst_id = ?',
+                'SELECT inst_id, inst_nome FROM Instituicao WHERE inst_id = ?',
                 [inst_id]
             );
 
@@ -1012,6 +1015,7 @@ module.exports = {
                     tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? (crm || medicoDoUsuario[0]?.med_crm || null) : null,
                     inst_id,
+                    inst_nome: instExistente[0].inst_nome,
                     status: Number(status)
                 }
             });
