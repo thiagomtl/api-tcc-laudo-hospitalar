@@ -92,7 +92,7 @@ Quadro 10 - Tabela Médico
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
 ID Médico	med_id	INT		x		Auto incremento
 ID Usuário	usu_id	INT			x	Usuário vinculado ao médico
-CRM	med_crm	VARCHAR	8			Registro profissional único
+CRM	med_crm	VARCHAR	6			Registro profissional unico
 
 Quadro 11 - Tabela Mensagem_Chat
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações

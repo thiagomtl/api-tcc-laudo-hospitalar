@@ -2,6 +2,7 @@ const db = require('../dataBase/connection');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { registrarLog } = require("./logsAcao");
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 function validarUsuario(dados) {
     const erros = [];
@@ -36,6 +37,14 @@ function validarUsuario(dados) {
     }
 
     return erros;
+}
+
+function normalizarCrm(crm) {
+    return String(crm || '').replace(/\D/g, '').slice(0, 6);
+}
+
+function crmValido(crm) {
+    return /^\d{6}$/.test(String(crm || ''));
 }
 
 function normalizarTipoUsuario(tipo) {
@@ -230,7 +239,7 @@ module.exports = {
             );
 
             if (crm !== undefined && usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
-                const crmTratado = String(crm || '').trim().toUpperCase();
+                const crmTratado = normalizarCrm(crm);
 
                 if (!crmTratado) {
                     return response.status(400).json({
@@ -240,10 +249,10 @@ module.exports = {
                     });
                 }
 
-                if (crmTratado.length > 8) {
+                if (!crmValido(crmTratado)) {
                     return response.status(400).json({
                         sucesso: false,
-                        mensagem: 'CRM deve ter ate 8 caracteres.',
+                        mensagem: 'CRM deve conter exatamente 6 digitos.',
                         dados: null
                     });
                 }
@@ -661,8 +670,10 @@ module.exports = {
                 crm
             } = request.body;
 
+            const nomeNormalizado = normalizarTextoLaudo(nome);
+
             const dadosValidacao = {
-                usu_nome: nome,
+                usu_nome: nomeNormalizado,
                 usu_documento: documento,
                 usu_email: email,
                 usu_senha: senha,
@@ -673,9 +684,14 @@ module.exports = {
             };
 
             const erros = validarUsuario(dadosValidacao);
+            const crmNormalizado = normalizarCrm(crm);
 
-            if (usuarioEhMedico(tipo) && !crm) {
+            if (usuarioEhMedico(tipo) && !crmNormalizado) {
                 erros.push('CRM e obrigatorio para usuario medico');
+            }
+
+            if (usuarioEhMedico(tipo) && crmNormalizado && !crmValido(crmNormalizado)) {
+                erros.push('CRM deve conter exatamente 6 digitos');
             }
 
             if (erros.length > 0) {
@@ -728,7 +744,7 @@ module.exports = {
             if (usuarioEhMedico(tipo)) {
                 const [crmExistente] = await db.query(
                     'SELECT med_id FROM Medico WHERE med_crm = ?',
-                    [crm]
+                    [crmNormalizado]
                 );
 
                 if (crmExistente.length > 0) {
@@ -759,7 +775,7 @@ module.exports = {
             `;
 
             const values = [
-                nome,
+                nomeNormalizado,
                 documento,
                 email,
                 senhaCriptografada,
@@ -776,14 +792,14 @@ module.exports = {
             if (usuarioEhMedico(tipo)) {
                 await db.query(
                     'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                    [result.insertId, crm]
+                    [result.insertId, crmNormalizado]
                 );
             }
 
             await registrarLog({
                 usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
                 acao: "CADASTRO_USUARIO",
-                descricao: `Usuário cadastrado: ${nome}`
+                descricao: `Usuário cadastrado: ${nomeNormalizado}`
             });
 
             return response.status(201).json({
@@ -791,12 +807,12 @@ module.exports = {
                 mensagem: 'Cadastro de usuário realizado com sucesso',
                 dados: {
                     id: result.insertId,
-                    nome,
+                    nome: nomeNormalizado,
                     documento,
                     email,
                     telefone,
                     tipo: tipoUsuarioParaResposta(tipo),
-                    crm: usuarioEhMedico(tipo) ? crm : null,
+                    crm: usuarioEhMedico(tipo) ? crmNormalizado : null,
                     inst_id,
                     inst_nome: instExistente[0].inst_nome,
                     status: Number(status)
@@ -826,6 +842,7 @@ module.exports = {
             } = request.body;
 
             const { id } = request.params;
+            const nomeNormalizado = normalizarTextoLaudo(nome);
 
             const [usuarioExistente] = await db.query(
                 'SELECT usu_id, usu_email, usu_documento, CAST(usu_status AS UNSIGNED) AS usu_status FROM Usuario WHERE usu_id = ?',
@@ -841,7 +858,7 @@ module.exports = {
             }
 
             const dadosValidacao = {
-                usu_nome: nome,
+                usu_nome: nomeNormalizado,
                 usu_documento: documento,
                 usu_email: email,
                 usu_senha: senha,
@@ -919,9 +936,10 @@ module.exports = {
                 'SELECT med_id, med_crm FROM Medico WHERE usu_id = ?',
                 [id]
             );
+            const crmNormalizado = normalizarCrm(crm);
 
             if (usuarioEhMedico(tipo)) {
-                if (!crm && medicoDoUsuario.length === 0) {
+                if (!crmNormalizado && medicoDoUsuario.length === 0) {
                     return response.status(400).json({
                         sucesso: false,
                         mensagem: 'CRM e obrigatorio para usuario medico',
@@ -929,10 +947,18 @@ module.exports = {
                     });
                 }
 
-                if (crm) {
+                if (crmNormalizado && !crmValido(crmNormalizado)) {
+                    return response.status(400).json({
+                        sucesso: false,
+                        mensagem: 'CRM deve conter exatamente 6 digitos',
+                        dados: null
+                    });
+                }
+
+                if (crmNormalizado) {
                     const [crmDuplicado] = await db.query(
                         'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
-                        [crm, id]
+                        [crmNormalizado, id]
                     );
 
                     if (crmDuplicado.length > 0) {
@@ -962,7 +988,7 @@ module.exports = {
             `;
 
             const values = [
-                nome,
+                nomeNormalizado,
                 documento,
                 email,
                 senhaCriptografada,
@@ -993,12 +1019,12 @@ module.exports = {
                 if (medicoDoUsuario.length > 0) {
                     await db.query(
                         'UPDATE Medico SET med_crm = COALESCE(?, med_crm) WHERE usu_id = ?',
-                        [crm || null, id]
+                        [crmNormalizado || null, id]
                     );
                 } else if (medicoDoUsuario.length === 0) {
                     await db.query(
                         'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                        [id, crm]
+                        [id, crmNormalizado]
                     );
                 }
             }
@@ -1008,12 +1034,12 @@ module.exports = {
                 mensagem: `Usuário ${id} atualizado com sucesso!`,
                 dados: {
                     id: Number(id),
-                    nome,
+                    nome: nomeNormalizado,
                     documento,
                     email,
                     telefone,
                     tipo: tipoUsuarioParaResposta(tipo),
-                    crm: usuarioEhMedico(tipo) ? (crm || medicoDoUsuario[0]?.med_crm || null) : null,
+                    crm: usuarioEhMedico(tipo) ? (crmNormalizado || medicoDoUsuario[0]?.med_crm || null) : null,
                     inst_id,
                     inst_nome: instExistente[0].inst_nome,
                     status: Number(status)

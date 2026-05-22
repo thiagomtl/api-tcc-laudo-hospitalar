@@ -1,4 +1,5 @@
 const db = require('../dataBase/connection');
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 module.exports = {
     async listarLeito(request, response) {
@@ -42,6 +43,16 @@ module.exports = {
                 });
             }
 
+            const identificacaoNormalizada = normalizarTextoLaudo(identificacao);
+
+            if (!identificacaoNormalizada) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A identificacao do leito deve conter letras ou numeros.',
+                    dados: null
+                });
+            }
+
             const [setorExistente] = await db.query(
                 `
                 SELECT set_id
@@ -66,7 +77,7 @@ module.exports = {
                 WHERE set_id = ?
                   AND leito_identificacao = ?
                 `,
-                [setor, identificacao]
+                [setor, identificacaoNormalizada]
             );
 
             if (leitoDuplicado.length > 0) {
@@ -84,7 +95,7 @@ module.exports = {
                 ) VALUES (?, ?)
             `;
 
-            const [result] = await db.query(sql, [setor, identificacao]);
+            const [result] = await db.query(sql, [setor, identificacaoNormalizada]);
 
             return response.status(201).json({
                 sucesso: true,
@@ -92,7 +103,7 @@ module.exports = {
                 dados: {
                     id: result.insertId,
                     setor,
-                    identificacao
+                    identificacao: identificacaoNormalizada
                 }
             });
         } catch (error) {
@@ -113,6 +124,16 @@ module.exports = {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Setor e identificação do leito são obrigatórios.',
+                    dados: null
+                });
+            }
+
+            const identificacaoNormalizada = normalizarTextoLaudo(identificacao);
+
+            if (!identificacaoNormalizada) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'A identificacao do leito deve conter letras ou numeros.',
                     dados: null
                 });
             }
@@ -159,7 +180,7 @@ module.exports = {
                   AND leito_identificacao = ?
                   AND leito_id != ?
                 `,
-                [setor, identificacao, id]
+                [setor, identificacaoNormalizada, id]
             );
 
             if (leitoDuplicado.length > 0) {
@@ -178,7 +199,7 @@ module.exports = {
                 WHERE leito_id = ?
             `;
 
-            await db.query(sql, [setor, identificacao, id]);
+            await db.query(sql, [setor, identificacaoNormalizada, id]);
 
             return response.status(200).json({
                 sucesso: true,
@@ -186,7 +207,7 @@ module.exports = {
                 dados: {
                     id: Number(id),
                     setor,
-                    identificacao
+                    identificacao: identificacaoNormalizada
                 }
             });
         } catch (error) {

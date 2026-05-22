@@ -1,5 +1,6 @@
 const db = require('../dataBase/connection');
 const { criarNotificacao } = require('../utils/notificacoes');
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 function normalizarCpf(cpf) {
     return String(cpf || '').replace(/\D/g, '');
@@ -35,7 +36,7 @@ module.exports = {
             const atendimentoEntrada = request.body.atendimento || request.body;
 
             const paciente = {
-                nome: pacienteEntrada.nome,
+                nome: normalizarTextoLaudo(pacienteEntrada.nome),
                 datanasc: pacienteEntrada.datanasc,
                 cpf: normalizarCpf(pacienteEntrada.cpf),
                 telefone: pacienteEntrada.telefone,
@@ -43,7 +44,7 @@ module.exports = {
                 sexo: pacienteEntrada.sexo,
                 num_prontuario: pacienteEntrada.num_prontuario,
                 cns: pacienteEntrada.cns,
-                nome_mae: pacienteEntrada.nome_mae,
+                nome_mae: normalizarTextoLaudo(pacienteEntrada.nome_mae),
                 raca: pacienteEntrada.raca,
                 bairro: pacienteEntrada.bairro,
                 num_casa: pacienteEntrada.num_casa,

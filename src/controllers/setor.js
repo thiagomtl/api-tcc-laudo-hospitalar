@@ -1,4 +1,5 @@
 const db = require('../dataBase/connection');
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 module.exports = {
     async listarSetor(request, response) {
@@ -39,13 +40,23 @@ module.exports = {
                 });
             }
 
+            const setorNormalizado = normalizarTextoLaudo(setor);
+
+            if (!setorNormalizado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O nome do setor deve conter letras ou numeros.',
+                    dados: null
+                });
+            }
+
             const [setorExistente] = await db.query(
                 `
                 SELECT set_id
                 FROM Setor
                 WHERE set_nome = ?
                 `,
-                [setor]
+                [setorNormalizado]
             );
 
             if (setorExistente.length > 0) {
@@ -61,14 +72,14 @@ module.exports = {
                 VALUES (?)
             `;
 
-            const [result] = await db.query(sql, [setor]);
+            const [result] = await db.query(sql, [setorNormalizado]);
 
             return response.status(201).json({
                 sucesso: true,
                 mensagem: 'Setor cadastrado com sucesso',
                 dados: {
                     id: result.insertId,
-                    setor
+                    setor: setorNormalizado
                 }
             });
         } catch (error) {
@@ -89,6 +100,16 @@ module.exports = {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'O nome do setor é obrigatório.',
+                    dados: null
+                });
+            }
+
+            const setorNormalizado = normalizarTextoLaudo(setor);
+
+            if (!setorNormalizado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'O nome do setor deve conter letras ou numeros.',
                     dados: null
                 });
             }
@@ -117,7 +138,7 @@ module.exports = {
                 WHERE set_nome = ?
                   AND set_id != ?
                 `,
-                [setor, id]
+                [setorNormalizado, id]
             );
 
             if (setorDuplicado.length > 0) {
@@ -134,14 +155,14 @@ module.exports = {
                 WHERE set_id = ?
             `;
 
-            await db.query(sql, [setor, id]);
+            await db.query(sql, [setorNormalizado, id]);
 
             return response.status(200).json({
                 sucesso: true,
                 mensagem: `Setor ID ${id} atualizado com sucesso`,
                 dados: {
                     id: Number(id),
-                    setor
+                    setor: setorNormalizado
                 }
             });
         } catch (error) {

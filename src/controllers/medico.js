@@ -1,5 +1,13 @@
 const db = require('../dataBase/connection');
 
+function normalizarCrm(crm) {
+    return String(crm || '').replace(/\D/g, '').slice(0, 6);
+}
+
+function crmValido(crm) {
+    return /^\d{6}$/.test(String(crm || ''));
+}
+
 module.exports = {
     async listarMedico(request, response) {
         try {
@@ -37,11 +45,20 @@ module.exports = {
     async cadastrarMedico(request, response) {
         try {
             const { usu_id, crm } = request.body;
+            const crmNormalizado = normalizarCrm(crm);
 
-            if (!usu_id || !crm) {
+            if (!usu_id || !crmNormalizado) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Usuario e CRM sao obrigatorios.',
+                    dados: null
+                });
+            }
+
+            if (!crmValido(crmNormalizado)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM deve conter exatamente 6 digitos.',
                     dados: null
                 });
             }
@@ -88,7 +105,7 @@ module.exports = {
                 FROM Medico
                 WHERE med_crm = ?
                 `,
-                [crm]
+                [crmNormalizado]
             );
 
             if (crmExistente.length > 0) {
@@ -104,7 +121,7 @@ module.exports = {
                 VALUES (?, ?)
             `;
 
-            const [result] = await db.query(sql, [usu_id, crm]);
+            const [result] = await db.query(sql, [usu_id, crmNormalizado]);
 
             return response.status(201).json({
                 sucesso: true,
@@ -112,7 +129,7 @@ module.exports = {
                 dados: {
                     id: result.insertId,
                     usu_id: Number(usu_id),
-                    crm
+                    crm: crmNormalizado
                 }
             });
         } catch (error) {
@@ -128,11 +145,20 @@ module.exports = {
         try {
             const { usu_id, crm } = request.body;
             const { id } = request.params;
+            const crmNormalizado = normalizarCrm(crm);
 
-            if (!crm) {
+            if (!crmNormalizado) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'CRM e obrigatorio.',
+                    dados: null
+                });
+            }
+
+            if (!crmValido(crmNormalizado)) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'CRM deve conter exatamente 6 digitos.',
                     dados: null
                 });
             }
@@ -200,7 +226,7 @@ module.exports = {
                 WHERE med_crm = ?
                   AND med_id != ?
                 `,
-                [crm, id]
+                [crmNormalizado, id]
             );
 
             if (crmDuplicado.length > 0) {
@@ -242,7 +268,7 @@ module.exports = {
 
             await db.query(sql, [
                 usuarioId,
-                crm,
+                crmNormalizado,
                 id
             ]);
 
@@ -252,7 +278,7 @@ module.exports = {
                 dados: {
                     id: Number(id),
                     usu_id: Number(usuarioId),
-                    crm
+                    crm: crmNormalizado
                 }
             });
         } catch (error) {

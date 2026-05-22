@@ -1,10 +1,11 @@
 const db = require('../dataBase/connection');
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 module.exports = {
     async listarPaciente(request, response) {
         try {
             const { nome } = request.query;
-            const pacienteNome = nome ? `%${nome}%` : `%`;
+            const pacienteNome = nome ? `%${normalizarTextoLaudo(nome)}%` : `%`;
 
             const sql = `
                 SELECT
@@ -76,6 +77,17 @@ module.exports = {
                 });
             }
 
+            const nomeNormalizado = normalizarTextoLaudo(nome);
+            const nomeMaeNormalizado = nome_mae ? normalizarTextoLaudo(nome_mae) : null;
+
+            if (!nomeNormalizado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Nome deve conter letras ou numeros.',
+                    dados: null
+                });
+            }
+
             if (!/^\d{11}$/.test(String(cpf))) {
                 return response.status(400).json({
                     sucesso: false,
@@ -141,7 +153,7 @@ module.exports = {
             `;
 
             const values = [
-                nome,
+                nomeNormalizado,
                 datanasc || null,
                 cpf,
                 telefone || null,
@@ -149,7 +161,7 @@ module.exports = {
                 sexo ?? null,
                 num_prontuario,
                 cns || null,
-                nome_mae || null,
+                nomeMaeNormalizado,
                 raca || null,
                 bairro || null,
                 num_casa || null,
@@ -167,14 +179,14 @@ module.exports = {
                 mensagem: 'Cadastro de paciente realizado com sucesso',
                 dados: {
                     id: result.insertId,
-                    nome,
+                    nome: nomeNormalizado,
                     datanasc,
                     cpf,
                     telefone,
                     sexo,
                     num_prontuario,
                     cns,
-                    nome_mae,
+                    nome_mae: nomeMaeNormalizado,
                     raca,
                     bairro,
                     num_casa,
@@ -221,6 +233,17 @@ module.exports = {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Nome, CPF e número de prontuário são obrigatórios.',
+                    dados: null
+                });
+            }
+
+            const nomeNormalizado = normalizarTextoLaudo(nome);
+            const nomeMaeNormalizado = nome_mae ? normalizarTextoLaudo(nome_mae) : null;
+
+            if (!nomeNormalizado) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Nome deve conter letras ou numeros.',
                     dados: null
                 });
             }
@@ -308,14 +331,14 @@ module.exports = {
             `;
 
             const values = [
-                nome,
+                nomeNormalizado,
                 datanasc || null,
                 cpf,
                 telefone || null,
                 sexo ?? null,
                 num_prontuario,
                 cns || null,
-                nome_mae || null,
+                nomeMaeNormalizado,
                 raca || null,
                 bairro || null,
                 num_casa || null,
@@ -334,14 +357,14 @@ module.exports = {
                 mensagem: `Paciente ${id} atualizado com sucesso!`,
                 dados: {
                     id: Number(id),
-                    nome,
+                    nome: nomeNormalizado,
                     datanasc,
                     cpf,
                     telefone,
                     sexo,
                     num_prontuario,
                     cns,
-                    nome_mae,
+                    nome_mae: nomeMaeNormalizado,
                     raca,
                     bairro,
                     num_casa,

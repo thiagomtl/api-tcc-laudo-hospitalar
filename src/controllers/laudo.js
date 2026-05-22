@@ -1,5 +1,6 @@
 const db = require('../dataBase/connection');
 const { registrarLog } = require("./logsAcao");
+const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
 function normalizarTipoUsuario(tipo) {
     return String(tipo || '')
@@ -119,7 +120,7 @@ module.exports = {
 
             if (nome) {
                 sql += ` AND pac.pac_nome LIKE ? `;
-                params.push(`%${nome}%`);
+                params.push(`%${normalizarTextoLaudo(nome)}%`);
             }
 
             if (convenio) {
@@ -129,7 +130,7 @@ module.exports = {
 
             if (setor) {
                 sql += ` AND seto.set_nome LIKE ? `;
-                params.push(`%${setor}%`);
+                params.push(`%${normalizarTextoLaudo(setor)}%`);
             }
 
             if (medico) {
