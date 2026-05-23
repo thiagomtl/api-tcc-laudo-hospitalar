@@ -43,6 +43,10 @@ function normalizarCrm(crm) {
     return String(crm || '').replace(/\D/g, '').slice(0, 6);
 }
 
+function normalizarUsuarioAcesso(usuario) {
+    return String(usuario || '').trim().toLowerCase();
+}
+
 function crmValido(crm) {
     return /^\d{6}$/.test(String(crm || ''));
 }
@@ -108,6 +112,7 @@ async function buscarPerfilPorId(usuarioId) {
         SELECT
             u.usu_id,
             u.usu_nome,
+            u.usu_usuario,
             u.usu_documento,
             u.usu_email,
             u.usu_datacriacao,
@@ -150,6 +155,7 @@ module.exports = {
             SELECT
                 u.usu_id,
                 u.usu_nome,
+                u.usu_usuario,
                 u.usu_documento,
                 u.usu_email,
                 u.usu_datacriacao,
@@ -531,6 +537,7 @@ module.exports = {
                 SELECT
                     u.usu_id,
                     u.usu_nome,
+                    u.usu_usuario,
                     u.usu_documento,
                     u.usu_email,
                     u.usu_datacriacao,
@@ -567,9 +574,10 @@ module.exports = {
 
     async usuariosLogin(request, response) {
         try {
-            const { email, senha } = request.body;
+            const identificador = String(request.body.identificador || request.body.email || '').trim();
+            const { senha } = request.body;
 
-            if (!email || !senha) {
+            if (!identificador || !senha) {
                 return response.status(400).json({
                     sucesso: false,
                     mensagem: 'Email e senha são obrigatórios.',
@@ -577,10 +585,16 @@ module.exports = {
                 });
             }
 
+            const identificadorEmail = identificador.toLowerCase();
+            const identificadorDocumento = identificador.replace(/\D/g, '');
+            const identificadorUsuario = normalizarUsuarioAcesso(identificador);
+
             const sql = `
                 SELECT
                     u.usu_id,
                     u.usu_nome,
+                    u.usu_usuario,
+                    u.usu_documento,
                     u.usu_email,
                     u.usu_senha,
                     u.usu_tipo,
@@ -592,10 +606,21 @@ module.exports = {
                 FROM Usuario u
                 LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
-                WHERE u.usu_email = ? AND u.usu_status = 1
+                WHERE u.usu_status = 1
+                  AND (
+                    LOWER(u.usu_email) = ?
+                    OR u.usu_documento = ?
+                    OR LOWER(u.usu_usuario) = ?
+                    OR LOWER(u.usu_nome) = ?
+                  )
             `;
 
-            const [rows] = await db.query(sql, [email]);
+            const [rows] = await db.query(sql, [
+                identificadorEmail,
+                identificadorDocumento,
+                identificadorUsuario,
+                identificadorUsuario
+            ]);
 
             if (rows.length < 1) {
                 return response.status(403).json({
@@ -624,6 +649,7 @@ module.exports = {
                     usu_id: usuario.usu_id,
                     id: usuario.usu_id,
                     nome: usuario.usu_nome,
+                    usuario: usuario.usu_usuario,
                     email: usuario.usu_email,
                     tipo: usuario.usu_tipo,
                     inst_id: usuario.inst_id,
@@ -660,6 +686,7 @@ module.exports = {
         try {
             const {
                 nome,
+                usuario,
                 documento,
                 senha,
                 email,
@@ -673,9 +700,11 @@ module.exports = {
             } = request.body;
 
             const nomeNormalizado = normalizarTextoLaudo(nome);
+            const usuarioNormalizado = normalizarUsuarioAcesso(usuario);
 
             const dadosValidacao = {
                 usu_nome: nomeNormalizado,
+                usu_usuario: usuarioNormalizado,
                 usu_documento: documento,
                 usu_email: email,
                 usu_senha: senha,
@@ -687,6 +716,10 @@ module.exports = {
 
             const erros = validarUsuario(dadosValidacao);
             const crmNormalizado = normalizarCrm(crm);
+
+            if (!usuarioNormalizado) {
+                erros.push('Usuario e obrigatorio');
+            }
 
             if (usuarioEhMedico(tipo) && !crmNormalizado) {
                 erros.push('CRM e obrigatorio para usuario medico');
@@ -730,6 +763,19 @@ module.exports = {
                 });
             }
 
+            const [usuarioExistente] = await db.query(
+                'SELECT usu_id FROM Usuario WHERE LOWER(usu_usuario) = ?',
+                [usuarioNormalizado]
+            );
+
+            if (usuarioExistente.length > 0) {
+                return response.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Usuario ja cadastrado',
+                    dados: null
+                });
+            }
+
             const [docExistente] = await db.query(
                 'SELECT usu_id FROM Usuario WHERE usu_documento = ?',
                 [documento]
@@ -763,6 +809,7 @@ module.exports = {
             const sql = `
                 INSERT INTO Usuario (
                     usu_nome,
+                    usu_usuario,
                     usu_documento,
                     usu_email,
                     usu_senha,
@@ -773,11 +820,12 @@ module.exports = {
                     usu_biometria,
                     usu_tipo,
                     usu_status
-                ) VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?)
             `;
 
             const values = [
                 nomeNormalizado,
+                usuarioNormalizado,
                 documento,
                 email,
                 senhaCriptografada,
@@ -810,6 +858,7 @@ module.exports = {
                 dados: {
                     id: result.insertId,
                     nome: nomeNormalizado,
+                    usuario: usuarioNormalizado,
                     documento,
                     email,
                     telefone,

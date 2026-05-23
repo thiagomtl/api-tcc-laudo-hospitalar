@@ -34,6 +34,7 @@ CREATE TABLE Instituicao (
 CREATE TABLE Usuario (
     usu_id INT AUTO_INCREMENT PRIMARY KEY,
     usu_nome VARCHAR(100) NOT NULL,
+    usu_usuario VARCHAR(50) NULL UNIQUE,
     usu_documento VARCHAR(11) NOT NULL,
     usu_email VARCHAR(100) NOT NULL,
     usu_senha VARCHAR(100) NOT NULL,

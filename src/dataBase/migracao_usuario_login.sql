@@ -1,0 +1,2 @@
+ALTER TABLE Usuario
+ADD COLUMN usu_usuario VARCHAR(50) NULL UNIQUE AFTER usu_nome;
