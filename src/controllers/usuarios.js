@@ -804,7 +804,7 @@ module.exports = {
 
             return response.status(201).json({
                 sucesso: true,
-                mensagem: 'Cadastro de usuário realizado com sucesso',
+                mensagem: 'Usuário cadastrado',
                 dados: {
                     id: result.insertId,
                     nome: nomeNormalizado,
