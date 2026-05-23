@@ -585,10 +585,12 @@ module.exports = {
                     u.usu_senha,
                     u.usu_tipo,
                     u.inst_id,
+                    i.inst_nome,
                     CAST(u.usu_status AS UNSIGNED) AS usu_status,
                     m.med_id,
                     m.med_crm
                 FROM Usuario u
+                LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
                 WHERE u.usu_email = ? AND u.usu_status = 1
             `;
