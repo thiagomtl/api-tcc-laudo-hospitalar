@@ -140,11 +140,20 @@ CREATE TABLE Laudo (
 
 CREATE TABLE Favorito (
     fav_id INT AUTO_INCREMENT PRIMARY KEY,
-    lau_id INT NULL,
     med_id INT NOT NULL,
     fav_nome VARCHAR(30) NOT NULL,
-    FOREIGN KEY (lau_id) REFERENCES Laudo(lau_id),
-    FOREIGN KEY (med_id) REFERENCES Medico(med_id)
+    cid_id INT NULL,
+    pro_id INT NULL,
+    cli_id INT NULL,
+    fav_carater VARCHAR(30) NULL,
+    fav_sinais VARCHAR(1024) NULL,
+    fav_internacao VARCHAR(1024) NULL,
+    fav_resultado VARCHAR(512) NULL,
+    fav_recurso VARCHAR(512) NULL,
+    FOREIGN KEY (med_id) REFERENCES Medico(med_id),
+    FOREIGN KEY (cid_id) REFERENCES CID(cid_id),
+    FOREIGN KEY (pro_id) REFERENCES Procedimento(pro_id),
+    FOREIGN KEY (cli_id) REFERENCES Escolha_Clinica(cli_id)
 );
 
 

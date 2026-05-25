@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DashboardController = require('../controllers/dashboard');
-const {autenticarToken, somenteAdministrador} = require('../middlewares/auth');
+const {autenticarToken, somenteAdministrador, somenteMedico} = require('../middlewares/auth');
 const LogsAcaoController = require("../controllers/logsAcao");
 
 const MedicoController = require('../controllers/medico');
@@ -32,10 +32,10 @@ router.get("/logs", LogsAcaoController.listarLogs);
 
 router.get('/dashboard/resumo', autenticarToken, DashboardController.resumoDashboard);
 
-router.get('/favoritos', FavoritoController.listarFavorito);
-router.post('/favoritos', FavoritoController.cadastrarFavorito);
-router.patch('/favoritos/:id', FavoritoController.editarFavorito);
-router.delete('/favoritos/:id', FavoritoController.apagarFavorito);
+router.get('/favoritos', autenticarToken, somenteMedico, FavoritoController.listarFavorito);
+router.post('/favoritos', autenticarToken, somenteMedico, FavoritoController.cadastrarFavorito);
+router.patch('/favoritos/:id', autenticarToken, somenteMedico, FavoritoController.editarFavorito);
+router.delete('/favoritos/:id', autenticarToken, somenteMedico, FavoritoController.apagarFavorito);
 
 router.get('/instituicao', InstituicaoController.listarInstituicao);
 router.post('/instituicao', InstituicaoController.cadastrarInstituicao);
