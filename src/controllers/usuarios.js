@@ -537,7 +537,6 @@ module.exports = {
                 SELECT
                     u.usu_id,
                     u.usu_nome,
-                    u.usu_usuario,
                     u.usu_documento,
                     u.usu_email,
                     u.usu_datacriacao,
@@ -547,11 +546,9 @@ module.exports = {
                     u.usu_biometria,
                     u.usu_tipo,
                     CAST(u.usu_status AS UNSIGNED) AS usu_status,
-                    i.inst_nome,
                     m.med_id,
                     m.med_crm
                 FROM Usuario u
-                LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
             `;
 
@@ -912,7 +909,7 @@ module.exports = {
                 usu_nome: nomeNormalizado,
                 usu_documento: documento,
                 usu_email: email,
-                usu_senha: senha,
+                usu_senha: senha || "senha_nao_alterada",
                 inst_id,
                 usu_telefone: telefone,
                 usu_tipo: tipo,
@@ -1022,33 +1019,43 @@ module.exports = {
                 }
             }
 
-            const senhaCriptografada = await bcrypt.hash(senha, 10);
-
-            const sql = `
-                UPDATE Usuario
-                SET
-                    usu_nome = ?,
-                    usu_documento = ?,
-                    usu_email = ?,
-                    usu_senha = ?,
-                    inst_id = ?,
-                    usu_telefone = ?,
-                    usu_tipo = ?,
-                    usu_status = ?
-                WHERE usu_id = ?
+            let sql = `
+            UPDATE Usuario
+            SET
+                usu_nome = ?,
+                usu_documento = ?,
+                usu_email = ?,
+                inst_id = ?,
+                usu_telefone = ?,
+                usu_tipo = ?,
+                usu_status = ?
             `;
 
             const values = [
-                nomeNormalizado,
+                nome,
                 documento,
                 email,
-                senhaCriptografada,
                 inst_id,
                 telefone,
                 tipo,
-                Number(status),
-                id
+                Number(status)
             ];
+
+            if (senha && senha.trim() !== "") {
+                const senhaCriptografada = await bcrypt.hash(senha, 10);
+
+                sql += `,
+                usu_senha = ?
+            `;
+
+                values.push(senhaCriptografada);
+            }
+
+            sql += `
+            WHERE usu_id = ?
+            `;
+
+            values.push(id);
 
             const [result] = await db.query(sql, values);
 
