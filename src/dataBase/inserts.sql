@@ -42,16 +42,32 @@ INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VAL
 
 /* Tabela Usuario */
 INSERT INTO Usuario (
-    usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao,
+    usu_nome, usu_usuario, usu_documento, usu_email, usu_senha, usu_datacriacao,
     inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
 ) VALUES
-('Ana Almeida', '10000000001', 'adm@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
-('Bruno Costa', '10000000002', 'fat@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:05:00', 1, '14990000002', NULL, NULL, 'Faturista', 1),
-('Carla Dias', '10000000003', 'med@medsync.com', '$2b$10$CMqTblSLpljm489CFxM9M.k5OP.42IwxlgVJFUbZ9PaEzPqVpLbmi', '2026-05-20 08:10:00', 1, '14990000003', NULL, NULL, 'Medico', 1);
+('Ana Almeida', 'ana.ad', '10000000001', 'adm@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
+('Bruno Costa', 'bruno.fat', '10000000002', 'fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14990000002', NULL, NULL, 'Faturista', 1),
+('Carla Dias', 'carla.med', '10000000003', 'med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14990000003', NULL, NULL, 'Medico', 1),
+('Luis Administrador', 'luis.ad', '10000000004', 'luis.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:15:00', 1, '14990000004', NULL, NULL, 'Administrador', 1),
+('Luis Faturista', 'luis.fat', '10000000005', 'luis.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:20:00', 1, '14990000005', NULL, NULL, 'Faturista', 1),
+('Luis Medico', 'luis.med', '10000000006', 'luis.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:25:00', 1, '14990000006', NULL, NULL, 'Medico', 1),
+('Joao Administrador', 'joao.ad', '10000000007', 'joao.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:30:00', 1, '14990000007', NULL, NULL, 'Administrador', 1),
+('Joao Faturista', 'joao.fat', '10000000008', 'joao.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:35:00', 1, '14990000008', NULL, NULL, 'Faturista', 1),
+('Joao Medico', 'joao.med', '10000000009', 'joao.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:40:00', 1, '14990000009', NULL, NULL, 'Medico', 1),
+('Thiago Administrador', 'thiago.ad', '10000000010', 'thiago.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:45:00', 1, '14990000010', NULL, NULL, 'Administrador', 1),
+('Thiago Faturista', 'thiago.fat', '10000000011', 'thiago.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:50:00', 1, '14990000011', NULL, NULL, 'Faturista', 1),
+('Thiago Medico', 'thiago.med', '10000000012', 'thiago.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:55:00', 1, '14990000012', NULL, NULL, 'Medico', 1),
+('Luiz Administrador', 'luiz.ad', '10000000013', 'luiz.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:00:00', 1, '14990000013', NULL, NULL, 'Administrador', 1),
+('Luiz Faturista', 'luiz.fat', '10000000014', 'luiz.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:05:00', 1, '14990000014', NULL, NULL, 'Faturista', 1),
+('Luiz Medico', 'luiz.med', '10000000015', 'luiz.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:10:00', 1, '14990000015', NULL, NULL, 'Medico', 1);
 
 /* Tabela Medico: os dados pessoais ficam em Usuario; aqui fica apenas o CRM */
 INSERT INTO Medico (usu_id, med_crm) VALUES
-(3, '1000003');
+(3, '100003'),
+(6, '900006'),
+(9, '900009'),
+(12, '900012'),
+(15, '900015');
 
 /* Tabela Paciente */
 INSERT INTO Paciente (
