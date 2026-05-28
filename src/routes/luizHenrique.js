@@ -14,10 +14,11 @@ router.patch('/perfil', autenticarToken, UsuarioController.editarPerfil);
 router.patch('/alterar-email', autenticarToken, UsuarioController.alterarEmail);
 router.patch('/alterar-senha', autenticarToken, UsuarioController.alterarSenha);
 
-router.get('/medicos', MedicoController.listarMedico);
-router.post('/medicos', MedicoController.cadastrarMedico);
-router.patch('/medicos/:id', MedicoController.editarMedico);
-router.delete('/medicos/:id', MedicoController.apagarMedico);
+router.get("/medicos", autenticarToken, MedicoController.listarMedico);
+router.post("/medicos", autenticarToken, somenteAdministrador, MedicoController.cadastrarMedico);
+router.patch("/medicos/:id", autenticarToken, somenteAdministrador, MedicoController.editarMedico);
+router.delete("/medicos/:id", autenticarToken, somenteAdministrador, MedicoController.apagarMedico);
+
 
 router.get('/usuarios', autenticarToken,somenteAdministrador,UsuarioController.listarUsuario);
 router.post('/usuarios', autenticarToken, somenteAdministrador, UsuarioController.cadastrarUsuario);
@@ -28,7 +29,7 @@ router.patch('/usuarios/ativar/:id', autenticarToken, somenteAdministrador, Usua
 
 router.post('/login', UsuarioController.usuariosLogin);
 
-router.get("/logs", LogsAcaoController.listarLogs);
+router.get("/logs", autenticarToken, somenteAdministrador, LogsAcaoController.listarLogs);
 
 router.get('/dashboard/resumo', autenticarToken, DashboardController.resumoDashboard);
 
@@ -37,10 +38,10 @@ router.post('/favoritos', autenticarToken, somenteMedico, FavoritoController.cad
 router.patch('/favoritos/:id', autenticarToken, somenteMedico, FavoritoController.editarFavorito);
 router.delete('/favoritos/:id', autenticarToken, somenteMedico, FavoritoController.apagarFavorito);
 
-router.get('/instituicao', InstituicaoController.listarInstituicao);
-router.post('/instituicao', InstituicaoController.cadastrarInstituicao);
-router.patch('/instituicao/:id', InstituicaoController.editarInstituicao);
-router.delete('/instituicao/:id', InstituicaoController.apagarInstituicao);
+router.get('/instituicao', autenticarToken, InstituicaoController.listarInstituicao);
+router.post("/instituicao", autenticarToken, somenteAdministrador, InstituicaoController.cadastrarInstituicao);
+router.patch("/instituicao/:id", autenticarToken, somenteAdministrador, InstituicaoController.editarInstituicao);
+router.delete("/instituicao/:id", autenticarToken, somenteAdministrador, InstituicaoController.apagarInstituicao);
 
 
 module.exports = router;
