@@ -31,7 +31,7 @@ router.post('/login', UsuarioController.usuariosLogin);
 
 router.get("/logs", autenticarToken, somenteAdministrador, LogsAcaoController.listarLogs);
 
-router.get('/dashboard/resumo', autenticarToken, DashboardController.resumoDashboard);
+router.get('/dashboard/resumo', autenticarToken, somenteAdministrador, DashboardController.resumoDashboard);
 
 router.get('/favoritos', autenticarToken, somenteMedico, FavoritoController.listarFavorito);
 router.post('/favoritos', autenticarToken, somenteMedico, FavoritoController.cadastrarFavorito);

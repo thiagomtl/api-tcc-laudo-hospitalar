@@ -191,10 +191,19 @@ module.exports = {
                 recurso
             } = request.body;
 
-            if (!atendimento || !escolhaClinica || !cid || !procedimento || !sinais) {
+            if (
+                !atendimento ||
+                !escolhaClinica ||
+                !cid ||
+                !procedimento ||
+                !sinais ||
+                !internacao ||
+                !resultado ||
+                !recurso
+            ) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Atendimento, escolha clínica, CID, procedimento e sinais são obrigatórios.',
+                    mensagem: 'Todos os campos obrigatórios devem ser preenchidos.',
                     dados: null
                 });
             }
@@ -331,7 +340,7 @@ module.exports = {
             console.log("CHEGOU NO LOG DO LAUDO");
             console.log("USUÁRIO:", request.usuario);
             await registrarLog({
-                usuarioId: request.usuario?.id || null,
+                usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
                 acao: "CADASTRO_LAUDO",
                 descricao: `Laudo cadastrado para o atendimento ${atendimento}`
             });

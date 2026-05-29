@@ -1273,7 +1273,7 @@ module.exports = {
             if (logs.length > 0) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'Não é possível excluir usuário com logs de ação registrados',
+                    mensagem: 'Este usuário possui histórico no sistema. Por segurança, ele não pode ser excluído, utilize a opção de ocultar/ativar para alterar o status do usuário.',
                     dados: null
                 });
             }
