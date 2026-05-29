@@ -17,6 +17,7 @@ SELECT proc_cid_id, pro_id, cid_id FROM Procedimento_Cids;
 SELECT lau_id, atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status FROM Laudo;
 SELECT fav_id, lau_id, med_id, fav_nome FROM Favorito;
 
+
 -- SELECTs com INNER JOIN para tabelas com chave estrangeira
 SELECT leito_id, set_id, leito_identificacao, Setor.set_nome FROM Leito INNER JOIN Setor ON Leito.set_id = Setor.set_id;
 SELECT usu_id, usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao, Usuario.inst_id, Instituicao.inst_nome, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status FROM Usuario INNER JOIN Instituicao ON Usuario.inst_id = Instituicao.inst_id;
@@ -43,6 +44,14 @@ INNER JOIN Laudo ON Favorito.lau_id = Laudo.lau_id
 INNER JOIN Medico ON Favorito.med_id = Medico.med_id
 INNER JOIN Usuario ON Medico.usu_id = Usuario.usu_id;
 
+-- LAUDO, ATENDIMENTO, USUARIO, MEDICO
+SELECT l.lau_id, l.atend_id, a.atend_data, m.med_id, m.med_crm, u.usu_id, u.usu_nome AS med_nome, u.usu_email AS med_email, l.lau_resultado, l.lau_datapreenc, l.lau_status
+FROM Laudo l
+INNER JOIN Atendimento a ON l.atend_id = a.atend_id
+INNER JOIN Medico m ON a.med_id = m.med_id
+INNER JOIN Usuario u ON m.usu_id = u.usu_id;
+
+
 -- DROP TABLEs na ordem correta para evitar erros de dependência
 DROP TABLE IF EXISTS Favorito;
 DROP TABLE IF EXISTS Laudo;
@@ -61,3 +70,59 @@ DROP TABLE IF EXISTS Escolha_Clinica;
 DROP TABLE IF EXISTS Procedimento;
 DROP TABLE IF EXISTS CID;
 DROP TABLE IF EXISTS Paciente;
+
+
+-- APAGAR USUARIO POR ID
+SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+START TRANSACTION;
+
+DROP TEMPORARY TABLE IF EXISTS tmp_usuarios_excluir;
+
+CREATE TEMPORARY TABLE tmp_usuarios_excluir (
+    usu_id INT PRIMARY KEY
+);
+
+INSERT INTO tmp_usuarios_excluir (usu_id) VALUES
+(1), (2), (3); --Defina os IDs dos usuários a serem excluídos
+
+DELETE l
+FROM Laudo l
+JOIN Atendimento a ON a.atend_id = l.atend_id
+JOIN Medico m ON m.med_id = a.med_id
+JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
+
+DELETE f
+FROM Favorito f
+JOIN Medico m ON m.med_id = f.med_id
+JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
+
+DELETE a
+FROM Atendimento a
+JOIN Medico m ON m.med_id = a.med_id
+JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
+
+DELETE m
+FROM Medico m
+JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
+
+DELETE lc
+FROM Logs_Acao lc
+JOIN tmp_usuarios_excluir t ON t.usu_id = lc.usu_id;
+
+DELETE mc
+FROM Mensagem_Chat mc
+JOIN tmp_usuarios_excluir t
+  ON t.usu_id = mc.usu_id_remetente
+  OR t.usu_id = mc.usu_id_destinatario;
+
+DELETE u
+FROM Usuario u
+JOIN tmp_usuarios_excluir t ON t.usu_id = u.usu_id;
+
+DROP TEMPORARY TABLE IF EXISTS tmp_usuarios_excluir;
+
+COMMIT;
+
+SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
