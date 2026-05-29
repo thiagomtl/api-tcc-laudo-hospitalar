@@ -14,6 +14,21 @@ function camposAusentes(objeto, campos) {
     return campos.filter((campo) => objeto[campo] === undefined || objeto[campo] === null || objeto[campo] === '');
 }
 
+function normalizarNomeMedico(nome) {
+    return normalizarTextoLaudo(nome)
+        .replace(/\b(DR|DRA|DRS|DRAS|DOUTOR|DOUTORA|MEDICO|MEDICA)\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function valorCampo(objeto, ...campos) {
+    if (!objeto || typeof objeto !== 'object') {
+        return undefined;
+    }
+
+    return primeiroValor(...campos.map((campo) => objeto[campo]));
+}
+
 async function validarReferencia(connection, tabela, coluna, valor, mensagem) {
     const [rows] = await connection.query(
         `SELECT ${coluna} FROM ${tabela} WHERE ${coluna} = ?`,
@@ -25,6 +40,77 @@ async function validarReferencia(connection, tabela, coluna, valor, mensagem) {
         error.status = 400;
         throw error;
     }
+}
+
+async function buscarMedicoPorNome(connection, nomeMedico) {
+    const nomeNormalizado = normalizarNomeMedico(nomeMedico);
+
+    const [medicos] = await connection.query(
+        `
+        SELECT
+            med.med_id,
+            med.med_crm,
+            u.usu_id,
+            u.usu_nome
+        FROM Medico med
+        INNER JOIN Usuario u
+            ON med.usu_id = u.usu_id
+        WHERE u.usu_tipo IN ('Medico', 'Médico')
+          AND u.usu_status = 1
+        `
+    );
+
+    return medicos.find((medico) => normalizarNomeMedico(medico.usu_nome) === nomeNormalizado);
+}
+
+async function resolverMedico(connection, medicoEntrada) {
+    const medico = typeof medicoEntrada === 'object'
+        ? primeiroValor(
+            medicoEntrada.med_id,
+            medicoEntrada.id,
+            medicoEntrada.nome,
+            medicoEntrada.nome_medico,
+            medicoEntrada.medico_nome,
+            medicoEntrada.med_nome
+        )
+        : medicoEntrada;
+
+    const medicoNormalizado = String(medico || '').trim();
+
+    if (/^\d+$/.test(medicoNormalizado)) {
+        const [rows] = await connection.query(
+            `
+            SELECT med_id
+            FROM Medico
+            WHERE med_id = ?
+            `,
+            [Number(medicoNormalizado)]
+        );
+
+        if (rows.length === 0) {
+            const error = new Error('Medico nao encontrado.');
+            error.status = 400;
+            throw error;
+        }
+
+        return {
+            id: Number(medicoNormalizado),
+            nome: null
+        };
+    }
+
+    const medicoEncontrado = await buscarMedicoPorNome(connection, medicoNormalizado);
+
+    if (!medicoEncontrado) {
+        const error = new Error('Medico nao encontrado pelo nome informado.');
+        error.status = 400;
+        throw error;
+    }
+
+    return {
+        id: medicoEncontrado.med_id,
+        nome: medicoEncontrado.usu_nome
+    };
 }
 
 module.exports = {
@@ -59,7 +145,13 @@ module.exports = {
                 convenio: atendimentoEntrada.convenio,
                 leito: atendimentoEntrada.leito,
                 carater: atendimentoEntrada.carater,
-                medico: atendimentoEntrada.medico
+                medico: primeiroValor(
+                    atendimentoEntrada.medico,
+                    atendimentoEntrada.nome_medico,
+                    atendimentoEntrada.medico_nome,
+                    atendimentoEntrada.med_nome,
+                    valorCampo(atendimentoEntrada.medico, 'med_id', 'id', 'nome', 'nome_medico', 'medico_nome', 'med_nome')
+                )
             };
 
             const camposObrigatoriosPaciente = [
@@ -113,7 +205,8 @@ module.exports = {
             await validarReferencia(connection, 'Convenio', 'con_id', atendimento.convenio, 'Convenio nao encontrado.');
             await validarReferencia(connection, 'Leito', 'leito_id', atendimento.leito, 'Leito nao encontrado.');
             await validarReferencia(connection, 'Carater', 'car_id', atendimento.carater, 'Carater nao encontrado.');
-            await validarReferencia(connection, 'Medico', 'med_id', atendimento.medico, 'Medico nao encontrado.');
+
+            const medicoResolvido = await resolverMedico(connection, atendimento.medico);
 
             const [pacientesEncontrados] = await connection.query(
                 `
@@ -247,7 +340,7 @@ module.exports = {
                     atendimento.convenio,
                     atendimento.leito,
                     atendimento.carater,
-                    atendimento.medico
+                    medicoResolvido.id
                 ]
             );
 
@@ -270,7 +363,8 @@ module.exports = {
                         convenio: atendimento.convenio,
                         leito: atendimento.leito,
                         carater: atendimento.carater,
-                        medico: atendimento.medico
+                        medico: medicoResolvido.id,
+                        medico_nome: medicoResolvido.nome || atendimento.medico
                     }
                 }
             });
@@ -288,7 +382,8 @@ module.exports = {
                         convenio: atendimento.convenio,
                         leito: atendimento.leito,
                         carater: atendimento.carater,
-                        medico: atendimento.medico
+                        medico: medicoResolvido.id,
+                        medico_nome: medicoResolvido.nome || atendimento.medico
                     },
                     notificacao
                 }
