@@ -26,6 +26,7 @@ router.delete('/cid/:id', autenticarToken, somenteAdministrador, CidController.a
 router.get('/laudo', autenticarToken, LaudoController.listarLaudo);
 router.post('/laudo', autenticarToken, somenteMedico, LaudoController.cadastrarLaudo);
 router.patch('/laudo/:id', autenticarToken, somenteMedico, LaudoController.editarLaudo);
+router.patch('/laudo/:id/imprimir', autenticarToken, LaudoController.marcarLaudoComoImpresso);
 router.delete('/laudo/:id', autenticarToken, somenteAdministrador, LaudoController.apagarLaudo);
 
 // PROCEDIMENTO
