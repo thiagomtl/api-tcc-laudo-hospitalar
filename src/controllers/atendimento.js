@@ -293,14 +293,13 @@ module.exports = {
 
             const sql = `
                 UPDATE Atendimento
-                SET
+                    SET
                     pac_id = ?,
                     con_id = ?,
                     leito_id = ?,
                     car_id = ?,
-                    med_id = ?,
-                    atend_data = NOW()
-                WHERE atend_id = ?
+                    med_id = ?
+                    WHERE atend_id = ?
             `;
 
             const values = [paciente, convenio, leito, carater, medico, id];
@@ -446,6 +445,7 @@ module.exports = {
                 lei.leito_identificacao,
                 seto.set_nome,
                 med.med_id,
+                med.med_crm,
                 u.usu_nome AS med_nome,
                 u.usu_email AS med_email,
                 atd.atend_data
