@@ -9,7 +9,21 @@ function normalizarTipoUsuario(tipo) {
 }
 
 function usuarioEhMedico(usuario) {
-    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico' || !!usuario?.med_id;
+}
+
+function aplicarFiltroMedicoLogado(sql, params, usuario, aliasMedico = 'med') {
+    if (!usuarioEhMedico(usuario)) {
+        return sql;
+    }
+
+    if (usuario.med_id) {
+        params.push(usuario.med_id);
+        return `${sql} AND ${aliasMedico}.med_id = ? `;
+    }
+
+    params.push(usuario.usu_id || usuario.id);
+    return `${sql} AND ${aliasMedico}.usu_id = ? `;
 }
 
 module.exports = {
@@ -497,10 +511,7 @@ module.exports = {
                 params.push(dataFim);
             }
 
-            if (usuarioEhMedico(request.usuario)) {
-                sql += ` AND med.usu_id = ? `;
-                params.push(request.usuario.usu_id || request.usuario.id);
-            }
+            sql = aplicarFiltroMedicoLogado(sql, params, request.usuario);
 
             sql += ` ORDER BY atd.atend_data DESC `;
 

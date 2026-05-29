@@ -10,7 +10,21 @@ function normalizarTipoUsuario(tipo) {
 }
 
 function usuarioEhMedico(usuario) {
-    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico' || !!usuario?.med_id;
+}
+
+function aplicarFiltroMedicoLogado(sql, params, usuario, aliasMedico = 'med') {
+    if (!usuarioEhMedico(usuario)) {
+        return sql;
+    }
+
+    if (usuario.med_id) {
+        params.push(usuario.med_id);
+        return `${sql} AND ${aliasMedico}.med_id = ? `;
+    }
+
+    params.push(usuario.usu_id || usuario.id);
+    return `${sql} AND ${aliasMedico}.usu_id = ? `;
 }
 
 module.exports = {
@@ -154,10 +168,7 @@ module.exports = {
                 params.push(dataFim);
             }
 
-            if (usuarioEhMedico(request.usuario)) {
-                sql += ` AND med.usu_id = ? `;
-                params.push(request.usuario.usu_id || request.usuario.id);
-            }
+            sql = aplicarFiltroMedicoLogado(sql, params, request.usuario);
 
             sql += ` ORDER BY lau.lau_datapreenc DESC `;
 
@@ -213,6 +224,7 @@ module.exports = {
                 `
                 SELECT
                     atd.atend_id,
+                    med.med_id,
                     med.usu_id
                 FROM Atendimento atd
                 INNER JOIN Medico med ON med.med_id = atd.med_id
@@ -231,8 +243,12 @@ module.exports = {
 
             if (usuarioEhMedico(request.usuario)) {
                 const usuarioId = request.usuario.usu_id || request.usuario.id;
+                const medicoId = request.usuario.med_id;
 
-                if (Number(atendimentoExistente[0].usu_id) !== Number(usuarioId)) {
+                if (
+                    Number(atendimentoExistente[0].usu_id) !== Number(usuarioId) &&
+                    Number(atendimentoExistente[0].med_id) !== Number(medicoId)
+                ) {
                     return response.status(403).json({
                         sucesso: false,
                         mensagem: 'Este atendimento nao pertence ao medico autenticado.',
