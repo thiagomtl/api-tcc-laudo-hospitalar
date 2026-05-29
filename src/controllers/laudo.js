@@ -291,23 +291,6 @@ module.exports = {
                 });
             }
 
-            const [laudoExistente] = await db.query(
-                `
-                SELECT lau_id
-                FROM Laudo
-                WHERE atend_id = ?
-                `,
-                [atendimento]
-            );
-
-            if (laudoExistente.length > 0) {
-                return response.status(400).json({
-                    sucesso: false,
-                    mensagem: 'Já existe um laudo cadastrado para este atendimento.',
-                    dados: null
-                });
-            }
-
             const sql = `
                 INSERT INTO Laudo (
                     atend_id,
