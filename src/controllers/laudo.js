@@ -128,6 +128,7 @@ module.exports = {
                 ON inst.inst_id = 1
 
             WHERE 1 = 1
+            AND lau.lau_status = 1
         `;
 
             const params = [];
@@ -531,5 +532,50 @@ module.exports = {
                 dados: error.message
             });
         }
+    },
+    
+    async marcarLaudoComoImpresso(request, response) {
+    try {
+        const { id } = request.params;
+
+        const [laudoExistente] = await db.query(
+            'SELECT lau_id FROM Laudo WHERE lau_id = ?',
+            [id]
+        );
+
+        if (laudoExistente.length === 0) {
+            return response.status(404).json({
+                sucesso: false,
+                mensagem: 'Laudo não encontrado.',
+                dados: null
+            });
+        }
+
+        await db.query(
+            'UPDATE Laudo SET lau_status = 2 WHERE lau_id = ?',
+            [id]
+        );
+
+        await registrarLog({
+            usuarioId: request.usuario?.usu_id || request.usuario?.id || null,
+            acao: "IMPRESSAO_LAUDO",
+            descricao: `Laudo impresso/enviado para histórico: ID ${id}`
+        });
+
+        return response.status(200).json({
+            sucesso: true,
+            mensagem: 'Laudo enviado para histórico com sucesso.',
+            dados: {
+                id: Number(id),
+                status: 2
+            }
+        });
+    } catch (error) {
+        return response.status(500).json({
+            sucesso: false,
+            mensagem: `Erro ao atualizar status do laudo: ${error.message}`,
+            dados: error.message
+        });
     }
+}
 };
