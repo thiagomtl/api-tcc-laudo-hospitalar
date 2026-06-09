@@ -280,5 +280,39 @@ module.exports = {
                 dados: error.message
             });
         }
+    },
+
+    async listarProcedimentosPorCid(request, response) {
+        try {
+            const { cidId } = request.params;
+
+            const [rows] = await db.query(
+                `
+      SELECT
+        p.pro_id,
+        p.pro_codigo,
+        p.pro_descricao
+      FROM procedimento_cids pc
+      INNER JOIN procedimento p
+        ON p.pro_id = pc.pro_id
+      WHERE pc.cid_id = ?
+      ORDER BY p.pro_descricao ASC
+      `,
+                [cidId]
+            );
+
+            return response.status(200).json({
+                sucesso: true,
+                mensagem: "Procedimentos relacionados ao CID obtidos com sucesso.",
+                itens: rows.length,
+                dados: rows
+            });
+        } catch (error) {
+            return response.status(500).json({
+                sucesso: false,
+                mensagem: `Erro ao buscar procedimentos do CID: ${error.message}`,
+                dados: null
+            });
+        }
     }
 };

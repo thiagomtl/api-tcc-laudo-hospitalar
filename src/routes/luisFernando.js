@@ -48,8 +48,13 @@ router.delete('/escolha-clinica/:id', autenticarToken, somenteAdministrador, Esc
 // PROCEDIMENTO + CID
 router.get('/procedimento-cids', autenticarToken, ProcedimentoCidController.listarProcedimentoCid);
 
+router.get(
+  "/procedimento/cid/:cidId",
+  autenticarToken,
+  ProcedimentoCidController.listarProcedimentosPorCid
+);
+
 router.post('/procedimento-cids', autenticarToken, somenteAdministrador, ProcedimentoCidController.cadastrarProcedimentoCid);
 router.patch('/procedimento-cids/:id', autenticarToken, somenteAdministrador, ProcedimentoCidController.editarProcedimentoCid);
 router.delete('/procedimento-cids/:id', autenticarToken, somenteAdministrador, ProcedimentoCidController.apagarProcedimentoCid);
-
 module.exports = router;
