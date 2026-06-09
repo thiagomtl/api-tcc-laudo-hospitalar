@@ -1,6 +1,28 @@
 -- Script de criação das tabelas conforme dicionário de dados
 -- Adaptado para MySQL
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS Favorito;
+DROP TABLE IF EXISTS Laudo;
+DROP TABLE IF EXISTS Procedimento_Cids;
+DROP TABLE IF EXISTS Atendimento;
+DROP TABLE IF EXISTS Mensagem_Chat;
+DROP TABLE IF EXISTS Logs_Acao;
+DROP TABLE IF EXISTS Medico;
+DROP TABLE IF EXISTS Usuario;
+DROP TABLE IF EXISTS Paciente;
+DROP TABLE IF EXISTS CID;
+DROP TABLE IF EXISTS Procedimento;
+DROP TABLE IF EXISTS Escolha_Clinica;
+DROP TABLE IF EXISTS Leito;
+DROP TABLE IF EXISTS Setor;
+DROP TABLE IF EXISTS Carater;
+DROP TABLE IF EXISTS Convenio;
+DROP TABLE IF EXISTS Instituicao;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 CREATE TABLE Convenio (
     con_id INT AUTO_INCREMENT PRIMARY KEY,
     con_tipo VARCHAR(50) NOT NULL
@@ -34,7 +56,7 @@ CREATE TABLE Instituicao (
 CREATE TABLE Usuario (
     usu_id INT AUTO_INCREMENT PRIMARY KEY,
     usu_nome VARCHAR(100) NOT NULL,
-    usu_usuario VARCHAR(50) NULL UNIQUE,
+    usu_usuario VARCHAR(50) NOT NULL UNIQUE,
     usu_documento VARCHAR(11) NOT NULL,
     usu_email VARCHAR(100) NOT NULL,
     usu_senha VARCHAR(100) NOT NULL,
@@ -49,9 +71,10 @@ CREATE TABLE Usuario (
 );
 
 CREATE TABLE Medico (
-    med_id INT AUTO_INCREMENT PRIMARY KEY,
-    usu_id INT NOT NULL UNIQUE,
+    usu_id INT NOT NULL PRIMARY KEY,
     med_crm VARCHAR(6) NOT NULL UNIQUE,
+    med_especialidade VARCHAR(100) NULL,
+    med_assinatura TEXT NULL,
     FOREIGN KEY (usu_id) REFERENCES Usuario(usu_id)
 );
 
@@ -82,13 +105,13 @@ CREATE TABLE Atendimento (
     con_id INT NOT NULL,
     leito_id INT NOT NULL,
     car_id INT NOT NULL,
-    med_id INT NOT NULL,
+    usu_id INT NOT NULL,
     atend_data DATETIME NOT NULL,
     FOREIGN KEY (pac_id) REFERENCES Paciente(pac_id),
     FOREIGN KEY (con_id) REFERENCES Convenio(con_id),
     FOREIGN KEY (leito_id) REFERENCES Leito(leito_id),
     FOREIGN KEY (car_id) REFERENCES Carater(car_id),
-    FOREIGN KEY (med_id) REFERENCES Medico(med_id)
+    FOREIGN KEY (usu_id) REFERENCES Medico(usu_id)
 );
 
 CREATE TABLE Escolha_Clinica (
@@ -140,7 +163,7 @@ CREATE TABLE Laudo (
 
 CREATE TABLE Favorito (
     fav_id INT AUTO_INCREMENT PRIMARY KEY,
-    med_id INT NOT NULL,
+    usu_id INT NOT NULL,
     fav_nome VARCHAR(30) NOT NULL,
     cid_id INT NULL,
     pro_id INT NULL,
@@ -150,7 +173,7 @@ CREATE TABLE Favorito (
     fav_internacao VARCHAR(1024) NULL,
     fav_resultado VARCHAR(512) NULL,
     fav_recurso VARCHAR(512) NULL,
-    FOREIGN KEY (med_id) REFERENCES Medico(med_id),
+    FOREIGN KEY (usu_id) REFERENCES Medico(usu_id),
     FOREIGN KEY (cid_id) REFERENCES CID(cid_id),
     FOREIGN KEY (pro_id) REFERENCES Procedimento(pro_id),
     FOREIGN KEY (cli_id) REFERENCES Escolha_Clinica(cli_id)

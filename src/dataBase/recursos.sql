@@ -6,8 +6,8 @@ SELECT leito_id, set_id, leito_identificacao FROM Leito;
 SELECT car_id, car_tipo FROM Carater;
 SELECT inst_id, inst_nome, inst_razao_social, inst_cnes, inst_cnpj FROM Instituicao;
 SELECT usu_id, usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao, inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status FROM Usuario;
-SELECT med_id, usu_id, med_crm FROM Medico;
-SELECT atend_id, pac_id, con_id, leito_id, car_id, med_id, atend_data FROM Atendimento;
+SELECT usu_id, med_crm, med_especialidade, med_assinatura FROM Medico;
+SELECT atend_id, pac_id, con_id, leito_id, car_id, usu_id, atend_data FROM Atendimento;
 SELECT log_id, usu_id, log_acao, log_detalhe, log_datahora FROM Logs_Acao;
 SELECT msg_id, usu_id_remetente, usu_id_destinatario, msg_conteudo, msg_arqanexo, msg_datahoraenvio, msg_status, msg_resposta FROM Mensagem_Chat;
 SELECT cli_id, cli_descricao FROM Escolha_Clinica;
@@ -15,18 +15,18 @@ SELECT pro_id, pro_codigo, pro_descricao FROM Procedimento;
 SELECT cid_id, cid_codigo, cid_descricao FROM CID;
 SELECT proc_cid_id, pro_id, cid_id FROM Procedimento_Cids;
 SELECT lau_id, atend_id, cli_id, proc_cid_id, lau_sinais, lau_internacao, lau_resultado, lau_recurso, lau_datapreenc, lau_status FROM Laudo;
-SELECT fav_id, lau_id, med_id, fav_nome FROM Favorito;
+SELECT fav_id, usu_id, fav_nome, cid_id, pro_id, cli_id, fav_carater, fav_sinais, fav_internacao, fav_resultado, fav_recurso FROM Favorito;
 
 
 -- SELECTs com INNER JOIN para tabelas com chave estrangeira
 SELECT leito_id, set_id, leito_identificacao, Setor.set_nome FROM Leito INNER JOIN Setor ON Leito.set_id = Setor.set_id;
 SELECT usu_id, usu_nome, usu_documento, usu_email, usu_senha, usu_datacriacao, Usuario.inst_id, Instituicao.inst_nome, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status FROM Usuario INNER JOIN Instituicao ON Usuario.inst_id = Instituicao.inst_id;
-SELECT atend_id, Paciente.pac_nome, Convenio.con_tipo, Leito.leito_identificacao, Carater.car_tipo, Usuario.usu_nome AS med_nome, Medico.med_crm, atend_data FROM Atendimento 
+SELECT atend_id, Paciente.pac_nome, Convenio.con_tipo, Leito.leito_identificacao, Carater.car_tipo, Usuario.usu_nome AS med_nome, Medico.med_crm, Medico.med_especialidade, Medico.med_assinatura, atend_data FROM Atendimento 
 INNER JOIN Paciente ON Atendimento.pac_id = Paciente.pac_id
 INNER JOIN Convenio ON Atendimento.con_id = Convenio.con_id
 INNER JOIN Leito ON Atendimento.leito_id = Leito.leito_id
 INNER JOIN Carater ON Atendimento.car_id = Carater.car_id
-INNER JOIN Medico ON Atendimento.med_id = Medico.med_id
+INNER JOIN Medico ON Atendimento.usu_id = Medico.usu_id
 INNER JOIN Usuario ON Medico.usu_id = Usuario.usu_id;
 SELECT log_id, Usuario.usu_nome, log_acao, log_detalhe, log_datahora FROM Logs_Acao INNER JOIN Usuario ON Logs_Acao.usu_id = Usuario.usu_id;
 SELECT msg_id, Remetente.usu_nome AS remetente, Destinatario.usu_nome AS destinatario, msg_conteudo, msg_arqanexo, msg_datahoraenvio, msg_status, msg_resposta FROM Mensagem_Chat 
@@ -39,16 +39,15 @@ SELECT lau_id, Atendimento.atend_id, Escolha_Clinica.cli_descricao, Procedimento
 INNER JOIN Atendimento ON Laudo.atend_id = Atendimento.atend_id
 INNER JOIN Escolha_Clinica ON Laudo.cli_id = Escolha_Clinica.cli_id
 INNER JOIN Procedimento_Cids ON Laudo.proc_cid_id = Procedimento_Cids.proc_cid_id;
-SELECT fav_id, Laudo.lau_id, Usuario.usu_nome AS med_nome, Medico.med_crm, fav_nome FROM Favorito 
-INNER JOIN Laudo ON Favorito.lau_id = Laudo.lau_id
-INNER JOIN Medico ON Favorito.med_id = Medico.med_id
+SELECT fav_id, Usuario.usu_nome AS med_nome, Medico.med_crm, Medico.med_especialidade, Medico.med_assinatura, fav_nome FROM Favorito 
+INNER JOIN Medico ON Favorito.usu_id = Medico.usu_id
 INNER JOIN Usuario ON Medico.usu_id = Usuario.usu_id;
 
 -- LAUDO, ATENDIMENTO, USUARIO, MEDICO
-SELECT l.lau_id, l.atend_id, a.atend_data, m.med_id, m.med_crm, u.usu_id, u.usu_nome AS med_nome, u.usu_email AS med_email, l.lau_resultado, l.lau_datapreenc, l.lau_status
+SELECT l.lau_id, l.atend_id, a.atend_data, m.usu_id, m.med_crm, m.med_especialidade, m.med_assinatura, u.usu_nome AS med_nome, u.usu_email AS med_email, l.lau_resultado, l.lau_datapreenc, l.lau_status
 FROM Laudo l
 INNER JOIN Atendimento a ON l.atend_id = a.atend_id
-INNER JOIN Medico m ON a.med_id = m.med_id
+INNER JOIN Medico m ON a.usu_id = m.usu_id
 INNER JOIN Usuario u ON m.usu_id = u.usu_id;
 
 
@@ -90,17 +89,17 @@ INSERT INTO tmp_usuarios_excluir (usu_id) VALUES
 DELETE l
 FROM Laudo l
 JOIN Atendimento a ON a.atend_id = l.atend_id
-JOIN Medico m ON m.med_id = a.med_id
+JOIN Medico m ON m.usu_id = a.usu_id
 JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
 
 DELETE f
 FROM Favorito f
-JOIN Medico m ON m.med_id = f.med_id
+JOIN Medico m ON m.usu_id = f.usu_id
 JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
 
 DELETE a
 FROM Atendimento a
-JOIN Medico m ON m.med_id = a.med_id
+JOIN Medico m ON m.usu_id = a.usu_id
 JOIN tmp_usuarios_excluir t ON t.usu_id = m.usu_id;
 
 DELETE m

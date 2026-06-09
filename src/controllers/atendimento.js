@@ -9,17 +9,12 @@ function normalizarTipoUsuario(tipo) {
 }
 
 function usuarioEhMedico(usuario) {
-    return normalizarTipoUsuario(usuario?.tipo) === 'medico' || !!usuario?.med_id;
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
 }
 
 function aplicarFiltroMedicoLogado(sql, params, usuario, aliasMedico = 'med') {
     if (!usuarioEhMedico(usuario)) {
         return sql;
-    }
-
-    if (usuario.med_id) {
-        params.push(usuario.med_id);
-        return `${sql} AND ${aliasMedico}.med_id = ? `;
     }
 
     params.push(usuario.usu_id || usuario.id);
@@ -36,7 +31,7 @@ module.exports = {
                     con_id,
                     leito_id,
                     car_id,
-                    med_id,
+                    usu_id,
                     atend_data
                 FROM Atendimento
             `;
@@ -140,9 +135,9 @@ module.exports = {
 
             const [medicoExistente] = await db.query(
                 `
-                SELECT med_id
+                SELECT usu_id
                 FROM Medico
-                WHERE med_id = ?
+                WHERE usu_id = ?
                 `,
                 [medico]
             );
@@ -161,7 +156,7 @@ module.exports = {
                     con_id,
                     leito_id,
                     car_id,
-                    med_id,
+                    usu_id,
                     atend_data
                 ) VALUES (?, ?, ?, ?, ?, NOW())
             `;
@@ -290,9 +285,9 @@ module.exports = {
 
             const [medicoExistente] = await db.query(
                 `
-                SELECT med_id
+                SELECT usu_id
                 FROM Medico
-                WHERE med_id = ?
+                WHERE usu_id = ?
                 `,
                 [medico]
             );
@@ -312,7 +307,7 @@ module.exports = {
                     con_id = ?,
                     leito_id = ?,
                     car_id = ?,
-                    med_id = ?
+                    usu_id = ?
                     WHERE atend_id = ?
             `;
 
@@ -458,8 +453,10 @@ module.exports = {
                 conv.con_tipo,
                 lei.leito_identificacao,
                 seto.set_nome,
-                med.med_id,
+                med.usu_id,
                 med.med_crm,
+                med.med_especialidade,
+                med.med_assinatura,
                 u.usu_nome AS med_nome,
                 u.usu_email AS med_email,
                 atd.atend_data
@@ -468,7 +465,7 @@ module.exports = {
             INNER JOIN Convenio conv ON atd.con_id = conv.con_id
             INNER JOIN Leito lei ON atd.leito_id = lei.leito_id
             INNER JOIN Setor seto ON lei.set_id = seto.set_id
-            INNER JOIN Medico med ON atd.med_id = med.med_id
+            INNER JOIN Medico med ON atd.usu_id = med.usu_id
             INNER JOIN Usuario u ON med.usu_id = u.usu_id
             LEFT JOIN Laudo lau ON lau.atend_id = atd.atend_id
             WHERE lau.lau_id IS NULL
@@ -496,7 +493,7 @@ module.exports = {
                     u.usu_nome LIKE ?
                     OR u.usu_email LIKE ?
                     OR med.med_crm LIKE ?
-                    OR med.med_id = ?
+                    OR med.usu_id = ?
                 ) `;
                 params.push(`%${medico}%`, `%${medico}%`, `%${medico}%`, Number(medico) || 0);
             }

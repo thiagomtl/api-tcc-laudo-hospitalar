@@ -1,5 +1,27 @@
 /* Seed limpo para testes de laudo */
-USE bd_tcc_laudos;
+/* Selecione o banco correto antes de executar este script. */
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE Favorito;
+TRUNCATE TABLE Laudo;
+TRUNCATE TABLE Procedimento_Cids;
+TRUNCATE TABLE Atendimento;
+TRUNCATE TABLE Mensagem_Chat;
+TRUNCATE TABLE Logs_Acao;
+TRUNCATE TABLE Medico;
+TRUNCATE TABLE Usuario;
+TRUNCATE TABLE Paciente;
+TRUNCATE TABLE CID;
+TRUNCATE TABLE Procedimento;
+TRUNCATE TABLE Escolha_Clinica;
+TRUNCATE TABLE Leito;
+TRUNCATE TABLE Setor;
+TRUNCATE TABLE Carater;
+TRUNCATE TABLE Convenio;
+TRUNCATE TABLE Instituicao;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 /* Tabela Convenio */
 INSERT INTO Convenio (con_tipo) VALUES
@@ -41,33 +63,17 @@ INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VAL
 ('Hospital MedSync', 'Hospital MedSync LTDA', '1234567', '12345678000199');
 
 /* Tabela Usuario */
+/* Senha padrao dos tres usuarios: 123456 */
 INSERT INTO Usuario (
     usu_nome, usu_usuario, usu_documento, usu_email, usu_senha, usu_datacriacao,
     inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
 ) VALUES
-('Ana Almeida', 'ana.ad', '10000000001', 'adm@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
-('Bruno Costa', 'bruno.fat', '10000000002', 'fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14990000002', NULL, NULL, 'Faturista', 1),
-('Carla Dias', 'carla.med', '10000000003', 'med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14990000003', NULL, NULL, 'Medico', 1),
-('Luis Administrador', 'luis.ad', '10000000004', 'luis.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:15:00', 1, '14990000004', NULL, NULL, 'Administrador', 1),
-('Luis Faturista', 'luis.fat', '10000000005', 'luis.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:20:00', 1, '14990000005', NULL, NULL, 'Faturista', 1),
-('Luis Medico', 'luis.med', '10000000006', 'luis.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:25:00', 1, '14990000006', NULL, NULL, 'Medico', 1),
-('Joao Administrador', 'joao.ad', '10000000007', 'joao.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:30:00', 1, '14990000007', NULL, NULL, 'Administrador', 1),
-('Joao Faturista', 'joao.fat', '10000000008', 'joao.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:35:00', 1, '14990000008', NULL, NULL, 'Faturista', 1),
-('Joao Medico', 'joao.med', '10000000009', 'joao.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:40:00', 1, '14990000009', NULL, NULL, 'Medico', 1),
-('Thiago Administrador', 'thiago.ad', '10000000010', 'thiago.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:45:00', 1, '14990000010', NULL, NULL, 'Administrador', 1),
-('Thiago Faturista', 'thiago.fat', '10000000011', 'thiago.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:50:00', 1, '14990000011', NULL, NULL, 'Faturista', 1),
-('Thiago Medico', 'thiago.med', '10000000012', 'thiago.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:55:00', 1, '14990000012', NULL, NULL, 'Medico', 1),
-('Luiz Administrador', 'luiz.ad', '10000000013', 'luiz.ad@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:00:00', 1, '14990000013', NULL, NULL, 'Administrador', 1),
-('Luiz Faturista', 'luiz.fat', '10000000014', 'luiz.fat@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:05:00', 1, '14990000014', NULL, NULL, 'Faturista', 1),
-('Luiz Medico', 'luiz.med', '10000000015', 'luiz.med@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 09:10:00', 1, '14990000015', NULL, NULL, 'Medico', 1);
+('Administrador', 'adm', '10000000001', 'adm@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
+('Faturista', 'faturista', '10000000002', 'faturista@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14990000002', NULL, NULL, 'Faturista', 1),
+('Medico', 'medico', '10000000003', 'medico@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14990000003', NULL, NULL, 'Medico', 1);
 
-/* Tabela Medico: os dados pessoais ficam em Usuario; aqui fica apenas o CRM */
-INSERT INTO Medico (usu_id, med_crm) VALUES
-(3, '100003'),
-(6, '900006'),
-(9, '900009'),
-(12, '900012'),
-(15, '900015');
+INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES
+((SELECT usu_id FROM Usuario WHERE usu_usuario = 'medico'), '123456', 'Clinica Medica', NULL);
 
 /* Tabela Paciente */
 INSERT INTO Paciente (
@@ -97,28 +103,35 @@ INSERT INTO Paciente (
 ('Patricia Araujo', '1996-02-03', '90000000019', '14991000019', '2026-05-20 10:30:00', 0, 2019, '700000000000019', 'Marta Araujo', 'Branca', 'Vila Nova', '88', 'Rua Acre', '17600013', 'SP', 'Tupa', 3555002),
 ('Felipe Barbosa', '1979-11-29', '90000000020', '14991000020', '2026-05-20 10:35:00', 1, 2020, '700000000000020', 'Ivone Barbosa', 'Parda', 'Centro', '144', 'Rua Mato Grosso', '17600014', 'SP', 'Tupa', 3555002);
 
-/* Tabela Atendimento: 20 atendimentos da Carla Dias (med_id = 1) */
-INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, med_id, atend_data) VALUES
-(1, 1, 1, 1, 1, '2026-05-20 11:00:00'),
-(2, 2, 2, 2, 1, '2026-05-20 11:05:00'),
-(3, 3, 3, 3, 1, '2026-05-20 11:10:00'),
-(4, 4, 4, 1, 1, '2026-05-20 11:15:00'),
-(5, 5, 5, 2, 1, '2026-05-20 11:20:00'),
-(6, 1, 6, 3, 1, '2026-05-20 11:25:00'),
-(7, 2, 7, 1, 1, '2026-05-20 11:30:00'),
-(8, 3, 8, 2, 1, '2026-05-20 11:35:00'),
-(9, 4, 9, 3, 1, '2026-05-20 11:40:00'),
-(10, 5, 10, 1, 1, '2026-05-20 11:45:00'),
-(11, 1, 1, 2, 1, '2026-05-20 11:50:00'),
-(12, 2, 2, 3, 1, '2026-05-20 11:55:00'),
-(13, 3, 3, 1, 1, '2026-05-20 12:00:00'),
-(14, 4, 4, 2, 1, '2026-05-20 12:05:00'),
-(15, 5, 5, 3, 1, '2026-05-20 12:10:00'),
-(16, 1, 6, 1, 1, '2026-05-20 12:15:00'),
-(17, 2, 7, 2, 1, '2026-05-20 12:20:00'),
-(18, 3, 8, 3, 1, '2026-05-20 12:25:00'),
-(19, 4, 9, 1, 1, '2026-05-20 12:30:00'),
-(20, 5, 10, 2, 1, '2026-05-20 12:35:00');
+SET @usu_id_medico = (
+    SELECT u.usu_id
+    FROM Usuario u
+    INNER JOIN Medico m ON m.usu_id = u.usu_id
+    WHERE u.usu_usuario = 'medico'
+);
+
+/* Tabela Atendimento: 20 atendimentos do usuario medico */
+INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, usu_id, atend_data) VALUES
+(1, 1, 1, 1, @usu_id_medico, '2026-05-20 11:00:00'),
+(2, 2, 2, 2, @usu_id_medico, '2026-05-20 11:05:00'),
+(3, 3, 3, 3, @usu_id_medico, '2026-05-20 11:10:00'),
+(4, 4, 4, 1, @usu_id_medico, '2026-05-20 11:15:00'),
+(5, 5, 5, 2, @usu_id_medico, '2026-05-20 11:20:00'),
+(6, 1, 6, 3, @usu_id_medico, '2026-05-20 11:25:00'),
+(7, 2, 7, 1, @usu_id_medico, '2026-05-20 11:30:00'),
+(8, 3, 8, 2, @usu_id_medico, '2026-05-20 11:35:00'),
+(9, 4, 9, 3, @usu_id_medico, '2026-05-20 11:40:00'),
+(10, 5, 10, 1, @usu_id_medico, '2026-05-20 11:45:00'),
+(11, 1, 1, 2, @usu_id_medico, '2026-05-20 11:50:00'),
+(12, 2, 2, 3, @usu_id_medico, '2026-05-20 11:55:00'),
+(13, 3, 3, 1, @usu_id_medico, '2026-05-20 12:00:00'),
+(14, 4, 4, 2, @usu_id_medico, '2026-05-20 12:05:00'),
+(15, 5, 5, 3, @usu_id_medico, '2026-05-20 12:10:00'),
+(16, 1, 6, 1, @usu_id_medico, '2026-05-20 12:15:00'),
+(17, 2, 7, 2, @usu_id_medico, '2026-05-20 12:20:00'),
+(18, 3, 8, 3, @usu_id_medico, '2026-05-20 12:25:00'),
+(19, 4, 9, 1, @usu_id_medico, '2026-05-20 12:30:00'),
+(20, 5, 10, 2, @usu_id_medico, '2026-05-20 12:35:00');
 
 /* Tabela Escolha_Clinica */
 INSERT INTO Escolha_Clinica (cli_descricao) VALUES
@@ -175,5 +188,8 @@ INSERT INTO Laudo (
 (1, 1, 1, 1, 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar', '2026-05-20 13:00:00', 1);
 
 /* Tabela Favorito */
-INSERT INTO Favorito (lau_id, med_id, fav_nome) VALUES
-(1, 1, 'Febre');
+INSERT INTO Favorito (
+    usu_id, fav_nome, cid_id, pro_id, cli_id, fav_carater,
+    fav_sinais, fav_internacao, fav_resultado, fav_recurso
+) VALUES
+(@usu_id_medico, 'Febre', 1, 1, 1, 'Urgencia', 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar');

@@ -66,7 +66,7 @@ function somenteAdministrador(request, response, next) {
 }
 
 function somenteMedico(request, response, next) {
-    if (normalizarTipoUsuario(request.usuario?.tipo) !== 'medico' && !request.usuario?.med_id) {
+    if (normalizarTipoUsuario(request.usuario?.tipo) !== 'medico') {
         return response.status(403).json({
             sucesso: false,
             mensagem: 'Acesso permitido apenas para médicos.',
