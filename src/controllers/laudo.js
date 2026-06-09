@@ -10,17 +10,12 @@ function normalizarTipoUsuario(tipo) {
 }
 
 function usuarioEhMedico(usuario) {
-    return normalizarTipoUsuario(usuario?.tipo) === 'medico' || !!usuario?.med_id;
+    return normalizarTipoUsuario(usuario?.tipo) === 'medico';
 }
 
 function aplicarFiltroMedicoLogado(sql, params, usuario, aliasMedico = 'med') {
     if (!usuarioEhMedico(usuario)) {
         return sql;
-    }
-
-    if (usuario.med_id) {
-        params.push(usuario.med_id);
-        return `${sql} AND ${aliasMedico}.med_id = ? `;
     }
 
     params.push(usuario.usu_id || usuario.id);
@@ -75,10 +70,12 @@ module.exports = {
                 pro.pro_codigo,
                 pro.pro_descricao,
 
-                med.med_id,
+                med.usu_id,
                 u.usu_nome AS med_nome,
                 u.usu_email AS med_email,
                 med.med_crm,
+                med.med_especialidade,
+                med.med_assinatura,
                 u.usu_documento AS med_cpf,
 
                 inst.inst_id,
@@ -119,7 +116,7 @@ module.exports = {
                 ON lau.pro_id = pro.pro_id
 
             INNER JOIN Medico med
-                ON atd.med_id = med.med_id
+                ON atd.usu_id = med.usu_id
 
             INNER JOIN Usuario u
                 ON med.usu_id = u.usu_id
@@ -153,7 +150,7 @@ module.exports = {
                     u.usu_nome LIKE ?
                     OR u.usu_email LIKE ?
                     OR med.med_crm LIKE ?
-                    OR med.med_id = ?
+                    OR med.usu_id = ?
                 ) `;
                 params.push(`%${medico}%`, `%${medico}%`, `%${medico}%`, Number(medico) || 0);
             }
@@ -224,10 +221,9 @@ module.exports = {
                 `
                 SELECT
                     atd.atend_id,
-                    med.med_id,
                     med.usu_id
                 FROM Atendimento atd
-                INNER JOIN Medico med ON med.med_id = atd.med_id
+                INNER JOIN Medico med ON med.usu_id = atd.usu_id
                 WHERE atd.atend_id = ?
                 `,
                 [atendimento]
@@ -243,12 +239,8 @@ module.exports = {
 
             if (usuarioEhMedico(request.usuario)) {
                 const usuarioId = request.usuario.usu_id || request.usuario.id;
-                const medicoId = request.usuario.med_id;
 
-                if (
-                    Number(atendimentoExistente[0].usu_id) !== Number(usuarioId) &&
-                    Number(atendimentoExistente[0].med_id) !== Number(medicoId)
-                ) {
+                if (Number(atendimentoExistente[0].usu_id) !== Number(usuarioId)) {
                     return response.status(403).json({
                         sucesso: false,
                         mensagem: 'Este atendimento nao pertence ao medico autenticado.',

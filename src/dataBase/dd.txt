@@ -60,7 +60,7 @@ ID Paciente	pac_id	INT			x	Paciente
 ID Convênio	con_id	INT			x	Convenio
 ID Leito	leito_id	INT			x	Leito
 ID Caráter	car_id	INT			x	Carater
-ID Médico	med_id	INT			x	Medico
+ID Usuário Médico	usu_id	INT			x	Medico
 Data Atendimento	atend_data	DATETIME				
 
 Quadro 8 - Tabela Logs Ação
@@ -90,9 +90,10 @@ Status	usu_status	BIT				Ativo/Inativo
 
 Quadro 10 - Tabela Médico
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Médico	med_id	INT		x		Auto incremento
-ID Usuário	usu_id	INT			x	Usuário vinculado ao médico
+ID Usuário	usu_id	INT		x	x	Usuário vinculado ao médico
 CRM	med_crm	VARCHAR	6			Registro profissional unico
+Especialidade	med_especialidade	VARCHAR	100			Especialidade do medico
+Assinatura	med_assinatura	TEXT				Assinatura do medico, podendo ser URL, caminho ou base64
 
 Quadro 11 - Tabela Mensagem_Chat
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
@@ -124,8 +125,7 @@ Status Laudo	lau_status	BIT				0 – Pendente, 1 - preenchido
 Quadro 13 - Tabela Favorito
 Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
 Favoritar Laudo	fav_id	INT		x		Auto incremento
-Id do Laudo	lau_id	INT			x	
-Id do médico	med_id	INT			x	
+Id do médico usuário	usu_id	INT			x	
 Nome Favorito	fav_nome	VARCHAR	30			
 
 Quadro 14 - Tabela Escolha_Clinica

@@ -48,9 +48,8 @@ async function buscarMedicoPorNome(connection, nomeMedico) {
     const [medicos] = await connection.query(
         `
         SELECT
-            med.med_id,
+            med.usu_id,
             med.med_crm,
-            u.usu_id,
             u.usu_nome
         FROM Medico med
         INNER JOIN Usuario u
@@ -66,7 +65,7 @@ async function buscarMedicoPorNome(connection, nomeMedico) {
 async function resolverMedico(connection, medicoEntrada) {
     const medico = typeof medicoEntrada === 'object'
         ? primeiroValor(
-            medicoEntrada.med_id,
+            medicoEntrada.usu_id,
             medicoEntrada.id,
             medicoEntrada.nome,
             medicoEntrada.nome_medico,
@@ -80,9 +79,9 @@ async function resolverMedico(connection, medicoEntrada) {
     if (/^\d+$/.test(medicoNormalizado)) {
         const [rows] = await connection.query(
             `
-            SELECT med_id
+            SELECT usu_id
             FROM Medico
-            WHERE med_id = ?
+            WHERE usu_id = ?
             `,
             [Number(medicoNormalizado)]
         );
@@ -108,7 +107,7 @@ async function resolverMedico(connection, medicoEntrada) {
     }
 
     return {
-        id: medicoEncontrado.med_id,
+        id: medicoEncontrado.usu_id,
         nome: medicoEncontrado.usu_nome
     };
 }
@@ -150,7 +149,7 @@ module.exports = {
                     atendimentoEntrada.nome_medico,
                     atendimentoEntrada.medico_nome,
                     atendimentoEntrada.med_nome,
-                    valorCampo(atendimentoEntrada.medico, 'med_id', 'id', 'nome', 'nome_medico', 'medico_nome', 'med_nome')
+                    valorCampo(atendimentoEntrada.medico, 'usu_id', 'id', 'nome', 'nome_medico', 'medico_nome', 'med_nome')
                 )
             };
 
@@ -331,7 +330,7 @@ module.exports = {
                     con_id,
                     leito_id,
                     car_id,
-                    med_id,
+                    usu_id,
                     atend_data
                 ) VALUES (?, ?, ?, ?, ?, NOW())
                 `,

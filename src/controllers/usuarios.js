@@ -47,6 +47,33 @@ function normalizarUsuarioAcesso(usuario) {
     return String(usuario || '').trim().toLowerCase();
 }
 
+function normalizarCampoOpcional(valor) {
+    if (valor === undefined) {
+        return undefined;
+    }
+
+    if (valor === null) {
+        return null;
+    }
+
+    const texto = String(valor).trim();
+
+    return texto || null;
+}
+
+function campoFoiInformado(body, campoPrincipal, campoAlternativo) {
+    return Object.prototype.hasOwnProperty.call(body, campoPrincipal) ||
+        Object.prototype.hasOwnProperty.call(body, campoAlternativo);
+}
+
+function obterCampoOpcional(body, campoPrincipal, campoAlternativo) {
+    if (Object.prototype.hasOwnProperty.call(body, campoPrincipal)) {
+        return body[campoPrincipal];
+    }
+
+    return body[campoAlternativo];
+}
+
 function crmValido(crm) {
     return /^\d{6}$/.test(String(crm || ''));
 }
@@ -123,9 +150,10 @@ async function buscarPerfilPorId(usuarioId) {
             u.usu_tipo,
             CAST(u.usu_status AS UNSIGNED) AS usu_status,
             i.inst_nome,
-            m.med_id,
             m.med_crm,
-            m.med_crm AS usu_crm
+            m.med_crm AS usu_crm,
+            m.med_especialidade,
+            m.med_assinatura
         FROM Usuario u
         LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
         LEFT JOIN Medico m ON m.usu_id = u.usu_id
@@ -166,9 +194,10 @@ module.exports = {
                 u.usu_tipo,
                 CAST(u.usu_status AS UNSIGNED) AS usu_status,
                 i.inst_nome,
-                m.med_id,
                 m.med_crm,
-                m.med_crm AS usu_crm
+                m.med_crm AS usu_crm,
+                m.med_especialidade,
+                m.med_assinatura
             FROM Usuario u
             LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
             LEFT JOIN Medico m ON m.usu_id = u.usu_id
@@ -211,8 +240,20 @@ module.exports = {
                 });
             }
 
-            const { telefone, crm } = request.body;
+            const {
+                telefone,
+                crm
+            } = request.body;
             const telefoneNumeros = String(telefone || '').replace(/\D/g, '');
+            const especialidadeInformada = campoFoiInformado(request.body, 'med_especialidade', 'especialidade');
+            const assinaturaInformada = campoFoiInformado(request.body, 'med_assinatura', 'assinatura');
+            const especialidadeTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_especialidade', 'especialidade')
+            );
+            const assinaturaTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_assinatura', 'assinatura')
+            );
+            const medicoFoiInformado = crm !== undefined || especialidadeInformada || assinaturaInformada;
             const perfilAtual = await buscarPerfilPorId(usuarioId);
 
             if (!perfilAtual) {
@@ -231,10 +272,10 @@ module.exports = {
                 });
             }
 
-            if (crm !== undefined && !usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
+            if (medicoFoiInformado && !usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
                 return response.status(403).json({
                     sucesso: false,
-                    mensagem: 'CRM nao pode ser alterado neste perfil.',
+                    mensagem: 'Dados de medico nao podem ser alterados neste perfil.',
                     dados: null
                 });
             }
@@ -244,10 +285,15 @@ module.exports = {
                 [telefoneNumeros, usuarioId]
             );
 
-            if (crm !== undefined && usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
-                const crmTratado = normalizarCrm(crm);
+            if (medicoFoiInformado && usuarioPodeAlterarCrm(perfilAtual.usu_tipo)) {
+                const crmTratado = crm !== undefined ? normalizarCrm(crm) : undefined;
 
-                if (!crmTratado) {
+                const [medicoDoUsuario] = await db.query(
+                    'SELECT usu_id, med_crm, med_especialidade, med_assinatura FROM Medico WHERE usu_id = ?',
+                    [usuarioId]
+                );
+
+                if (crm !== undefined && !crmTratado) {
                     return response.status(400).json({
                         sucesso: false,
                         mensagem: 'CRM e obrigatorio para usuario medico.',
@@ -255,7 +301,7 @@ module.exports = {
                     });
                 }
 
-                if (!crmValido(crmTratado)) {
+                if (crmTratado !== undefined && !crmValido(crmTratado)) {
                     return response.status(400).json({
                         sucesso: false,
                         mensagem: 'CRM deve conter exatamente 6 digitos.',
@@ -263,33 +309,55 @@ module.exports = {
                     });
                 }
 
-                const [crmDuplicado] = await db.query(
-                    'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
-                    [crmTratado, usuarioId]
-                );
+                if (crmTratado !== undefined) {
+                    const [crmDuplicado] = await db.query(
+                        'SELECT usu_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
+                        [crmTratado, usuarioId]
+                    );
 
-                if (crmDuplicado.length > 0) {
-                    return response.status(400).json({
-                        sucesso: false,
-                        mensagem: 'CRM ja cadastrado para outro medico.',
-                        dados: null
-                    });
+                    if (crmDuplicado.length > 0) {
+                        return response.status(400).json({
+                            sucesso: false,
+                            mensagem: 'CRM ja cadastrado para outro medico.',
+                            dados: null
+                        });
+                    }
                 }
 
-                const [medicoDoUsuario] = await db.query(
-                    'SELECT med_id FROM Medico WHERE usu_id = ?',
-                    [usuarioId]
-                );
+                const especialidadeAtualizada = especialidadeInformada
+                    ? especialidadeTratada
+                    : (medicoDoUsuario[0]?.med_especialidade ?? null);
+                const assinaturaAtualizada = assinaturaInformada
+                    ? assinaturaTratada
+                    : (medicoDoUsuario[0]?.med_assinatura ?? null);
 
                 if (medicoDoUsuario.length > 0) {
                     await db.query(
-                        'UPDATE Medico SET med_crm = ? WHERE usu_id = ?',
-                        [crmTratado, usuarioId]
+                        'UPDATE Medico SET med_crm = COALESCE(?, med_crm), med_especialidade = ?, med_assinatura = ? WHERE usu_id = ?',
+                        [
+                            crmTratado || null,
+                            especialidadeAtualizada,
+                            assinaturaAtualizada,
+                            usuarioId
+                        ]
                     );
                 } else {
+                    if (!crmTratado) {
+                        return response.status(400).json({
+                            sucesso: false,
+                            mensagem: 'CRM e obrigatorio para usuario medico.',
+                            dados: null
+                        });
+                    }
+
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                        [usuarioId, crmTratado]
+                        'INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES (?, ?, ?, ?)',
+                        [
+                            usuarioId,
+                            crmTratado,
+                            especialidadeAtualizada,
+                            assinaturaAtualizada
+                        ]
                     );
                 }
             }
@@ -546,8 +614,9 @@ module.exports = {
                     u.usu_biometria,
                     u.usu_tipo,
                     CAST(u.usu_status AS UNSIGNED) AS usu_status,
-                    m.med_id,
-                    m.med_crm
+                    m.med_crm,
+                    m.med_especialidade,
+                    m.med_assinatura
                 FROM Usuario u
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
             `;
@@ -598,8 +667,9 @@ module.exports = {
                     u.inst_id,
                     i.inst_nome,
                     CAST(u.usu_status AS UNSIGNED) AS usu_status,
-                    m.med_id,
-                    m.med_crm
+                    m.med_crm,
+                    m.med_especialidade,
+                    m.med_assinatura
                 FROM Usuario u
                 LEFT JOIN Instituicao i ON i.inst_id = u.inst_id
                 LEFT JOIN Medico m ON m.usu_id = u.usu_id
@@ -649,8 +719,7 @@ module.exports = {
                     usuario: usuario.usu_usuario,
                     email: usuario.usu_email,
                     tipo: usuario.usu_tipo,
-                    inst_id: usuario.inst_id,
-                    med_id: usuario.med_id || null
+                    inst_id: usuario.inst_id
                 },
                 process.env.JWT_SECRET,
                 { expiresIn: '8h' }
@@ -698,6 +767,12 @@ module.exports = {
 
             const nomeNormalizado = normalizarTextoLaudo(nome);
             const usuarioNormalizado = normalizarUsuarioAcesso(usuario);
+            const especialidadeTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_especialidade', 'especialidade')
+            );
+            const assinaturaTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_assinatura', 'assinatura')
+            );
 
             const dadosValidacao = {
                 usu_nome: nomeNormalizado,
@@ -788,7 +863,7 @@ module.exports = {
 
             if (usuarioEhMedico(tipo)) {
                 const [crmExistente] = await db.query(
-                    'SELECT med_id FROM Medico WHERE med_crm = ?',
+                    'SELECT usu_id FROM Medico WHERE med_crm = ?',
                     [crmNormalizado]
                 );
 
@@ -838,8 +913,13 @@ module.exports = {
 
             if (usuarioEhMedico(tipo)) {
                 await db.query(
-                    'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                    [result.insertId, crmNormalizado]
+                    'INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES (?, ?, ?, ?)',
+                    [
+                        result.insertId,
+                        crmNormalizado,
+                        especialidadeTratada ?? null,
+                        assinaturaTratada ?? null
+                    ]
                 );
             }
 
@@ -861,6 +941,10 @@ module.exports = {
                     telefone,
                     tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? crmNormalizado : null,
+                    especialidade: usuarioEhMedico(tipo) ? (especialidadeTratada ?? null) : null,
+                    assinatura: usuarioEhMedico(tipo) ? (assinaturaTratada ?? null) : null,
+                    med_especialidade: usuarioEhMedico(tipo) ? (especialidadeTratada ?? null) : null,
+                    med_assinatura: usuarioEhMedico(tipo) ? (assinaturaTratada ?? null) : null,
                     inst_id,
                     inst_nome: instExistente[0].inst_nome,
                     status: Number(status)
@@ -891,6 +975,14 @@ module.exports = {
 
             const { id } = request.params;
             const nomeNormalizado = normalizarTextoLaudo(nome);
+            const especialidadeInformada = campoFoiInformado(request.body, 'med_especialidade', 'especialidade');
+            const assinaturaInformada = campoFoiInformado(request.body, 'med_assinatura', 'assinatura');
+            const especialidadeTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_especialidade', 'especialidade')
+            );
+            const assinaturaTratada = normalizarCampoOpcional(
+                obterCampoOpcional(request.body, 'med_assinatura', 'assinatura')
+            );
 
             const [usuarioExistente] = await db.query(
                 'SELECT usu_id, usu_email, usu_documento, CAST(usu_status AS UNSIGNED) AS usu_status FROM Usuario WHERE usu_id = ?',
@@ -981,10 +1073,16 @@ module.exports = {
             }
 
             const [medicoDoUsuario] = await db.query(
-                'SELECT med_id, med_crm FROM Medico WHERE usu_id = ?',
+                'SELECT usu_id, med_crm, med_especialidade, med_assinatura FROM Medico WHERE usu_id = ?',
                 [id]
             );
             const crmNormalizado = normalizarCrm(crm);
+            const especialidadeAtualizada = especialidadeInformada
+                ? especialidadeTratada
+                : (medicoDoUsuario[0]?.med_especialidade ?? null);
+            const assinaturaAtualizada = assinaturaInformada
+                ? assinaturaTratada
+                : (medicoDoUsuario[0]?.med_assinatura ?? null);
 
             if (usuarioEhMedico(tipo)) {
                 if (!crmNormalizado && medicoDoUsuario.length === 0) {
@@ -1005,7 +1103,7 @@ module.exports = {
 
                 if (crmNormalizado) {
                     const [crmDuplicado] = await db.query(
-                        'SELECT med_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
+                        'SELECT usu_id FROM Medico WHERE med_crm = ? AND usu_id != ?',
                         [crmNormalizado, id]
                     );
 
@@ -1076,13 +1174,23 @@ module.exports = {
             if (usuarioEhMedico(tipo)) {
                 if (medicoDoUsuario.length > 0) {
                     await db.query(
-                        'UPDATE Medico SET med_crm = COALESCE(?, med_crm) WHERE usu_id = ?',
-                        [crmNormalizado || null, id]
+                        'UPDATE Medico SET med_crm = COALESCE(?, med_crm), med_especialidade = ?, med_assinatura = ? WHERE usu_id = ?',
+                        [
+                            crmNormalizado || null,
+                            especialidadeAtualizada,
+                            assinaturaAtualizada,
+                            id
+                        ]
                     );
                 } else if (medicoDoUsuario.length === 0) {
                     await db.query(
-                        'INSERT INTO Medico (usu_id, med_crm) VALUES (?, ?)',
-                        [id, crmNormalizado]
+                        'INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES (?, ?, ?, ?)',
+                        [
+                            id,
+                            crmNormalizado,
+                            especialidadeAtualizada,
+                            assinaturaAtualizada
+                        ]
                     );
                 }
             }
@@ -1098,6 +1206,10 @@ module.exports = {
                     telefone,
                     tipo: tipoUsuarioParaResposta(tipo),
                     crm: usuarioEhMedico(tipo) ? (crmNormalizado || medicoDoUsuario[0]?.med_crm || null) : null,
+                    especialidade: usuarioEhMedico(tipo) ? especialidadeAtualizada : null,
+                    assinatura: usuarioEhMedico(tipo) ? assinaturaAtualizada : null,
+                    med_especialidade: usuarioEhMedico(tipo) ? especialidadeAtualizada : null,
+                    med_assinatura: usuarioEhMedico(tipo) ? assinaturaAtualizada : null,
                     inst_id,
                     inst_nome: instExistente[0].inst_nome,
                     status: Number(status)
@@ -1297,21 +1409,19 @@ module.exports = {
             }
 
             const [medico] = await db.query(
-                'SELECT med_id FROM Medico WHERE usu_id = ?',
+                'SELECT usu_id FROM Medico WHERE usu_id = ?',
                 [id]
             );
 
             if (medico.length > 0) {
-                const medId = medico[0].med_id;
-
                 const [atendimentos] = await db.query(
-                    'SELECT atend_id FROM Atendimento WHERE med_id = ?',
-                    [medId]
+                    'SELECT atend_id FROM Atendimento WHERE usu_id = ?',
+                    [id]
                 );
 
                 const [favoritos] = await db.query(
-                    'SELECT fav_id FROM Favorito WHERE med_id = ?',
-                    [medId]
+                    'SELECT fav_id FROM Favorito WHERE usu_id = ?',
+                    [id]
                 );
 
                 if (atendimentos.length > 0 || favoritos.length > 0) {
@@ -1323,8 +1433,8 @@ module.exports = {
                 }
 
                 await db.query(
-                    'DELETE FROM Medico WHERE med_id = ?',
-                    [medId]
+                    'DELETE FROM Medico WHERE usu_id = ?',
+                    [id]
                 );
             }
 

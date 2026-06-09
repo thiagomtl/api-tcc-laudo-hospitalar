@@ -1,8 +1,8 @@
 const db = require('../dataBase/connection');
 const normalizarTextoLaudo = require('../utils/normalizarTextoLaudo');
 
-function obterMedicoId(request) {
-    return request.usuario?.med_id || null;
+function obterMedicoUsuarioId(request) {
+    return request.usuario?.usu_id || request.usuario?.id || null;
 }
 
 function normalizarCampo(valor) {
@@ -19,7 +19,7 @@ function montarFavorito(row) {
     return {
         id: row.fav_id,
         fav_id: row.fav_id,
-        med_id: row.med_id,
+        usu_id: row.usu_id,
         nome: row.fav_nome,
         nomeModelo: row.fav_nome,
         cid: row.cid_id,
@@ -36,12 +36,12 @@ function montarFavorito(row) {
     };
 }
 
-async function buscarFavoritoPorId(id, medId) {
+async function buscarFavoritoPorId(id, usuarioId) {
     const [rows] = await db.query(
         `
             SELECT
                 fav.fav_id,
-                fav.med_id,
+                fav.usu_id,
                 fav.fav_nome,
                 fav.cid_id,
                 cid.cid_codigo,
@@ -57,9 +57,9 @@ async function buscarFavoritoPorId(id, medId) {
             FROM Favorito fav
             LEFT JOIN CID cid ON cid.cid_id = fav.cid_id
             LEFT JOIN Procedimento pro ON pro.pro_id = fav.pro_id
-            WHERE fav.fav_id = ? AND fav.med_id = ?
+            WHERE fav.fav_id = ? AND fav.usu_id = ?
         `,
-        [id, medId]
+        [id, usuarioId]
     );
 
     return rows[0] || null;
@@ -68,9 +68,9 @@ async function buscarFavoritoPorId(id, medId) {
 module.exports = {
     async listarFavorito(request, response) {
         try {
-            const medId = obterMedicoId(request);
+            const usuarioId = obterMedicoUsuarioId(request);
 
-            if (!medId) {
+            if (!usuarioId) {
                 return response.status(403).json({
                     sucesso: false,
                     mensagem: 'Usuario medico nao identificado.',
@@ -85,7 +85,7 @@ module.exports = {
                 `
                     SELECT
                         fav.fav_id,
-                        fav.med_id,
+                        fav.usu_id,
                         fav.fav_nome,
                         fav.cid_id,
                         cid.cid_codigo,
@@ -101,11 +101,11 @@ module.exports = {
                     FROM Favorito fav
                     LEFT JOIN CID cid ON cid.cid_id = fav.cid_id
                     LEFT JOIN Procedimento pro ON pro.pro_id = fav.pro_id
-                    WHERE fav.med_id = ?
+                    WHERE fav.usu_id = ?
                       AND fav.fav_nome LIKE ?
                     ORDER BY fav.fav_id DESC
                 `,
-                [medId, favNome]
+                [usuarioId, favNome]
             );
 
             const dados = rows.map(montarFavorito);
@@ -127,9 +127,9 @@ module.exports = {
 
     async cadastrarFavorito(request, response) {
         try {
-            const medId = obterMedicoId(request);
+            const usuarioId = obterMedicoUsuarioId(request);
 
-            if (!medId) {
+            if (!usuarioId) {
                 return response.status(403).json({
                     sucesso: false,
                     mensagem: 'Usuario medico nao identificado.',
@@ -165,8 +165,8 @@ module.exports = {
             }
 
             const [duplicado] = await db.query(
-                'SELECT fav_id FROM Favorito WHERE med_id = ? AND fav_nome = ?',
-                [medId, nomeFavorito]
+                'SELECT fav_id FROM Favorito WHERE usu_id = ? AND fav_nome = ?',
+                [usuarioId, nomeFavorito]
             );
 
             if (duplicado.length > 0) {
@@ -180,7 +180,7 @@ module.exports = {
             const [result] = await db.query(
                 `
                     INSERT INTO Favorito (
-                        med_id,
+                        usu_id,
                         fav_nome,
                         cid_id,
                         pro_id,
@@ -194,7 +194,7 @@ module.exports = {
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 [
-                    medId,
+                    usuarioId,
                     nomeFavorito,
                     cid_id || cid || null,
                     pro_id || procedimento || null,
@@ -207,7 +207,7 @@ module.exports = {
                 ]
             );
 
-            const favorito = await buscarFavoritoPorId(result.insertId, medId);
+            const favorito = await buscarFavoritoPorId(result.insertId, usuarioId);
 
             return response.status(201).json({
                 sucesso: true,
@@ -225,10 +225,10 @@ module.exports = {
 
     async editarFavorito(request, response) {
         try {
-            const medId = obterMedicoId(request);
+            const usuarioId = obterMedicoUsuarioId(request);
             const { id } = request.params;
 
-            if (!medId) {
+            if (!usuarioId) {
                 return response.status(403).json({
                     sucesso: false,
                     mensagem: 'Usuario medico nao identificado.',
@@ -264,8 +264,8 @@ module.exports = {
             }
 
             const [duplicado] = await db.query(
-                'SELECT fav_id FROM Favorito WHERE med_id = ? AND fav_nome = ? AND fav_id != ?',
-                [medId, nomeFavorito, id]
+                'SELECT fav_id FROM Favorito WHERE usu_id = ? AND fav_nome = ? AND fav_id != ?',
+                [usuarioId, nomeFavorito, id]
             );
 
             if (duplicado.length > 0) {
@@ -290,7 +290,7 @@ module.exports = {
                         fav_resultado = ?,
                         fav_recurso = ?
                     WHERE fav_id = ?
-                      AND med_id = ?
+                      AND usu_id = ?
                 `,
                 [
                     nomeFavorito,
@@ -303,7 +303,7 @@ module.exports = {
                     normalizarCampo(resultadosExames),
                     normalizarCampo(recursosNecessarios),
                     id,
-                    medId
+                    usuarioId
                 ]
             );
 
@@ -315,7 +315,7 @@ module.exports = {
                 });
             }
 
-            const favorito = await buscarFavoritoPorId(id, medId);
+            const favorito = await buscarFavoritoPorId(id, usuarioId);
 
             return response.status(200).json({
                 sucesso: true,
@@ -333,10 +333,10 @@ module.exports = {
 
     async apagarFavorito(request, response) {
         try {
-            const medId = obterMedicoId(request);
+            const usuarioId = obterMedicoUsuarioId(request);
             const { id } = request.params;
 
-            if (!medId) {
+            if (!usuarioId) {
                 return response.status(403).json({
                     sucesso: false,
                     mensagem: 'Usuario medico nao identificado.',
@@ -345,8 +345,8 @@ module.exports = {
             }
 
             const [result] = await db.query(
-                'DELETE FROM Favorito WHERE fav_id = ? AND med_id = ?',
-                [id, medId]
+                'DELETE FROM Favorito WHERE fav_id = ? AND usu_id = ?',
+                [id, usuarioId]
             );
 
             if (result.affectedRows === 0) {
