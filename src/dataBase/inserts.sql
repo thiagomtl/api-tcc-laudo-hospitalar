@@ -26,37 +26,55 @@ SET FOREIGN_KEY_CHECKS = 1;
 /* Tabela Convenio */
 INSERT INTO Convenio (con_tipo) VALUES
 ('SUS'),
-('Unimed'),
+('Unimed Tupã'),
+('Unimed Intercâmbio'),
 ('Particular'),
-('Bradesco Saude'),
+('Iamspe'),
+('Santa Casa Saúde'),
+('Bradesco Saúde'),
 ('SulAmerica');
 
 /* Tabela Setor */
 INSERT INTO Setor (set_nome) VALUES
 ('UTI A'),
 ('UTI B'),
+('UTI C'),
 ('Pediatria'),
-('Clinica Medica'),
-('Ortopedia');
+('Ala Convênio'),
+('Ala SUS/Feminino'),
+('Ala SUS/Masculino'),
+('Ala Cirúrgica SUS'),
+('Ala Cirúrgica Mista'),
+('Maternidade');
 
 /* Tabela Leito */
 INSERT INTO Leito (set_id, leito_identificacao) VALUES
-(1, 'UTI-A-01'),
-(1, 'UTI-A-02'),
-(2, 'UTI-B-01'),
-(2, 'UTI-B-02'),
-(3, 'PED-01'),
-(3, 'PED-02'),
-(4, 'CM-01'),
-(4, 'CM-02'),
-(5, 'ORT-01'),
-(5, 'ORT-02');
+(1, 'UTI-A 01'),
+(1, 'UTI-A 02'),
+(2, 'UTI-B 01'),
+(2, 'UTI-B 02'),
+(3, 'UTI-C 01'),
+(3, 'UTI-C 02'),
+(4, 'PED 01'),
+(4, 'PED 02'),
+(5, 'CONV 01'),
+(5, 'CONV 02'),
+(6, 'SUS-F 01'),
+(6, 'SUS-F 02'),
+(7, 'SUS-M 01'),
+(7, 'SUS-M 02'),
+(8, 'CIR-SUS 01'),
+(8, 'CIR-SUS 02'),
+(9, 'CIR-MISTA 01'),
+(9, 'CIR-MISTA 02'),
+(10, 'MAT 01'),
+(10, 'MAT 02');
 
 /* Tabela Carater */
 INSERT INTO Carater (car_tipo) VALUES
-('Urgencia'),
+('Urgência'),
 ('Eletivo'),
-('Internacao');
+('Obstétrica');
 
 /* Tabela Instituicao */
 INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VALUES
@@ -68,12 +86,12 @@ INSERT INTO Usuario (
     usu_nome, usu_usuario, usu_documento, usu_email, usu_senha, usu_datacriacao,
     inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
 ) VALUES
-('Administrador', 'adm', '10000000001', 'adm@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14990000001', NULL, NULL, 'Administrador', 1),
-('Faturista', 'faturista', '10000000002', 'faturista@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14990000002', NULL, NULL, 'Faturista', 1),
-('Medico', 'medico', '10000000003', 'medico@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14990000003', NULL, NULL, 'Medico', 1);
+('Thiago Melo', 'thiagom', '10000000001', 'thiago.melo@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14996123702', NULL, NULL, 'Administrador', 1),
+('João Marcos', 'joaom', '10000000002', 'joao.marcos@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14996784967', NULL, NULL, 'Faturista', 1),
+('Luiz Henrique', 'luizh', '10000000003', 'luiz.henrique@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14996427297', NULL, NULL, 'Medico', 1);
 
 INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES
-((SELECT usu_id FROM Usuario WHERE usu_usuario = 'medico'), '123456', 'Clinica Medica', NULL);
+((SELECT usu_id FROM Usuario WHERE usu_usuario = 'luizh'), '123456', 'Clinica Medica', NULL);
 
 /* Tabela Paciente */
 INSERT INTO Paciente (
@@ -107,65 +125,64 @@ SET @usu_id_medico = (
     SELECT u.usu_id
     FROM Usuario u
     INNER JOIN Medico m ON m.usu_id = u.usu_id
-    WHERE u.usu_usuario = 'medico'
+    WHERE u.usu_usuario = 'luizh'
 );
 
 /* Tabela Atendimento: 20 atendimentos do usuario medico */
 INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, usu_id, atend_data) VALUES
 (1, 1, 1, 1, @usu_id_medico, '2026-05-20 11:00:00'),
-(2, 2, 2, 2, @usu_id_medico, '2026-05-20 11:05:00'),
-(3, 3, 3, 3, @usu_id_medico, '2026-05-20 11:10:00'),
-(4, 4, 4, 1, @usu_id_medico, '2026-05-20 11:15:00'),
-(5, 5, 5, 2, @usu_id_medico, '2026-05-20 11:20:00'),
-(6, 1, 6, 3, @usu_id_medico, '2026-05-20 11:25:00'),
-(7, 2, 7, 1, @usu_id_medico, '2026-05-20 11:30:00'),
-(8, 3, 8, 2, @usu_id_medico, '2026-05-20 11:35:00'),
-(9, 4, 9, 3, @usu_id_medico, '2026-05-20 11:40:00'),
-(10, 5, 10, 1, @usu_id_medico, '2026-05-20 11:45:00'),
-(11, 1, 1, 2, @usu_id_medico, '2026-05-20 11:50:00'),
-(12, 2, 2, 3, @usu_id_medico, '2026-05-20 11:55:00'),
-(13, 3, 3, 1, @usu_id_medico, '2026-05-20 12:00:00'),
-(14, 4, 4, 2, @usu_id_medico, '2026-05-20 12:05:00'),
-(15, 5, 5, 3, @usu_id_medico, '2026-05-20 12:10:00'),
-(16, 1, 6, 1, @usu_id_medico, '2026-05-20 12:15:00'),
-(17, 2, 7, 2, @usu_id_medico, '2026-05-20 12:20:00'),
-(18, 3, 8, 3, @usu_id_medico, '2026-05-20 12:25:00'),
-(19, 4, 9, 1, @usu_id_medico, '2026-05-20 12:30:00'),
-(20, 5, 10, 2, @usu_id_medico, '2026-05-20 12:35:00');
+(2, 2, 3, 2, @usu_id_medico, '2026-05-20 11:05:00'),
+(3, 3, 5, 3, @usu_id_medico, '2026-05-20 11:10:00'),
+(4, 4, 7, 1, @usu_id_medico, '2026-05-20 11:15:00'),
+(5, 5, 9, 2, @usu_id_medico, '2026-05-20 11:20:00'),
+(6, 6, 11, 3, @usu_id_medico, '2026-05-20 11:25:00'),
+(7, 7, 13, 1, @usu_id_medico, '2026-05-20 11:30:00'),
+(8, 8, 15, 2, @usu_id_medico, '2026-05-20 11:35:00'),
+(9, 1, 17, 3, @usu_id_medico, '2026-05-20 11:40:00'),
+(10, 2, 19, 1, @usu_id_medico, '2026-05-20 11:45:00'),
+(11, 3, 2, 2, @usu_id_medico, '2026-05-20 11:50:00'),
+(12, 4, 4, 3, @usu_id_medico, '2026-05-20 11:55:00'),
+(13, 5, 6, 1, @usu_id_medico, '2026-05-20 12:00:00'),
+(14, 6, 8, 2, @usu_id_medico, '2026-05-20 12:05:00'),
+(15, 7, 10, 3, @usu_id_medico, '2026-05-20 12:10:00'),
+(16, 8, 12, 1, @usu_id_medico, '2026-05-20 12:15:00'),
+(17, 1, 14, 2, @usu_id_medico, '2026-05-20 12:20:00'),
+(18, 2, 16, 3, @usu_id_medico, '2026-05-20 12:25:00'),
+(19, 3, 18, 1, @usu_id_medico, '2026-05-20 12:30:00'),
+(20, 4, 20, 2, @usu_id_medico, '2026-05-20 12:35:00');
 
 /* Tabela Escolha_Clinica */
 INSERT INTO Escolha_Clinica (cli_descricao) VALUES
 ('Medica'),
 ('Cirurgica'),
 ('Pediatrica'),
-('Obstetrica'),
-('Ortopedica');
+('Obstetrica');
 
 /* Tabela Procedimento */
 INSERT INTO Procedimento (pro_codigo, pro_descricao) VALUES
-(301010072, 'Consulta medica'),
-(403010012, 'Eletrocardiograma'),
-(202010058, 'Hemograma completo'),
-(205020046, 'Raio X torax'),
-(407030016, 'Ultrassonografia'),
-(403020026, 'Ecocardiograma'),
-(408010013, 'Tomografia'),
-(409010030, 'Ressonancia'),
-(412010054, 'Endoscopia'),
-(401020010, 'Curativo especial');
+(303010037, 'TRATAMENTO DE OUTRAS DOENÇAS BACTERIANAS'),
+(303010010, 'TRATAMENTO DE DENGUE CLASSICA'),
+(407030026, 'COLECISTECTOMIA'),
+(303060190, 'TRATAMENTO DE INFARTO AGUDO DO MIOCÁRDIO'),
+(408050519, 'TRATAMENTO CIRÚRGICO DE FRATURA DA DIÁFISE DO FÊMUR'),
+(403020026, 'TRATAMENTO DAS DOENCAS CRONICAS DAS VIAS AEREAS INFERIORES'),
+(303140151, 'TRATAMENTO DE PNEUMONIAS OU INFLUENZA (GRIPE)'),
+(308040015, 'TRATAMENTO DE COMPLICACOES DE PROCEDIMENTOS CIRURGICOS OU CLINICOS'),
+(411010034, 'OPERACAO CESARIANA'),
+(409040240, 'VASECTOMIA');
 
 /* Tabela CID */
 INSERT INTO CID (cid_codigo, cid_descricao) VALUES
-('R50', 'Febre'),
-('R10', 'Dor abdominal'),
-('J18', 'Pneumonia'),
-('I10', 'Hipertensao'),
-('E11', 'Diabetes tipo 2'),
-('S72', 'Fratura femur'),
-('N39', 'Infeccao urinaria'),
-('M54', 'Dor lombar'),
-('K35', 'Apendicite'),
-('Z00', 'Exame geral');
+('A419', 'SEPTICEMIA NAO ESPECIFICADA'),
+('A90', 'DENGUE'),
+('K819', 'COLECISTITE SEM OUTRA ESPECIFICAÇÃO'),
+('I219', 'INFARTO AGUDO DO MIOCARDIO NAO ESPECIFICADO'),
+('S729', 'FRATURA DO FEMUR PARTE NAO ESPECIFICADA'),
+('J449', 'DOENCA PULMONAR OBSTRUTIVA CRONICA NAO ESPECIFICADA'),
+('J189', 'PNEUMONIA NAO ESPECIFICADA'),
+('M544', 'LUMBAGO COM CIATICA'),
+('O820', 'PARTO POR CESARIANA ELETIVA'),
+('Z302', 'ESTERILIZACAO');
 
 /* Tabela Procedimento_Cids */
 INSERT INTO Procedimento_Cids (pro_id, cid_id) VALUES
@@ -180,7 +197,6 @@ INSERT INTO Procedimento_Cids (pro_id, cid_id) VALUES
 (9, 9),
 (10, 10);
 
-/* Tabela Laudo: 1 concluido para a Carla. Os outros 19 atendimentos ficam pendentes sem linha em Laudo. */
 INSERT INTO Laudo (
     atend_id, cli_id, cid_id, pro_id, lau_sinais, lau_internacao,
     lau_resultado, lau_recurso, lau_datapreenc, lau_status
