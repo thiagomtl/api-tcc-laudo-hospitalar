@@ -1,0 +1,158 @@
+DICIONARIO DE DADOS - FORMATO PARA COLAR NO WORD
+
+Cada linha abaixo usa TAB entre as colunas:
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+
+TABELA: Instituicao✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID da instituicao	inst_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico da instituicao
+Nome fantasia	inst_nome	VARCHAR	100	-	-	NOT NULL	Nome da instituicao
+Razao social	inst_razao_social	VARCHAR	150	-	-	NOT NULL	Razao social da instituicao
+CNES	inst_cnes	CHAR	7	-	-	NOT NULL	Codigo CNES da instituicao
+CNPJ	inst_cnpj	CHAR	14	-	-	NOT NULL	CNPJ apenas com numeros
+
+TABELA: Convenio✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do convenio	con_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do convenio
+Tipo de convenio	con_tipo	VARCHAR	50	-	-	NOT NULL	Tipo ou nome do convenio
+
+TABELA: Setor
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do setor	set_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do setor
+Nome do setor	set_nome	VARCHAR	30	-	-	NOT NULL	Nome do setor hospitalar
+
+TABELA: Leito✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do leito	leito_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do leito
+ID do setor	set_id	INT	-	-	FK	NOT NULL; FK para Setor(set_id)	Relaciona o leito ao setor
+Identificacao do leito	leito_identificacao	VARCHAR	20	-	-	NOT NULL	Codigo, nome ou numero do leito
+
+TABELA: Carater✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do carater	car_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do carater
+Tipo de carater	car_tipo	VARCHAR	30	-	-	NOT NULL	Tipo de carater do atendimento
+
+TABELA: Escolha_Clinica✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID da escolha clinica	cli_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico da escolha clinica
+Descricao	cli_descricao	VARCHAR	20	-	-	NOT NULL	Descricao da clinica ou area selecionada
+
+TABELA: Procedimento✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do procedimento	pro_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do procedimento
+Codigo do procedimento	pro_codigo	INT	-	-	-	NULL	Codigo do procedimento
+Descricao	pro_descricao	VARCHAR	100	-	-	-	NULL	Descricao do procedimento
+
+TABELA: CID✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do CID	cid_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do CID
+Codigo do CID	cid_codigo	VARCHAR	4	-	-	NOT NULL	Codigo CID
+Descricao	cid_descricao	VARCHAR	100	-	-	NOT NULL	Descricao do CID
+
+TABELA: Usuario✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do usuario	usu_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do usuario
+Nome	usu_nome	VARCHAR	100	-	-	NOT NULL	Nome completo do usuario
+Login do usuario	usu_usuario	VARCHAR	50	-	-	UNIQUE; NOT NULL	Login unico. Na migracao antiga foi criado como NULL UNIQUE
+Documento	usu_documento	VARCHAR	11	-	-	NOT NULL	Documento do usuario
+E-mail	usu_email	VARCHAR	100	-	-	NOT NULL	E-mail do usuario
+Senha	usu_senha	VARCHAR	100	-	-	NOT NULL	Senha armazenada pelo sistema
+Data de criacao	usu_datacriacao	DATETIME	-	-	-	NOT NULL	Data e hora de criacao do cadastro
+ID da instituicao	inst_id	INT	-	-	FK	NOT NULL; FK para Instituicao(inst_id)	Instituicao vinculada ao usuario
+Telefone	usu_telefone	VARCHAR	15	-	-	NOT NULL	Telefone do usuario
+Foto	usu_foto	VARCHAR	255	-	-	NULL	Caminho ou nome do arquivo de foto
+Biometria	usu_biometria	VARCHAR	255	-	-	NULL	Caminho ou nome do arquivo biometrico
+Tipo de usuario	usu_tipo	VARCHAR	15	-	-	NOT NULL	Perfil do usuario, como administrador, medico ou faturista
+Status	usu_status	BIT	-	-	-	NOT NULL	Indica se o usuario esta ativo ou inativo
+
+TABELA: Medico✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do usuario medico	usu_id	INT	-	PK	FK	PRIMARY KEY; NOT NULL; FK para Usuario(usu_id)	Especializacao de usuario como medico
+CRM	med_crm	VARCHAR	6	-	-	UNIQUE; NOT NULL	Registro profissional unico do medico
+Especialidade	med_especialidade	VARCHAR	100	-	-	NULL	Especialidade medica
+Assinatura	med_assinatura	TEXT	-	-	-	NULL	Assinatura do medico, podendo ser caminho, URL ou base64
+
+TABELA: Paciente✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do paciente	pac_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do paciente
+Nome	pac_nome	VARCHAR	60	-	-	NOT NULL	Nome completo do paciente
+Data de nascimento	pac_datanasc	DATE	-	-	-	NOT NULL	Data de nascimento do paciente
+CPF	pac_cpf	CHAR	11	-	-	UNIQUE; NOT NULL	CPF unico do paciente
+Telefone	pac_telefone	VARCHAR	15	-	-	NOT NULL	Telefone do paciente
+Data de cadastro	pac_datacadastro	DATETIME	-	-	-	NOT NULL	Data e hora do cadastro
+Sexo	pac_sexo	BIT	-	-	-	NOT NULL	Indicador binario usado pelo sistema
+Numero do prontuario	pac_num_prontuario	INT	-	-	-	NOT NULL	Numero do prontuario do paciente
+CNS	pac_cns	CHAR	15	-	-	NOT NULL	Cartao Nacional de Saude
+Nome da mae	pac_nome_mae	VARCHAR	60	-	-	NOT NULL	Nome da mae do paciente
+Raca	pac_raca	VARCHAR	10	-	-	NOT NULL	Raca/cor informada
+Bairro	pac_bairro	VARCHAR	50	-	-	NOT NULL	Bairro do endereco
+Numero da casa	pac_num_casa	VARCHAR	7	-	-	NOT NULL	Numero ou complemento curto do endereco
+Logradouro	pac_logradouro	VARCHAR	120	-	-	NOT NULL	Rua, avenida ou logradouro
+CEP	pac_cep	CHAR	8	-	-	NOT NULL	CEP apenas com numeros
+UF	pac_uf	CHAR	2	-	-	NOT NULL	Sigla da unidade federativa
+Municipio	pac_municipio	VARCHAR	50	-	-	NOT NULL	Municipio do endereco
+Codigo IBGE	pac_cod_ibge	INT	-	-	-	NOT NULL	Codigo IBGE do municipio
+
+TABELA: Atendimento✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do atendimento	atend_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do atendimento
+ID do paciente	pac_id	INT	-	-	FK	NOT NULL; FK para Paciente(pac_id)	Paciente atendido
+ID do convenio	con_id	INT	-	-	FK	NOT NULL; FK para Convenio(con_id)	Convenio do atendimento
+ID do leito	leito_id	INT	-	-	FK	NOT NULL; FK para Leito(leito_id)	Leito associado ao atendimento
+ID do carater	car_id	INT	-	-	FK	NOT NULL; FK para Carater(car_id)	Carater do atendimento
+ID do medico	usu_id	INT	-	-	FK	NOT NULL; FK para Medico(usu_id)	Medico responsavel
+Data do atendimento	atend_data	DATETIME	-	-	-	NOT NULL	Data e hora do atendimento
+
+TABELA: Laudo
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do laudo	lau_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do laudo
+ID do atendimento	atend_id	INT	-	-	FK	NOT NULL; FK para Atendimento(atend_id)	Atendimento relacionado ao laudo
+ID da escolha clinica	cli_id	INT	-	-	FK	NOT NULL; FK para Escolha_Clinica(cli_id)	Escolha clinica do laudo
+ID do CID	cid_id	INT	-	-	FK	NOT NULL; FK para CID(cid_id)	CID relacionado diretamente ao laudo
+ID do procedimento	pro_id	INT	-	-	FK	NOT NULL; FK para Procedimento(pro_id)	Procedimento relacionado diretamente ao laudo
+Sinais e sintomas	lau_sinais	VARCHAR	1024	-	-	NOT NULL	Sinais e sintomas informados no laudo
+Internacao	lau_internacao	VARCHAR	1024	-	-	NOT NULL	Dados ou justificativa de internacao
+Resultado	lau_resultado	VARCHAR	512	-	-	NOT NULL	Resultado descrito no laudo
+Recurso	lau_recurso	VARCHAR	512	-	-	NOT NULL	Recurso descrito/solicitado no laudo
+Data de preenchimento	lau_datapreenc	DATETIME	-	-	-	NOT NULL	Data e hora do preenchimento
+Status	lau_status	BIT	-	-	-	NOT NULL	Status binario do laudo
+
+TABELA: Procedimento_Cids✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID da associacao procedimento/CID	proc_cid_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico da associacao
+ID do procedimento	pro_id	INT	-	-	FK	NULL; FK para Procedimento(pro_id)	Procedimento associado ao CID
+ID do CID	cid_id	INT	-	-	FK	NOT NULL; FK para CID(cid_id)	CID associado ao procedimento
+
+TABELA: Favorito✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do favorito	fav_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do favorito
+ID do medico	usu_id	INT	-	-	FK	NOT NULL; FK para Medico(usu_id)	Medico proprietario do favorito
+Nome do favorito	fav_nome	VARCHAR	30	-	-	NOT NULL	Nome do modelo favorito
+ID do CID	cid_id	INT	-	-	FK	NULL; FK para CID(cid_id)	CID opcional do modelo favorito
+ID do procedimento	pro_id	INT	-	-	FK	NULL; FK para Procedimento(pro_id)	Procedimento opcional do modelo favorito
+ID da escolha clinica	cli_id	INT	-	-	FK	NULL; FK para Escolha_Clinica(cli_id)	Escolha clinica opcional do modelo favorito
+Carater do favorito	fav_carater	VARCHAR	30	-	-	NULL	Valor textual; nao referencia Carater(car_id)
+Sinais e sintomas	fav_sinais	VARCHAR	1024	-	-	NULL	Texto padrao do modelo favorito
+Internacao	fav_internacao	VARCHAR	1024	-	-	NULL	Texto padrao do modelo favorito
+Resultado	fav_resultado	VARCHAR	512	-	-	NULL	Texto padrao do modelo favorito
+Recurso	fav_recurso	VARCHAR	512	-	-	NULL	Texto padrao do modelo favorito
+
+TABELA: Logs_Acao✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID do log	log_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico do log
+ID do usuario	usu_id	INT	-	-	FK	NOT NULL; FK para Usuario(usu_id)	Usuario que executou a acao
+Acao	log_acao	VARCHAR	200	-	-	NOT NULL	Acao executada
+Detalhe	log_detalhe	VARCHAR	255	-	-	NOT NULL	Detalhes da acao registrada
+Data e hora	log_datahora	DATETIME	-	-	-	NOT NULL	Data e hora do registro
+
+TABELA: Mensagem_Chat✅
+Campo Logico	Campo Fisico	Tipo De Dados	Tamanho Do Campo	PK	FK	Restricoes	Observacoes
+ID da mensagem	msg_id	INT	-	PK	-	PRIMARY KEY; AUTO_INCREMENT; NOT NULL	Identificador unico da mensagem
+ID do remetente	usu_id_remetente	INT	-	-	FK	NOT NULL; FK para Usuario(usu_id)	Usuario que enviou a mensagem
+ID do destinatario	usu_id_destinatario	INT	-	-	FK	NOT NULL; FK para Usuario(usu_id)	Usuario que recebeu a mensagem
+Conteudo	msg_conteudo	VARCHAR	500	-	-	NULL	Texto da mensagem
+Arquivo anexo	msg_arqanexo	VARCHAR	255	-	-	NULL	Caminho ou nome do arquivo anexo
+Data/hora de envio	msg_datahoraenvio	DATETIME	-	-	-	NOT NULL	Data e hora do envio
+Status	msg_status	VARCHAR	10	-	-	NOT NULL	Status da mensagem
+Mensagem respondida	msg_resposta	INT	-	-	FK	NULL; FK para Mensagem_Chat(msg_id)	Mensagem original respondida
+
