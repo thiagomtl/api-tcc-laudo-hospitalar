@@ -2,7 +2,7 @@ DICIONARIO DE DADOS - FORMATO LISTA
 
 Fonte: src/dataBase/create.sql e migracoes em src/dataBase/migracao_*.sql.
 
-TABELA: Instituicao
+TABELA: Instituicao✅
 
 - Campo logico: ID da instituicao
   Campo fisico: inst_id
@@ -11,7 +11,7 @@ TABELA: Instituicao
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico da instituicao.
+  Observacoes: Identificador único da instituicao.
 
 - Campo logico: Nome fantasia
   Campo fisico: inst_nome
@@ -50,7 +50,7 @@ TABELA: Instituicao
   Observacoes: CNPJ apenas com numeros.
 
 
-TABELA: Convenio
+TABELA: Convenio✅
 
 - Campo logico: ID do convenio
   Campo fisico: con_id
@@ -59,7 +59,7 @@ TABELA: Convenio
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do convenio.
+  Observacoes: Identificador único do convenio.
 
 - Campo logico: Tipo de convenio
   Campo fisico: con_tipo
@@ -71,7 +71,7 @@ TABELA: Convenio
   Observacoes: Tipo ou nome do convenio.
 
 
-TABELA: Setor
+TABELA: Setor✅
 
 - Campo logico: ID do setor
   Campo fisico: set_id
@@ -80,7 +80,7 @@ TABELA: Setor
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do setor.
+  Observacoes: Identificador único do setor.
 
 - Campo logico: Nome do setor
   Campo fisico: set_nome
@@ -92,7 +92,7 @@ TABELA: Setor
   Observacoes: Nome do setor hospitalar.
 
 
-TABELA: Leito
+TABELA: Leito✅
 
 - Campo logico: ID do leito
   Campo fisico: leito_id
@@ -101,7 +101,7 @@ TABELA: Leito
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do leito.
+  Observacoes: Identificador único do leito.
 
 - Campo logico: ID do setor
   Campo fisico: set_id
@@ -122,7 +122,7 @@ TABELA: Leito
   Observacoes: Codigo, nome ou numero do leito.
 
 
-TABELA: Carater
+TABELA: Carater✅
 
 - Campo logico: ID do carater
   Campo fisico: car_id
@@ -131,7 +131,7 @@ TABELA: Carater
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do carater.
+  Observacoes: Identificador único do carater.
 
 - Campo logico: Tipo de carater
   Campo fisico: car_tipo
@@ -143,7 +143,7 @@ TABELA: Carater
   Observacoes: Tipo de carater do atendimento.
 
 
-TABELA: Escolha_Clinica
+TABELA: Escolha_Clinica✅
 
 - Campo logico: ID da escolha clinica
   Campo fisico: cli_id
@@ -152,7 +152,7 @@ TABELA: Escolha_Clinica
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico da escolha clinica.
+  Observacoes: Identificador único da escolha clinica.
 
 - Campo logico: Descricao
   Campo fisico: cli_descricao
@@ -173,7 +173,7 @@ TABELA: Procedimento
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do procedimento.
+  Observacoes: Identificador único do procedimento.
 
 - Campo logico: Codigo do procedimento
   Campo fisico: pro_codigo
@@ -203,7 +203,7 @@ TABELA: CID
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do CID.
+  Observacoes: Identificador único do CID.
 
 - Campo logico: Codigo do CID
   Campo fisico: cid_codigo
@@ -233,7 +233,7 @@ TABELA: Usuario
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do usuario.
+  Observacoes: Identificador único do usuario.
 
 - Campo logico: Nome
   Campo fisico: usu_nome
@@ -251,7 +251,7 @@ TABELA: Usuario
   PK: Nao
   FK: Nao
   Restricoes: UNIQUE; NOT NULL
-  Observacoes: Login unico. Na migracao antiga foi criado como NULL UNIQUE.
+  Observacoes: Login único. Na migracao antiga foi criado como NULL UNIQUE.
 
 - Campo logico: Documento
   Campo fisico: usu_documento
@@ -362,7 +362,7 @@ TABELA: Medico
   PK: Nao
   FK: Nao
   Restricoes: UNIQUE; NOT NULL
-  Observacoes: Registro profissional unico do medico.
+  Observacoes: Registro profissional único do medico.
 
 - Campo logico: Especialidade
   Campo fisico: med_especialidade
@@ -392,7 +392,7 @@ TABELA: Paciente
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do paciente.
+  Observacoes: Identificador único do paciente.
 
 - Campo logico: Nome
   Campo fisico: pac_nome
@@ -419,7 +419,7 @@ TABELA: Paciente
   PK: Nao
   FK: Nao
   Restricoes: UNIQUE; NOT NULL
-  Observacoes: CPF unico do paciente.
+  Observacoes: CPF único do paciente.
 
 - Campo logico: Telefone
   Campo fisico: pac_telefone
@@ -557,7 +557,7 @@ TABELA: Atendimento
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do atendimento.
+  Observacoes: Identificador único do atendimento.
 
 - Campo logico: ID do paciente
   Campo fisico: pac_id
@@ -623,7 +623,7 @@ TABELA: Procedimento_Cids
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico da associacao.
+  Observacoes: Identificador único da associacao.
 
 - Campo logico: ID do procedimento
   Campo fisico: pro_id
@@ -653,7 +653,7 @@ TABELA: Laudo
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do laudo.
+  Observacoes: Identificador único do laudo.
 
 - Campo logico: ID do atendimento
   Campo fisico: atend_id
@@ -755,7 +755,7 @@ TABELA: Favorito
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do favorito.
+  Observacoes: Identificador único do favorito.
 
 - Campo logico: ID do medico
   Campo fisico: usu_id
@@ -857,7 +857,7 @@ TABELA: Logs_Acao
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico do log.
+  Observacoes: Identificador único do log.
 
 - Campo logico: ID do usuario
   Campo fisico: usu_id
@@ -905,7 +905,7 @@ TABELA: Mensagem_Chat
   PK: Sim
   FK: Nao
   Restricoes: PRIMARY KEY; AUTO_INCREMENT; NOT NULL
-  Observacoes: Identificador unico da mensagem.
+  Observacoes: Identificador único da mensagem.
 
 - Campo logico: ID do remetente
   Campo fisico: usu_id_remetente
