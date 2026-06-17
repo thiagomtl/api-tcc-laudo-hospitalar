@@ -12,6 +12,16 @@ Observações importantes para o MER:
 - `Mensagem_Chat.msg_resposta` é uma FK autorreferenciada para `Mensagem_Chat.msg_id`.
 - A migração `migracao_usuario_login.sql` adicionava `Usuario.usu_usuario` como `NULL UNIQUE`; no `create.sql` atual a coluna aparece como `NOT NULL UNIQUE`.
 
+## Ordem recomendada para conferir o MER
+
+A ordem abaixo é por dependência lógica das chaves, não por alfabeto. Ela começa nas tabelas-base e depois mostra as tabelas que dependem delas.
+
+1. Tabelas-base sem FK: `Convenio`, `Setor`, `Carater`, `Instituicao`, `Paciente`, `Escolha_Clinica`, `Procedimento`, `CID`.
+2. Tabelas dependentes diretas: `Leito` depende de `Setor`; `Usuario` depende de `Instituicao`; `Medico` depende de `Usuario`.
+3. Tabelas de movimento/associação: `Atendimento` depende de `Paciente`, `Convenio`, `Leito`, `Carater` e `Medico`; `Procedimento_Cids` depende de `Procedimento` e `CID`.
+4. Tabelas geradas pelo uso do sistema: `Laudo` depende de `Atendimento`, `Escolha_Clinica`, `CID` e `Procedimento`; `Favorito` depende de `Medico`, `CID`, `Procedimento` e `Escolha_Clinica`.
+5. Tabelas de auditoria/comunicação: `Logs_Acao` depende de `Usuario`; `Mensagem_Chat` depende de `Usuario` e dela mesma por `msg_resposta`.
+
 ## Relações das chaves
 
 | Origem | Chave estrangeira | Destino | Cardinalidade física esperada | Observação |
@@ -225,4 +235,3 @@ Observações importantes para o MER:
 | Data/hora de envio | `msg_datahoraenvio` | `DATETIME` | - | Não | Não | Não | Não | Data/hora do envio. |
 | Status | `msg_status` | `VARCHAR` | 10 | Não | Não | Não | Não | Status da mensagem. |
 | Mensagem respondida | `msg_resposta` | `INT` | - | Sim | Não | Sim | Não | Referencia `Mensagem_Chat(msg_id)`. |
-
