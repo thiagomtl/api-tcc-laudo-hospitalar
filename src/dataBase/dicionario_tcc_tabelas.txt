@@ -164,7 +164,7 @@ TABELA: Escolha_Clinica✅
   Observacoes: Descricao da clinica ou area selecionada.
 
 
-TABELA: Procedimento
+TABELA: Procedimento✅
 
 - Campo logico: ID do procedimento
   Campo fisico: pro_id
@@ -194,7 +194,7 @@ TABELA: Procedimento
   Observacoes: Descricao do procedimento.
 
 
-TABELA: CID
+TABELA: CID✅
 
 - Campo logico: ID do CID
   Campo fisico: cid_id
@@ -224,7 +224,7 @@ TABELA: CID
   Observacoes: Descricao do CID.
 
 
-TABELA: Usuario
+TABELA: Usuario ✅
 
 - Campo logico: ID do usuario
   Campo fisico: usu_id
@@ -344,7 +344,7 @@ TABELA: Usuario
   Observacoes: Indica se o usuario esta ativo ou inativo.
 
 
-TABELA: Medico
+TABELA: Medico✅
 
 - Campo logico: ID do usuario medico
   Campo fisico: usu_id
@@ -383,7 +383,7 @@ TABELA: Medico
   Observacoes: Assinatura do medico, podendo ser caminho, URL ou base64.
 
 
-TABELA: Paciente
+TABELA: Paciente❌
 
 - Campo logico: ID do paciente
   Campo fisico: pac_id
@@ -548,7 +548,7 @@ TABELA: Paciente
   Observacoes: Codigo IBGE do municipio.
 
 
-TABELA: Atendimento
+TABELA: Atendimento❌
 
 - Campo logico: ID do atendimento
   Campo fisico: atend_id
@@ -614,7 +614,7 @@ TABELA: Atendimento
   Observacoes: Data e hora do atendimento.
 
 
-TABELA: Procedimento_Cids
+TABELA: Procedimento_Cids❌
 
 - Campo logico: ID da associacao procedimento/CID
   Campo fisico: proc_cid_id
@@ -644,7 +644,7 @@ TABELA: Procedimento_Cids
   Observacoes: CID associado ao procedimento.
 
 
-TABELA: Laudo
+TABELA: Laudo❌
 
 - Campo logico: ID do laudo
   Campo fisico: lau_id
@@ -746,7 +746,7 @@ TABELA: Laudo
   Observacoes: Status binario do laudo.
 
 
-TABELA: Favorito
+TABELA: Favorito❌
 
 - Campo logico: ID do favorito
   Campo fisico: fav_id
@@ -848,7 +848,7 @@ TABELA: Favorito
   Observacoes: Texto padrao do modelo favorito.
 
 
-TABELA: Logs_Acao
+TABELA: Logs_Acao❌
 
 - Campo logico: ID do log
   Campo fisico: log_id
@@ -896,7 +896,7 @@ TABELA: Logs_Acao
   Observacoes: Data e hora do registro.
 
 
-TABELA: Mensagem_Chat
+TABELA: Mensagem_Chat❌
 
 - Campo logico: ID da mensagem
   Campo fisico: msg_id
@@ -969,4 +969,3 @@ TABELA: Mensagem_Chat
   FK: Sim
   Restricoes: NULL; FK para Mensagem_Chat(msg_id)
   Observacoes: Mensagem original respondida.
-
