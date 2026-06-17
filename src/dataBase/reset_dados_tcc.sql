@@ -1,19 +1,22 @@
-/* Seed limpo para testes de laudo */
-/* Selecione o banco correto antes de executar este script. */
+/* Reset dos dados de teste do TCC preservando tabelas robustas.
+   Nao altera:
+   - CID
+   - Procedimento
+   - Procedimento_Cids
+
+   Execute depois que as tabelas estruturais ja existirem no banco.
+*/
 
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE Favorito;
 TRUNCATE TABLE Laudo;
-TRUNCATE TABLE Procedimento_Cids;
 TRUNCATE TABLE Atendimento;
 TRUNCATE TABLE Mensagem_Chat;
 TRUNCATE TABLE Logs_Acao;
 TRUNCATE TABLE Medico;
 TRUNCATE TABLE Usuario;
 TRUNCATE TABLE Paciente;
-TRUNCATE TABLE CID;
-TRUNCATE TABLE Procedimento;
 TRUNCATE TABLE Escolha_Clinica;
 TRUNCATE TABLE Leito;
 TRUNCATE TABLE Setor;
@@ -26,12 +29,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 /* Tabela Convenio */
 INSERT INTO Convenio (con_tipo) VALUES
 ('SUS'),
-('Unimed Tupã'),
-('Unimed Intercâmbio'),
+('Unimed Tupa'),
+('Unimed Intercambio'),
 ('Particular'),
 ('Iamspe'),
-('Santa Casa Saúde'),
-('Bradesco Saúde'),
+('Santa Casa Saude'),
+('Bradesco Saude'),
 ('SulAmerica');
 
 /* Tabela Setor */
@@ -40,11 +43,11 @@ INSERT INTO Setor (set_nome) VALUES
 ('UTI B'),
 ('UTI C'),
 ('Pediatria'),
-('Ala Convênio'),
+('Ala Convenio'),
 ('Ala SUS/Feminino'),
 ('Ala SUS/Masculino'),
-('Ala Cirúrgica SUS'),
-('Ala Cirúrgica Mista'),
+('Ala Cirurgica SUS'),
+('Ala Cirurgica Mista'),
 ('Maternidade');
 
 /* Tabela Leito */
@@ -72,9 +75,16 @@ INSERT INTO Leito (set_id, leito_identificacao) VALUES
 
 /* Tabela Carater */
 INSERT INTO Carater (car_tipo) VALUES
-('Urgência'),
+('Urgencia'),
 ('Eletivo'),
-('Obstétrica');
+('Obstetrica');
+
+/* Tabela Escolha_Clinica */
+INSERT INTO Escolha_Clinica (cli_descricao) VALUES
+('Medica'),
+('Cirurgica'),
+('Pediatrica'),
+('Obstetrica');
 
 /* Tabela Instituicao */
 INSERT INTO Instituicao (inst_nome, inst_razao_social, inst_cnes, inst_cnpj) VALUES
@@ -87,7 +97,7 @@ INSERT INTO Usuario (
     inst_id, usu_telefone, usu_foto, usu_biometria, usu_tipo, usu_status
 ) VALUES
 ('Thiago Melo', 'thiagom', '10000000001', 'thiago.melo@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:00:00', 1, '14996123702', NULL, NULL, 'Administrador', 1),
-('João Marcos', 'joaom', '10000000002', 'joao.marcos@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14996784967', NULL, NULL, 'Faturista', 1),
+('Joao Marcos', 'joaom', '10000000002', 'joao.marcos@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:05:00', 1, '14996784967', NULL, NULL, 'Faturista', 1),
 ('Luiz Henrique', 'luizh', '10000000003', 'luiz.henrique@medsync.com', '$2b$10$fioIX3f9fkrcLbAIjbLSJOXOrDWfMPnwWD1L7Se7vh6FKUk2jHTF.', '2026-05-20 08:10:00', 1, '14996427297', NULL, NULL, 'Medico', 1);
 
 INSERT INTO Medico (usu_id, med_crm, med_especialidade, med_assinatura) VALUES
@@ -151,61 +161,19 @@ INSERT INTO Atendimento (pac_id, con_id, leito_id, car_id, usu_id, atend_data) V
 (19, 2, 2, 2, @usu_id_medico, '2026-05-20 12:30:00'),
 (20, 3, 4, 1, @usu_id_medico, '2026-05-20 12:35:00');
 
-/* Tabela Escolha_Clinica */
-INSERT INTO Escolha_Clinica (cli_descricao) VALUES
-('Medica'),
-('Cirurgica'),
-('Pediatrica'),
-('Obstetrica');
-
-/* Tabela Procedimento */
-INSERT INTO Procedimento (pro_codigo, pro_descricao) VALUES
-(303010037, 'TRATAMENTO DE OUTRAS DOENÇAS BACTERIANAS'),
-(303010010, 'TRATAMENTO DE DENGUE CLASSICA'),
-(407030026, 'COLECISTECTOMIA'),
-(303060190, 'TRATAMENTO DE INFARTO AGUDO DO MIOCÁRDIO'),
-(408050519, 'TRATAMENTO CIRÚRGICO DE FRATURA DA DIÁFISE DO FÊMUR'),
-(403020026, 'TRATAMENTO DAS DOENCAS CRONICAS DAS VIAS AEREAS INFERIORES'),
-(303140151, 'TRATAMENTO DE PNEUMONIAS OU INFLUENZA (GRIPE)'),
-(308040015, 'TRATAMENTO DE COMPLICACOES DE PROCEDIMENTOS CIRURGICOS OU CLINICOS'),
-(411010034, 'OPERACAO CESARIANA'),
-(409040240, 'VASECTOMIA');
-
-/* Tabela CID */
-INSERT INTO CID (cid_codigo, cid_descricao) VALUES
-('A419', 'SEPTICEMIA NAO ESPECIFICADA'),
-('A90', 'DENGUE'),
-('K819', 'COLECISTITE SEM OUTRA ESPECIFICAÇÃO'),
-('I219', 'INFARTO AGUDO DO MIOCARDIO NAO ESPECIFICADO'),
-('S729', 'FRATURA DO FEMUR PARTE NAO ESPECIFICADA'),
-('J449', 'DOENCA PULMONAR OBSTRUTIVA CRONICA NAO ESPECIFICADA'),
-('J189', 'PNEUMONIA NAO ESPECIFICADA'),
-('M544', 'LUMBAGO COM CIATICA'),
-('O820', 'PARTO POR CESARIANA ELETIVA'),
-('Z302', 'ESTERILIZACAO');
-
-/* Tabela Procedimento_Cids */
-INSERT INTO Procedimento_Cids (pro_id, cid_id) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
-(6, 6),
-(7, 7),
-(8, 8),
-(9, 9),
-(10, 10);
+/* IDs buscados na base robusta. Nao assume que cid_id/pro_id sejam 1, 2, 3... */
+SET @cid_a419 = (SELECT cid_id FROM CID WHERE cid_codigo = 'A419' LIMIT 1);
+SET @pro_303010037 = (SELECT pro_id FROM Procedimento WHERE pro_codigo = 303010037 LIMIT 1);
 
 INSERT INTO Laudo (
     atend_id, cli_id, cid_id, pro_id, lau_sinais, lau_internacao,
     lau_resultado, lau_recurso, lau_datapreenc, lau_status
 ) VALUES
-(1, 1, 1, 1, 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar', '2026-05-20 13:00:00', 1);
+(1, 1, @cid_a419, @pro_303010037, 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar', '2026-05-20 13:00:00', 1);
 
 /* Tabela Favorito */
 INSERT INTO Favorito (
     usu_id, fav_nome, cid_id, pro_id, cli_id, fav_carater,
     fav_sinais, fav_internacao, fav_resultado, fav_recurso
 ) VALUES
-(@usu_id_medico, 'Febre', 1, 1, 1, 'Urgencia', 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar');
+(@usu_id_medico, 'Sepse', @cid_a419, @pro_303010037, 1, 'Urgencia', 'Febre e mal-estar', 'Observacao clinica', 'Paciente estavel', 'Medicar e observar');
