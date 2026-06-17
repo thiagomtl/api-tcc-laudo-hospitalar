@@ -1,156 +1,228 @@
+# Dicionário de Dados - Banco de Laudos Hospitalares
 
-Dicionário de dados
+Fonte usada para conferência: `src/dataBase/create.sql` e migrações em `src/dataBase/migracao_*.sql`.
 
+Observações importantes para o MER:
 
+- `Medico.usu_id` é ao mesmo tempo PK e FK para `Usuario.usu_id`, representando uma especialização de usuário.
+- `Atendimento.usu_id` referencia `Medico.usu_id`, não `Usuario.usu_id`.
+- `Favorito.usu_id` referencia `Medico.usu_id`; após a migração de limpeza, `Favorito` não referencia mais `Laudo`.
+- `Laudo` referencia diretamente `CID(cid_id)` e `Procedimento(pro_id)`. No script atual não existe `proc_cid_id` em `Laudo`.
+- `Procedimento_Cids` é a tabela associativa entre `Procedimento` e `CID`, mas `pro_id` está como `NULL` no script.
+- `Mensagem_Chat.msg_resposta` é uma FK autorreferenciada para `Mensagem_Chat.msg_id`.
+- A migração `migracao_usuario_login.sql` adicionava `Usuario.usu_usuario` como `NULL UNIQUE`; no `create.sql` atual a coluna aparece como `NOT NULL UNIQUE`.
 
-Quadro 1 – Tabela Paciente
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID do Paciente	pac_id	INT		x		Auto incremento
-Nome	pac_nome	VARCHAR	60			Nome completo
-Data de Nascimento	pac_datanasc	DATE				
-CPF	pac_cpf	CHAR	11			Unique
-Telefone	pac_telefone	VARCHAR	15			Pode conter DDD
-Data de Cadastro	pac_datacadastro	DATETIME				Gerado pelo sistema
-Sexo	pac_sexo	BIT				Sexo do paciente –0F e 1M
-Numero Prontuario	pac_num_prontuario	INT				
-CNS	pac_cns	CHAR	15			Cartão Nacional de Saúde
-Nome da mãe do paciente	pac_nome_mae	VARCHAR	60			
-Raça	pac_raca	VARCHAR	10			Conforme classificação IBGE
-Bairro	pac_bairro	VARCHAR	50			
-Numero Casa	pac_num_casa	VARCHAR	7			Pode conter complemento
-Logradouro casa	pac_logradouro	VARCHAR	120			Rua/Avenida
-CEP	pac_cep	CHAR	8			Apenas números
-UF	pac_uf	CHAR	2			Sigla do estado
-Municipio	pac_municipio	VARCHAR	50			
-Codigo IBGE	pac_cod_ibge	INT				Código IBGE do município
+## Relações das chaves
 
-Quadro 2 – Tabela Convênio
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Convênio	con_id	INT		x		Auto incremento
-Tipo de Convênio	con_tipo	VARCHAR	50			
+| Origem | Chave estrangeira | Destino | Cardinalidade física esperada | Observação |
+| --- | --- | --- | --- | --- |
+| `Leito` | `set_id` | `Setor(set_id)` | `Setor` 1:N `Leito` | Cada leito pertence a um setor. |
+| `Usuario` | `inst_id` | `Instituicao(inst_id)` | `Instituicao` 1:N `Usuario` | Cada usuário pertence a uma instituição. |
+| `Medico` | `usu_id` | `Usuario(usu_id)` | `Usuario` 1:0..1 `Medico` | Especialização; todo médico é usuário. |
+| `Atendimento` | `pac_id` | `Paciente(pac_id)` | `Paciente` 1:N `Atendimento` | Um paciente pode ter vários atendimentos. |
+| `Atendimento` | `con_id` | `Convenio(con_id)` | `Convenio` 1:N `Atendimento` | Um convênio pode aparecer em vários atendimentos. |
+| `Atendimento` | `leito_id` | `Leito(leito_id)` | `Leito` 1:N `Atendimento` | O banco não impede múltiplos atendimentos no mesmo leito. |
+| `Atendimento` | `car_id` | `Carater(car_id)` | `Carater` 1:N `Atendimento` | Caráter do atendimento. |
+| `Atendimento` | `usu_id` | `Medico(usu_id)` | `Medico` 1:N `Atendimento` | Médico responsável pelo atendimento. |
+| `Procedimento_Cids` | `pro_id` | `Procedimento(pro_id)` | `Procedimento` 1:N `Procedimento_Cids` | FK opcional no script (`NULL`). |
+| `Procedimento_Cids` | `cid_id` | `CID(cid_id)` | `CID` 1:N `Procedimento_Cids` | CID associado ao procedimento. |
+| `Laudo` | `atend_id` | `Atendimento(atend_id)` | `Atendimento` 1:N `Laudo` | Não há restrição UNIQUE em `atend_id`. |
+| `Laudo` | `cli_id` | `Escolha_Clinica(cli_id)` | `Escolha_Clinica` 1:N `Laudo` | Clínica/especialidade escolhida no laudo. |
+| `Laudo` | `cid_id` | `CID(cid_id)` | `CID` 1:N `Laudo` | CID usado diretamente no laudo. |
+| `Laudo` | `pro_id` | `Procedimento(pro_id)` | `Procedimento` 1:N `Laudo` | Procedimento usado diretamente no laudo. |
+| `Favorito` | `usu_id` | `Medico(usu_id)` | `Medico` 1:N `Favorito` | Modelo favorito salvo pelo médico. |
+| `Favorito` | `cid_id` | `CID(cid_id)` | `CID` 1:N `Favorito` | FK opcional. |
+| `Favorito` | `pro_id` | `Procedimento(pro_id)` | `Procedimento` 1:N `Favorito` | FK opcional. |
+| `Favorito` | `cli_id` | `Escolha_Clinica(cli_id)` | `Escolha_Clinica` 1:N `Favorito` | FK opcional. |
+| `Logs_Acao` | `usu_id` | `Usuario(usu_id)` | `Usuario` 1:N `Logs_Acao` | Histórico de ações do usuário. |
+| `Mensagem_Chat` | `usu_id_remetente` | `Usuario(usu_id)` | `Usuario` 1:N `Mensagem_Chat` | Usuário que enviou a mensagem. |
+| `Mensagem_Chat` | `usu_id_destinatario` | `Usuario(usu_id)` | `Usuario` 1:N `Mensagem_Chat` | Usuário que recebeu a mensagem. |
+| `Mensagem_Chat` | `msg_resposta` | `Mensagem_Chat(msg_id)` | `Mensagem_Chat` 1:N respostas | FK opcional para mensagem original. |
 
-Quadro 3 - Tabela Leito
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Leito	leito_id	INT		x		Auto incremento
-ID Setor	set_id	INT			x	Relaciona com Setor
-Identificação Leito	leito_identificacao	VARCHAR	20			
+## Tabela `Convenio`
 
-Quadro 4 - Tabela Setor
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Setor	set_id	INT		x		Auto incremento
-Nome do Setor	set_nome	VARCHAR	30			
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do convênio | `con_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Tipo de convênio | `con_tipo` | `VARCHAR` | 50 | Não | Não | Não | Não | Descrição/tipo do convênio. |
 
-Quadro 5 - Tabela Caráter
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Caráter	car_id	INT		x		Auto incremento
-Tipo de Caráter	car_tipo	VARCHAR	30			
+## Tabela `Setor`
 
-Quadro 6 - Tabela Instituição
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Instituição	inst_id	INT		x		Auto incremento
-Nome Fantasia	inst_nome	VARCHAR	100			
-Razão Social	inst_razao_social	VARCHAR	150			
-CNES	inst_cnes	CHAR	7			
-CNPJ	inst_cnpj	CHAR	14			Formato numérico
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do setor | `set_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Nome do setor | `set_nome` | `VARCHAR` | 30 | Não | Não | Não | Não | Nome do setor hospitalar. |
 
-Quadro 7 - Tabela Atendimento
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Atendimento	atend_id	INT		x		Auto incremento
-ID Paciente	pac_id	INT			x	Paciente
-ID Convênio	con_id	INT			x	Convenio
-ID Leito	leito_id	INT			x	Leito
-ID Caráter	car_id	INT			x	Carater
-ID Usuário Médico	usu_id	INT			x	Medico
-Data Atendimento	atend_data	DATETIME				
+## Tabela `Leito`
 
-Quadro 8 - Tabela Logs Ação
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Log	log_id	INT		x		Auto incremento
-ID Usuário	usu_id	INT			x	Usuário
-Ação	log_acao	VARCHAR	200			
-Detalhe	log_detalhe	VARCHAR	255			
-Data e Hora	log_datahora	DATETIME				Registrado automaticamente
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do leito | `leito_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do setor | `set_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Setor(set_id)`. |
+| Identificação do leito | `leito_identificacao` | `VARCHAR` | 20 | Não | Não | Não | Não | Código/nome de identificação do leito. |
 
-Quadro 9 - Tabela Usuário
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Usuário	usu_id	INT		x		Auto incremento
-Nome	usu_nome	VARCHAR	100			
-Documento	usu_documento	VARCHAR	11			RG ou CPF
-Email	usu_email	VARCHAR	100			
-Senha	usu_senha	VARCHAR	100			Hash da senha
-Data Criação	usu_datacriacao	DATETIME				
-Instituição	inst_id	INT			x	Relacionado com Instituição
-Telefone	usu_telefone	VARCHAR	15			Com DDD
-Foto	usu_foto	VARCHAR	255			Nome da imagem
-NULL
-Biometria	usu_biometria	VARCHAR	255			Nome do arquivo
-NULL
-Tipo de Usuário	usu_tipo	VARCHAR	15			Administrador, Médico, etc.
-Status	usu_status	BIT				Ativo/Inativo
+## Tabela `Carater`
 
-Quadro 10 - Tabela Médico
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Usuário	usu_id	INT		x	x	Usuário vinculado ao médico
-CRM	med_crm	VARCHAR	6			Registro profissional unico
-Especialidade	med_especialidade	VARCHAR	100			Especialidade do medico
-Assinatura	med_assinatura	TEXT				Assinatura do medico, podendo ser URL, caminho ou base64
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do caráter | `car_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Tipo de caráter | `car_tipo` | `VARCHAR` | 30 | Não | Não | Não | Não | Tipo de atendimento/internação. |
 
-Quadro 11 - Tabela Mensagem_Chat
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Mensagem	msg_id	INT		x		Auto incremento
-ID Usuário Remetente	usu_id_remetente	INT			x	Usuário
-ID Usuário Destinatário	usu_id_destinatario	INT			x	Usuário
-Mensagem	msg_conteudo	VARCHAR	500			
-Mensagem Anexo	msg_arqanexo	VARCHAR	255			Arquivo em anexo
-NULL
-Data e Hora	msg_datahoraenvio	DATETIME				
-Status Mensagem	msg_status	VARCHAR	10			Enviada, Lida, Entregue
-Mensagem Resposta	msg_resposta	INT			x	FK para msg_id da mensagem original
-NULL
+## Tabela `Instituicao`
 
-Quadro 12 - Tabela Laudo
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Laudo	lau_id	INT		x		Auto incremento
-ID Atendimento	atend_id	INT			x	Atendimento
-Escolha Clinica	cli_id	INT			x	Clinica
-Procedimento Cids	proc_cid_id	INT			x	CID
-Sinais Laudo	lau_sinais	VARCHAR	1024			
-Internação Laudo	lau_internacao	VARCHAR	1024			
-Resultado Laudo	lau_resultado	VARCHAR	512			
-Recurso Laudo	lau_recurso	VARCHAR	512			
-Data Preenchimento Laudo	lau_datapreenc	DATETIME				
-Status Laudo	lau_status	BIT				0 – Pendente, 1 - preenchido
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID da instituição | `inst_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Nome fantasia | `inst_nome` | `VARCHAR` | 100 | Não | Não | Não | Não | Nome da instituição. |
+| Razão social | `inst_razao_social` | `VARCHAR` | 150 | Não | Não | Não | Não | Razão social da instituição. |
+| CNES | `inst_cnes` | `CHAR` | 7 | Não | Não | Não | Não | Código CNES. |
+| CNPJ | `inst_cnpj` | `CHAR` | 14 | Não | Não | Não | Não | CNPJ apenas com números. |
 
+## Tabela `Usuario`
 
-Quadro 13 - Tabela Favorito
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-Favoritar Laudo	fav_id	INT		x		Auto incremento
-Id do médico usuário	usu_id	INT			x	
-Nome Favorito	fav_nome	VARCHAR	30			
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do usuário | `usu_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Nome | `usu_nome` | `VARCHAR` | 100 | Não | Não | Não | Não | Nome completo do usuário. |
+| Login/usuário | `usu_usuario` | `VARCHAR` | 50 | Não | Não | Não | Sim | Login único; na migração antiga foi criado como nulo. |
+| Documento | `usu_documento` | `VARCHAR` | 11 | Não | Não | Não | Não | Documento do usuário. |
+| E-mail | `usu_email` | `VARCHAR` | 100 | Não | Não | Não | Não | E-mail de contato/login. |
+| Senha | `usu_senha` | `VARCHAR` | 100 | Não | Não | Não | Não | Senha armazenada pelo sistema. |
+| Data de criação | `usu_datacriacao` | `DATETIME` | - | Não | Não | Não | Não | Data/hora de cadastro. |
+| ID da instituição | `inst_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Instituicao(inst_id)`. |
+| Telefone | `usu_telefone` | `VARCHAR` | 15 | Não | Não | Não | Não | Telefone do usuário. |
+| Foto | `usu_foto` | `VARCHAR` | 255 | Sim | Não | Não | Não | Nome/caminho da foto. |
+| Biometria | `usu_biometria` | `VARCHAR` | 255 | Sim | Não | Não | Não | Nome/caminho do arquivo biométrico. |
+| Tipo de usuário | `usu_tipo` | `VARCHAR` | 15 | Não | Não | Não | Não | Ex.: administrador, médico. |
+| Status | `usu_status` | `BIT` | - | Não | Não | Não | Não | Indicador de ativo/inativo. |
 
-Quadro 14 - Tabela Escolha_Clinica
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Escolha	cli_id	INT		x		Auto incremento
-Descrição	cli_descricao	VARCHAR	20			
+## Tabela `Medico`
 
-Quadro 15 - Tabela Procedimento
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Procedimento	pro_id	INT		x		Auto incremento
-Codigo	pro_codigo	INT				
-Descrição	pro_descricao	VARCHAR	100			
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do usuário médico | `usu_id` | `INT` | - | Não | Sim | Sim | Não | Referencia `Usuario(usu_id)` e identifica o médico. |
+| CRM | `med_crm` | `VARCHAR` | 6 | Não | Não | Não | Sim | Registro profissional único. |
+| Especialidade | `med_especialidade` | `VARCHAR` | 100 | Sim | Não | Não | Não | Especialidade do médico. |
+| Assinatura | `med_assinatura` | `TEXT` | - | Sim | Não | Não | Não | Assinatura do médico, podendo ser caminho, URL ou base64. |
 
+## Tabela `Paciente`
 
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do paciente | `pac_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Nome | `pac_nome` | `VARCHAR` | 60 | Não | Não | Não | Não | Nome completo do paciente. |
+| Data de nascimento | `pac_datanasc` | `DATE` | - | Não | Não | Não | Não | Data de nascimento. |
+| CPF | `pac_cpf` | `CHAR` | 11 | Não | Não | Não | Sim | CPF único. |
+| Telefone | `pac_telefone` | `VARCHAR` | 15 | Não | Não | Não | Não | Telefone do paciente. |
+| Data de cadastro | `pac_datacadastro` | `DATETIME` | - | Não | Não | Não | Não | Data/hora de cadastro. |
+| Sexo | `pac_sexo` | `BIT` | - | Não | Não | Não | Não | Indicador binário usado pelo sistema. |
+| Número do prontuário | `pac_num_prontuario` | `INT` | - | Não | Não | Não | Não | Número do prontuário. |
+| CNS | `pac_cns` | `CHAR` | 15 | Não | Não | Não | Não | Cartão Nacional de Saúde. |
+| Nome da mãe | `pac_nome_mae` | `VARCHAR` | 60 | Não | Não | Não | Não | Nome da mãe do paciente. |
+| Raça | `pac_raca` | `VARCHAR` | 10 | Não | Não | Não | Não | Classificação de raça/cor. |
+| Bairro | `pac_bairro` | `VARCHAR` | 50 | Não | Não | Não | Não | Bairro do endereço. |
+| Número da casa | `pac_num_casa` | `VARCHAR` | 7 | Não | Não | Não | Não | Número/complemento curto. |
+| Logradouro | `pac_logradouro` | `VARCHAR` | 120 | Não | Não | Não | Não | Rua, avenida etc. |
+| CEP | `pac_cep` | `CHAR` | 8 | Não | Não | Não | Não | CEP apenas com números. |
+| UF | `pac_uf` | `CHAR` | 2 | Não | Não | Não | Não | Sigla da unidade federativa. |
+| Município | `pac_municipio` | `VARCHAR` | 50 | Não | Não | Não | Não | Município do endereço. |
+| Código IBGE | `pac_cod_ibge` | `INT` | - | Não | Não | Não | Não | Código IBGE do município. |
 
+## Tabela `Atendimento`
 
-Quadro 16 - Tabela Procedimento_Cids
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID Procedimento Cid	proc_cid_id	INT		x		Auto incremento
-ID Procedimento	pro_id	INT			x	Procedimento
-ID CID	cid_id	INT			x	Cid
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do atendimento | `atend_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do paciente | `pac_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Paciente(pac_id)`. |
+| ID do convênio | `con_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Convenio(con_id)`. |
+| ID do leito | `leito_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Leito(leito_id)`. |
+| ID do caráter | `car_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Carater(car_id)`. |
+| ID do médico | `usu_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Medico(usu_id)`. |
+| Data do atendimento | `atend_data` | `DATETIME` | - | Não | Não | Não | Não | Data/hora do atendimento. |
 
-Quadro 17 - Tabela CID
-Campo Lógico	Campo Físico	Tipo de dados	Tamanho do campo	PK	FK	Observações
-ID CID	cid_id	INT		PK		Auto incremento
-Codigo Cid	cid_codigo	VARCHAR	4			
-Descrição CID	cid_descricao	VARCHAR	100			
+## Tabela `Escolha_Clinica`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID da escolha clínica | `cli_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Descrição | `cli_descricao` | `VARCHAR` | 20 | Não | Não | Não | Não | Descrição da clínica/especialidade selecionável. |
+
+## Tabela `Procedimento`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do procedimento | `pro_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Código do procedimento | `pro_codigo` | `INT` | - | Sim | Não | Não | Não | Código do procedimento. |
+| Descrição | `pro_descricao` | `VARCHAR` | 100 | Sim | Não | Não | Não | Descrição do procedimento. |
+
+## Tabela `CID`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do CID | `cid_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| Código do CID | `cid_codigo` | `VARCHAR` | 4 | Não | Não | Não | Não | Código CID. |
+| Descrição | `cid_descricao` | `VARCHAR` | 100 | Não | Não | Não | Não | Descrição do CID. |
+
+## Tabela `Procedimento_Cids`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID da associação procedimento/CID | `proc_cid_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do procedimento | `pro_id` | `INT` | - | Sim | Não | Sim | Não | Referencia `Procedimento(pro_id)`. |
+| ID do CID | `cid_id` | `INT` | - | Não | Não | Sim | Não | Referencia `CID(cid_id)`. |
+
+## Tabela `Laudo`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do laudo | `lau_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do atendimento | `atend_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Atendimento(atend_id)`. |
+| ID da escolha clínica | `cli_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Escolha_Clinica(cli_id)`. |
+| ID do CID | `cid_id` | `INT` | - | Não | Não | Sim | Não | Referencia `CID(cid_id)`. |
+| ID do procedimento | `pro_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Procedimento(pro_id)`. |
+| Sinais e sintomas | `lau_sinais` | `VARCHAR` | 1024 | Não | Não | Não | Não | Sinais/sintomas informados no laudo. |
+| Internação | `lau_internacao` | `VARCHAR` | 1024 | Não | Não | Não | Não | Justificativa/dados da internação. |
+| Resultado | `lau_resultado` | `VARCHAR` | 512 | Não | Não | Não | Não | Resultado/laudo. |
+| Recurso | `lau_recurso` | `VARCHAR` | 512 | Não | Não | Não | Não | Recurso solicitado/usado. |
+| Data de preenchimento | `lau_datapreenc` | `DATETIME` | - | Não | Não | Não | Não | Data/hora de preenchimento. |
+| Status | `lau_status` | `BIT` | - | Não | Não | Não | Não | Status binário do laudo. |
+
+## Tabela `Favorito`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do favorito | `fav_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do médico | `usu_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Medico(usu_id)`. |
+| Nome do favorito | `fav_nome` | `VARCHAR` | 30 | Não | Não | Não | Não | Nome do modelo favorito. |
+| ID do CID | `cid_id` | `INT` | - | Sim | Não | Sim | Não | Referencia `CID(cid_id)`. |
+| ID do procedimento | `pro_id` | `INT` | - | Sim | Não | Sim | Não | Referencia `Procedimento(pro_id)`. |
+| ID da escolha clínica | `cli_id` | `INT` | - | Sim | Não | Sim | Não | Referencia `Escolha_Clinica(cli_id)`. |
+| Caráter do favorito | `fav_carater` | `VARCHAR` | 30 | Sim | Não | Não | Não | Valor textual; não referencia `Carater(car_id)`. |
+| Sinais e sintomas | `fav_sinais` | `VARCHAR` | 1024 | Sim | Não | Não | Não | Texto padrão do modelo favorito. |
+| Internação | `fav_internacao` | `VARCHAR` | 1024 | Sim | Não | Não | Não | Texto padrão do modelo favorito. |
+| Resultado | `fav_resultado` | `VARCHAR` | 512 | Sim | Não | Não | Não | Texto padrão do modelo favorito. |
+| Recurso | `fav_recurso` | `VARCHAR` | 512 | Sim | Não | Não | Não | Texto padrão do modelo favorito. |
+
+## Tabela `Logs_Acao`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID do log | `log_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do usuário | `usu_id` | `INT` | - | Não | Não | Sim | Não | Referencia `Usuario(usu_id)`. |
+| Ação | `log_acao` | `VARCHAR` | 200 | Não | Não | Não | Não | Ação executada. |
+| Detalhe | `log_detalhe` | `VARCHAR` | 255 | Não | Não | Não | Não | Detalhes da ação. |
+| Data e hora | `log_datahora` | `DATETIME` | - | Não | Não | Não | Não | Data/hora do log. |
+
+## Tabela `Mensagem_Chat`
+
+| Campo lógico | Campo físico | Tipo | Tamanho | Nulo | PK | FK | Único | Observação |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ID da mensagem | `msg_id` | `INT` | - | Não | Sim | Não | Não | Auto incremento. |
+| ID do remetente | `usu_id_remetente` | `INT` | - | Não | Não | Sim | Não | Referencia `Usuario(usu_id)`. |
+| ID do destinatário | `usu_id_destinatario` | `INT` | - | Não | Não | Sim | Não | Referencia `Usuario(usu_id)`. |
+| Conteúdo | `msg_conteudo` | `VARCHAR` | 500 | Sim | Não | Não | Não | Texto da mensagem. |
+| Arquivo anexo | `msg_arqanexo` | `VARCHAR` | 255 | Sim | Não | Não | Não | Nome/caminho do anexo. |
+| Data/hora de envio | `msg_datahoraenvio` | `DATETIME` | - | Não | Não | Não | Não | Data/hora do envio. |
+| Status | `msg_status` | `VARCHAR` | 10 | Não | Não | Não | Não | Status da mensagem. |
+| Mensagem respondida | `msg_resposta` | `INT` | - | Sim | Não | Sim | Não | Referencia `Mensagem_Chat(msg_id)`. |
 
